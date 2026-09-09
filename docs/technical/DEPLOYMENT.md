@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -43,6 +43,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | 组织席位 / 配额 / 订阅计费 | ❌ | ✅ | ✅ | ✅ |
 | 跨租户读写守卫（强制显式 `sourceTenantId`） | 不适用（单租户） | ✅ | ✅ | ✅ |
 | `POST /integrations/events` 商业事件入站 | ❌ | ❌ | ✅ | ✅ |
+| `POST /integrations/syncrobrain/telemetry-credits` 时间窗入账 | ❌ | ❌ | ✅ | ✅ |
 | VistaRemote 人工介入深链 · DataLuminary 导出事件 | ❌ | ❌ | ❌ | ✅ |
 
 **本机实验室例外**：`COMMERCE_AUTH_MODE=lab|off` 时，`agent-commerce` 那三类入站事件在任何档位都开着——这个模式的存在就是为了在笔记本上跑 `pnpm run smoke:ecosystem-commerce`，而 §4.2 已经禁止它出现在 `NODE_ENV=production`。**smart-site 的两类事件不吃这个例外**，只认档位。
@@ -68,11 +69,11 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 ## 3. Compose 标准化
 
-`deploy/docker-compose.core.yml` 是**基座**（只有 `api` + `indexer`），其余文件都是 **overlay**，用 `-f` 叠加：
+`deploy/docker-compose.core.yml` 是**基座**（只有 `doerflow-api` + `indexer`），其余文件都是 **overlay**，用 `-f` 叠加：
 
 | 文件 | 作用 | DB / Redis |
 |---|---|---|
-| `docker-compose.core.yml` | 基座：api + indexer | 不含 |
+| `docker-compose.core.yml` | 基座：doerflow-api + indexer + web + admin | 不含 |
 | `docker-compose.dev.yml` | 本机开发 | 内置，**映射到宿主** `5439` / `6379` |
 | `docker-compose.prod.yml` | 生产单机 | 内置，**不映射宿主端口** |
 | `docker-compose.external-db.yml` | 生产 + 外部托管 DB | 不含；必须提供外部 URL |
@@ -100,19 +101,21 @@ docker compose -f deploy/docker-compose.core.yml -f deploy/docker-compose.prod.y
 |---|---|
 | **禁止 `container_name`** | 固定容器名无法多副本、无法蓝绿；`docker compose scale` 直接失败 |
 | **禁止 `host.docker.internal`** | 在 Linux 主机不存在；控制面必须用服务名或真实 DNS |
-| **禁止跨档位共享同一 env 文件** | `api` / `indexer` / `postgres` 各自 `env_file`；DB 口令不进 API 容器环境，反之亦然 |
+| **禁止跨档位共享同一 env 文件** | `doerflow-api` / `indexer` / `postgres` 各自 `env_file`；DB 口令不进 API 容器环境，反之亦然 |
 | **生产不得映射 DB / Redis 宿主端口** | `prod` 与 `external-db` overlay 里 `postgres`/`redis` 不允许出现 `ports:` |
 | **Entitlement 走 `:3040` + DNS** | `ENTITLEMENT_BASE_URL` 必须是服务名或域名，端口 `3040`（见 [PORTS.md](./PORTS.md)） |
-| **每个长驻服务有 healthcheck** | `/live` 用于容器存活，`/ready` 用于流量准入 |
+| **每个长驻服务有 healthcheck** | `/live` 用于容器存活，`/ready` 用于流量准入；web `/health`、admin `/health` |
+| **Web/Admin 默认绑 loopback** | `DOERFLOW_WEB_BIND` / `DOERFLOW_ADMIN_BIND` 默认 `127.0.0.1`；对外反代再改 bind |
 
 ### 3.2 env 文件划分
 
 | 文件 | 归属 | 内容 |
 |---|---|---|
-| `deploy/env/api.env`（模板 `deploy/production.env.example`） | api | 应用配置、密钥、链、商业开关 |
+| `deploy/env/api.env`（模板 `deploy/production.env.example`） | doerflow-api | 应用配置、密钥、链、商业开关 |
 | `deploy/env/indexer.env` | indexer | 只有 `INDEXER_ROLE=worker` 与追链参数 |
-| `deploy/env/db.env` | postgres | `POSTGRES_*` 口令，**不进 api 容器** |
-| `deploy/env/control-plane.env` | api（overlay） | `IDP_*` / `ENTITLEMENT_*` / `DOERFLOW_API_AUDIENCE` |
+| `deploy/env/db.env` | postgres | `POSTGRES_*` 口令，**不进 doerflow-api 容器** |
+| `deploy/env/web.env` | doerflow-web | 仅公开前端变量，无密钥 |
+| `deploy/env/admin.env` | doerflow-admin | 仅公开前端变量，无密钥 |
 
 `LEDGER_DATABASE_URL` / `REDIS_URL` 由 compose 的 `environment:` 组装，不写进共享 env 文件。
 
@@ -226,6 +229,9 @@ AuthN（双轨）───┤
 ---
 
 ## 7. 验收
+
+日常开发只起 **一个** 产品栈。把 `agent-commerce` / `smart-site` 当交付物时，在 LuminaryWorks 跑 `pnpm preflight:scenario` 再 `pnpm scenario:up`（一次真实组合）。**不要**每次改动都六产品一起 `up`。备份/`pg_dump` 与 N-1 升级是后续私有化/SaaS 硬化门禁，不是当前 Compose 实验室的阻塞项。见 LuminaryWorks `spec/composable-deployment.md` §11。
+
 
 ```bash
 pnpm run compose:config       # docker compose config 对四种叠加组合做语法校验

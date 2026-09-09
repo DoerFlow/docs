@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -95,6 +95,14 @@ DoerFlow 是 [LuminaryWorks](https://github.com/LuminaryWorks/LuminaryWorks) 六
 | VistaCast | **摄像头 AI 告警**（[vistacast.dev](https://vistacast.dev)）；告警进入 DoerFlow 任务与 Job 结算，**不是**远程调试 |
 
 双向价值流、租户隔离与兼容合同见 [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · FR-ST-007 · FR-XPROD-* · 协议内激励见 [ECOSYSTEM.md](./ECOSYSTEM.md)。
+
+### 3.4 部署边界（standalone 可独立）
+
+DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（web / admin / wallet / worker）全部可选。四个累进档位 `DEPLOYMENT_PROFILE` = `standalone` | `control-plane` | `agent-commerce` | `smart-site`，边界、Compose 叠加与能力清单见 **[DEPLOYMENT.md](./DEPLOYMENT.md)**（`FR-DEP-*`）。
+
+- **`standalone`**：不需要 Logto / Entitlement / 兄弟产品。`ENTITLEMENT_MODE` 可为 `off` 或 `offline_license`，但 **AuthN 不静默匿名**——写路径始终要求 SIWE 或平台 JWT。
+- **生产托管平台**（`control-plane` 及以上）：必须 **AuthN（Logto OIDC + M2M）+ Entitlement + Casbin**；钱包证明单独走 **SIWE / `wallet_links`**（双轨，Logto 会话不是钱包证明）。
+- **`agent-commerce`**（VistaCast / SyncroBrain）与 **`smart-site`**（VistaRemote 人工介入深链 / DataLuminary 导出）目前是 **已实现的工程实验室，默认关**；未接真实对端前 `/capabilities` 的 `readiness` 保持 `lab`。见 [SMART_SITE.md](./SMART_SITE.md)（`FR-SITE-*`）。
 
 ## 4. 用户角色
 
@@ -220,15 +228,32 @@ DoerFlow 是 [LuminaryWorks](https://github.com/LuminaryWorks/LuminaryWorks) 六
 - 实验室版本 **v1.1-channels-lab**：`pnpm run smoke:channels`
 
 #### FR-ST-007 跨产品商业作业与事件（生态变现）
-- Provider Skill / Trading Job 携带 `productCode`（`vistacast|syncrobrain|generic`）、`offeringCode`、`sourceTenantId`、`sourceRef`、`pricingUnit`、`readiness`（`production|lab`，可 `disabled`）、`idempotencyKey`
+- Provider Skill / Trading Job 携带 `productCode`（`vistacast|syncrobrain|vistaremote|dataluminary|generic`）、`offeringCode`、`sourceTenantId`、`sourceRef`、`pricingUnit`、`readiness`（`production|lab`，可 `disabled`）、`idempotencyKey`
 - Job 状态机：`awaiting_payment` → `authorized` → `running` → `succeeded` → `captured`/`settled`；失败或超时 `voided`|`failed`。实验室旧值 `open` 视为 `awaiting_payment`
 - **Job 专用** signed receipt：`authorize` 验 EIP-712 / Session / 预算，**不得**给 payee 入账；provider **2xx 且输出 hash 已持久化**后**原子 capture**；**5xx / 超时 void**。禁止再把「Receipt Vault accepted + `applyReceipt` best-effort」当作 Job 结算
 - `POST /payments/receipts` 旧路径保持兼容（非 Job 微支付仍可入账）
 - `POST /integrations/events` 接收 CloudEvents 1.0：`com.vistacast.alert.v1`、`com.syncrobrain.incident.v1`、`com.syncrobrain.work-order.v1`；按 `sourceProduct+eventId` 去重；持久化 issuer/subject/org/sourceTenant 映射、`sourceRef`、callback
+- **FR-IOT-008**：`POST /integrations/syncrobrain/telemetry-credits` 接收 `com.syncrobrain.telemetry-credit.v1`（时间窗 digest → 链下 `ledger.credit`）；**不得**经 `/integrations/events` 入账；细则 [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md)
 - 由事件创建 Agent/Human 任务必须走 [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) 门禁；无法安全复用任务服务时只标记 `correlated`（**不得伪称已创建任务**）
 - 回调为签名 CloudEvents + durable outbox 重试；**不得**自动修改源产品业务状态
 - 生产默认 M2M bearer + Entitlement + Casbin；显式 `COMMERCE_AUTH_MODE=lab|off` 供 smoke。供应方 payee 必须关联**平台主体 + SIWE 钱包**；Logto 会话**不是**钱包证明；生产禁止开放注册 Provider
 - 验收：`pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`）
+
+#### FR-ST-008 smart-site 场景（人工介入深链 + 导出关联）
+- `DEPLOYMENT_PROFILE=smart-site` 才启用；追加入站 `com.dataluminary.export.v1`、`com.vistaremote.intervention.v1`，其余档位一律 `EVENT_TYPE_NOT_ALLOWED`
+- **不自动远控**：只按 `SMART_SITE_REMOTE_DEEP_LINK_TEMPLATE` + `sourceRef` 产出人工 `deepLink`（`mode="manual"`，占位符逐个 `encodeURIComponent`）；API 不发起远程会话、不持有 VistaRemote 凭据
+- **不自动 resolve**：介入回执与导出完成都不改任务/事件终态，不放款
+- **无 runtime import**：跨产品仅签名 CloudEvents + REST + OIDC
+- 细则与需求 ID：[SMART_SITE.md](./SMART_SITE.md)（`FR-SITE-001` ～ `FR-SITE-005`）
+
+### 5.3.1 部署与运维契约（FR-DEP-*）
+
+- **FR-DEP-001**：`DEPLOYMENT_PROFILE` 四档累进；最小后端 = API + Indexer + Postgres + Redis，客户端可选
+- **FR-DEP-002**：Compose 标准化为 `core` 基座 + `dev` / `prod` / `external-db` / `control-plane` / `smoke` overlay；**禁止** `container_name` 与 `host.docker.internal`；各服务独立 `env_file`；生产 `postgres`/`redis` **不映射宿主端口**；Entitlement 走 `:3040` + DNS
+- **FR-DEP-003**：`GET /ready` 降级时返回 **`503`**（不再 `200`）；`GET /live` 恒 `200`
+- **FR-DEP-004**：`GET /version` + `GET /capabilities` 能力清单；启动时 **fail-closed** 校验（`NODE_ENV=production` 禁 `COMMERCE_AUTH_MODE=lab|off`；非 `standalone` 必须 `ENTITLEMENT_MODE ∈ {shadow_read,enforce}` 且有控制面 URL；`offline_license` 必须 License 三件套齐全；`anonymousWrites` 恒 `false`）
+- **FR-DEP-005**：`/trading/jobs` 与 `/integrations/events` 的跨租户守卫一致——`production` 模式读写都要鉴权，且读必须显式 `sourceTenantId`（缺失 `400 TENANT_SCOPE_REQUIRED`，不匹配 `403 CROSS_TENANT`）；`lab|off` 保持实验室兼容
+- 展开：[DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ### 5.4 P2P 通信层（P2P Layer）
 
@@ -355,11 +380,12 @@ DoerFlow 是 [LuminaryWorks](https://github.com/LuminaryWorks/LuminaryWorks) 六
 | 场景 | 版本 | 要点 |
 |------|------|------|
 | **实验室 Device HTTP** | v1.1-channels-lab / P4 | 注册、心跳、telemetry hash、账本入账（无链上 DeviceRegistry） |
+| **TB 时间窗入账** | FR-IOT-008 | SyncroBrain Gateway CloudEvents → 账本；非 MQTT 总线 |
 | 车 ↔ 充电桩 | v1.2+ | Agent 导航、稳定币支付、认证设备 |
 | 传感器数据微市场 | v1.2+ | 高频微额、Agent 买方、流式计费 |
 | 分布式能源 / 冷链 SLA | v1.3+ | 余电竞价、温度 Oracle |
 
-- **BYOD**；实验室走 api `/devices`，不把 MQTT/Matter 当结算轨  
+- **BYOD**；实验室走 api `/devices`；跨产品入账走时间窗 digest REST（[SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md)），不把 MQTT/Matter 当结算轨  
 - 平台收入：Gas + 市场服务费（微额累加 / 企业契约）
 
 ### 5.10 清算底座、客户端与商业发版顺序
@@ -527,8 +553,9 @@ integration_events / outbox_callbacks
 | Storage | `/api/v1/storage` | 元数据 pin。默认本地目录；`STORAGE_BACKEND=pinata` 才用 Pinata。`backend: "local"` 均为成功 |
 | Payments | `/api/v1/payments` | 收据、账本、`ledger/credit` / `ledger/credit-batch`、snapshot / proof、披露；Job 授权走 `/trading/jobs/:id/authorize|capture|void` |
 | Trading | `/api/v1/trading` | 目录 / 报价 / 作业 / `execute` / `authorize` / Provider HTTP Skill / SSE / WebSocket；CloudEvents + HMAC |
-| Integrations | `/api/v1/integrations` | CloudEvents inbox（`POST /events`）；按 sourceProduct+eventId 去重 |
-| Ready | `/api/v1/ready` · `/live` | M5 生产探针 |
+| Integrations | `/api/v1/integrations` | CloudEvents inbox（`POST /events`）；SyncroBrain 时间窗入账 `POST /syncrobrain/telemetry-credits`；按 sourceProduct+eventId 去重；`production` 模式读写均需鉴权 + 显式 `sourceTenantId` |
+| Ready | `/api/v1/ready` · `/live` | M5 生产探针。`ready` 降级 **503**；`live` 恒 200 |
+| Version | `/api/v1/version` · `/capabilities` | 版本 / `gitSha` / `profile` / `manifestHash`；能力清单（FR-DEP-004） |
 | Stats | `/api/v1/stats` | 市场统计 |
 
 ### 8.2 智能合约接口

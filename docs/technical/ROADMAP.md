@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -307,7 +307,9 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | M5b / 公开运行 | v1.0 | ⚪ 取消邀请制 · 主网地址页；审计/Bounty 有资金再做 |
 | 支线 MetaDEX | v0.15.x | 🟡 合约进度另计 |
 | **五通道实验室** | **v1.1-channels-lab** | **✅ `pnpm run smoke:channels`（P0–P4）** |
-| **生态商业实验室** | **v1.2-ecosystem-commerce** | **`pnpm run smoke:ecosystem-commerce`** |
+| **生态商业实验室** | **v1.2-ecosystem-commerce** | **`pnpm run smoke:ecosystem-commerce`**（默认关，未接真实对端） |
+| **部署边界四档 + 探针** | **v0.1-profiles** | **`pnpm run compose:preflight` · `smoke:m5`** |
+| **smart-site 最小契约** | **v0.1-smart-site-lab** | 🟡 契约与深链已实现；默认关 |
 | 支线 IoT 规模化 / 能源 / Omnichain | v1.2+ | ⚪ P4 仅为单设备 HTTP PoC |
 
 *状态: ✅ 完成 | 🟡 进行中 | ⚪ 未开始 | 🔴 阻塞*
@@ -342,8 +344,27 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 |----|------|
 | Job 授权结算 | `authorize` 不入账 → 2xx+hash 后 `capture`；5xx `void` |
 | Inbox | `POST /integrations/events` CloudEvents |
+| TB 时间窗入账 | `POST /integrations/syncrobrain/telemetry-credits`（FR-IOT-008） |
 | 回调 | durable outbox |
-| 鉴权 | 生产 M2M+Entitlement+Casbin；`COMMERCE_AUTH_MODE=lab\|off` |
+| 鉴权 | 生产 M2M+Entitlement+Casbin；`COMMERCE_AUTH_MODE=lab\|off`（生产禁用） |
 | 验收 | `pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`） |
+
+**现状诚实标注**：VistaCast / SyncroBrain 对接是**已实现的工程实验室**，`DEPLOYMENT_PROFILE` 未开时**默认关**；未接真实生产对端。
+
+---
+
+## 10. 部署边界与 smart-site
+
+规范：[DEPLOYMENT.md](./DEPLOYMENT.md)（`FR-DEP-*`）· [SMART_SITE.md](./SMART_SITE.md)（`FR-SITE-*`）。
+
+| 项 | 落点 |
+|----|------|
+| 四档累进 | `DEPLOYMENT_PROFILE=standalone\|control-plane\|agent-commerce\|smart-site` |
+| 最小后端 | API + Indexer + Postgres + Redis；客户端可选 |
+| Compose | `core` 基座 + `dev`/`prod`/`external-db`/`control-plane`/`smoke` overlay |
+| 探针 | `/ready` 降级 **503**；新增 `/version` 与 `/capabilities` |
+| 启动校验 | capability manifest fail-closed（生产禁 `COMMERCE_AUTH_MODE=lab\|off`） |
+| smart-site | 人工介入深链 + DataLuminary 导出关联；**不自动远控、不自动 resolve** |
+| 验收 | `pnpm run compose:config` · `pnpm run compose:preflight` · `pnpm run smoke:m5` |
 
 *主线规范入口：[ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [CHANNELS.md](./CHANNELS.md) · [CLIENTS.md](./CLIENTS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md)*

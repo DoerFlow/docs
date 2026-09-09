@@ -21,6 +21,7 @@ VibeAgent 采用 **Spec-Driven Development**：主规格维护在 MetaRepo 根�
 | [等级费率 FEE_TIERS_AA](/technical/FEE_TIERS_AA) | ERC-4337 AA 手续费 |
 | [本地端口 PORTS](/technical/PORTS) | API 默认 13008 |
 | [物联网 IOT](/technical/IOT) | 车桩/数据/能源/冷链 |
+| [TB 时间窗入账](/technical/SYNCROBRAIN_TELEMETRY_CREDIT) | SyncroBrain digest → DoerFlow 账本 REST |
 | [Agent 链策略 AGENT_CHAIN](/technical/AGENT_CHAIN) | 现成 L2 + MasterChef；自建链延期 |
 | [生态策略 ECOSYSTEM](/technical/ECOSYSTEM) | 参与方激励与收入 |
 | [跨产品生态 luminaryworks-ecosystem](/technical/luminaryworks-ecosystem) | VistaCast / SyncroBrain CloudEvents · Job 结算 |

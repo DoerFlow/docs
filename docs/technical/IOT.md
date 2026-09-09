@@ -1,14 +1,14 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
 
 # 物联网交易与设备经济
 
-**版本**: v0.2-lab · **最后更新**: 2026-08-29  
-**路线图**: 实验室 P4 = v1.1-channels-lab HTTP 设备；规模化车桩/能源/冷链 = **v1.2+**（见 [ROADMAP.md](./ROADMAP.md) · [CHANNELS.md](./CHANNELS.md)）
+**版本**: v0.3-lab · **最后更新**: 2026-09-09  
+**路线图**: 实验室 P4 = v1.1-channels-lab HTTP 设备；TB 时间窗入账 = **FR-IOT-008**；规模化车桩/能源/冷链 = **v1.2+**（见 [ROADMAP.md](./ROADMAP.md) · [CHANNELS.md](./CHANNELS.md)）
 
 ## 1. 愿景
 
@@ -21,6 +21,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | 场景 | 版本 | 频率 | 单笔规模 | 平台收入 |
 |------|------|------|----------|----------|
 | **实验室 Device HTTP**（注册/心跳/遥测） | v1.1-channels-lab | 低 | 微额账本 | 本地验收 |
+| **TB 时间窗入账**（Gateway → 账本） | FR-IOT-008 | 中 | 微额账本 | 实验室 REST |
 | **设备直连支付**（车↔充电桩） | v1.2+ | 中 | 中（稳定币） | Gas + 市场服务费 |
 | **数据资产微市场**（传感器→Agent） | v0.5 | 极高 | 微额（$0.00001/次） | 海量调用 ×（Gas + 数据费抽成） |
 | **分布式能源交易**（光伏↔储能） | v0.6 | 高 | 高（按度电） | 清算手续费（链上结算比例） |
@@ -119,6 +120,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | `EnergyMarket` | contracts | v0.6 |
 | `ConditionalFreight` | contracts | v0.6 |
 | Device REST `/devices`（实验室） | api | v1.1-channels-lab |
+| TB 时间窗 → 账本入账 | api | FR-IOT-008 · [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md) |
 
 ## 7. 验收（按版本）
 
@@ -126,6 +128,14 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 - [x] `POST /devices/register` + heartbeat + telemetry hash → 账本入账（`pnpm run smoke:channels`）
 - [ ] 链上 `DeviceRegistry` / 稳定币充电（仍为 v1.2+）
+
+### FR-IOT-008（TB 时间窗入账 · 实验室）
+
+合同：[SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md)。
+
+- [x] REST：`POST /integrations/syncrobrain/telemetry-credits`（CloudEvents `com.syncrobrain.telemetry-credit.v1`）
+- [ ] SyncroBrain Gateway 在 TB 遥测时间窗闭合后自动出站（仍须 `DOERFLOW_ENABLED`）
+- [ ] 生产 asset ↔ SIWE payee 绑定表（本步实验室信任 Gateway 提供的 `payee`）
 
 ### v1.2+ 车桩
 

@@ -129,6 +129,7 @@ export default defineConfig({
             { text: '等级费率 AA', link: '/technical/FEE_TIERS_AA' },
             { text: '本地端口 PORTS', link: '/technical/PORTS' },
             { text: '物联网 IOT', link: '/technical/IOT' },
+            { text: 'TB 时间窗入账', link: '/technical/SYNCROBRAIN_TELEMETRY_CREDIT' },
             { text: 'Agent 链策略', link: '/technical/AGENT_CHAIN' },
             { text: '生态策略 ECOSYSTEM', link: '/technical/ECOSYSTEM' },
             { text: '跨产品生态', link: '/technical/luminaryworks-ecosystem' },

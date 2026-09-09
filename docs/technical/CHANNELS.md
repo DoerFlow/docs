@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -8,7 +8,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 # 五通道任务经济（CHANNELS）
 
 **版本**: v1.2-ecosystem-commerce · **最后更新**: 2026-09-05  
-**关联**: [AGENT_RUNTIME.md](./AGENT_RUNTIME.md) · [ENDPOINT.md](./ENDPOINT.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md)
+**关联**: [AGENT_RUNTIME.md](./AGENT_RUNTIME.md) · [ENDPOINT.md](./ENDPOINT.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 本文件展开 `SPEC.md` **FR-ST-006**：Agent 与 Agent、人、云 API、电脑/手机、物联网都可以完成任务并获取报酬。内核是同一套作业与结算，通道只替换发现协议与执行器。
 
@@ -24,7 +24,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | `agent-human` | Agent ↔ 人 | wallet 发布 · worker 大厅 | `human-worker` | 照片/GPS/问卷/`proofCid` | `escrow`（链下 stub 可先 `ledger`） |
 | `agent-cloud` | Agent ↔ 云 API | OpenAPI + MCP + `/trading/catalog` | `cloud-adapter` | EIP-712 Receipt + job 执行结果 | `ledger` |
 | `agent-endpoint` | Agent ↔ 电脑/手机 | `/endpoints` 注册与能力白名单 | `endpoint-agent` | 沙箱输出 hash | 微额 `ledger`；高风险 `escrow` |
-| `agent-iot` | Agent ↔ 设备 | `/devices` 注册 + 心跳 | `iot-device` | telemetry hash | 数据流 `ledger`；任务型 `escrow` |
+| `agent-iot` | Agent ↔ 设备 | `/devices` 注册 + 心跳；跨产品走时间窗 REST | `iot-device` | telemetry / window digest hash | 数据流 `ledger`；任务型 `escrow` |
 
 强制字段：每个作业必须带 `channel`、`executorKind`、`settlementRail`。缺失则拒绝执行。
 
@@ -94,7 +94,9 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | 项 | 规则 |
 |----|------|
 | Provider invoke | `Content-Type: application/cloudevents+json` · `type=com.doerflow.trading.job.invoke` · `X-DoerFlow-Signature: sha256=…` |
-| 入站事件 | `POST /integrations/events` · CloudEvents 1.0 · 允许 VistaCast 告警与 SyncroBrain 事故/工单 |
+| 入站事件 | `POST /integrations/events` · CloudEvents 1.0 · `agent-commerce` 档位允许 VistaCast 告警与 SyncroBrain 事故/工单；`smart-site` 追加 DataLuminary 导出与 VistaRemote 介入回执（见 [SMART_SITE.md](./SMART_SITE.md)） |
+| 设备入账 | `POST /integrations/syncrobrain/telemetry-credits` · `com.syncrobrain.telemetry-credit.v1` · 时间窗 digest → `ledger`（[SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md)）；**不**经 inbox 入账 |
+| 跨租户读 | `production` 模式下 `GET /trading/jobs` 与 `GET /integrations/events` 均需鉴权 + 显式 `sourceTenantId`（FR-DEP-005） |
 | Job 支付 | `awaiting_payment → authorized → running → succeeded → captured/settled`；5xx/超时 `voided`/`failed` |
 | 授权 vs 入账 | `authorize` 预留预算与 nonce，**不**给 payee 入账；仅 2xx+output hash 后 `capture` |
 | 回调 | durable outbox；签名 CloudEvents；**不**改源产品业务状态 |

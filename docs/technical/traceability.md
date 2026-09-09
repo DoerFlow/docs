@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -9,7 +9,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 将 `SPEC.md` 中的需求 ID 映射到实现仓库与模块，用于 Spec 驱动开发与 Code Review。
 
-**最后更新**: 2026-09-05
+**最后更新**: 2026-09-09
 
 | 需求 ID | 简述 | 主仓库 | 模块/路径 | 版本 |
 |---------|------|--------|-----------|------|
@@ -90,7 +90,17 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-PRV-004 | Provider 元数据 product/offering/tenant/readiness | api, shared/sdk | `POST /trading/providers/skills` | **生态商业** |
 | FR-PRV-005 | 生产 M2M+Entitlement+Casbin；lab/off smoke | api | `COMMERCE_AUTH_MODE` | **生态商业** |
 | FR-PRV-006 | payee=平台主体+SIWE；生产禁止开放注册 | api | wallet_links；Logto ≠ 钱包 | **生态商业** |
-| FR-UI-ECO-001 | Web 生态服务目录/来源/Job 结算 | web | `/ecosystem` · en+zh | **生态商业** |
+| FR-UI-ECO-001 | Web 生态服务目录/来源/Job 结算 | web | `/ecosystem` · en+zh · 部署档位徽标 | **生态商业** |
+| FR-DEP-001 | 四档部署边界 / 最小后端 | spec, api, deploy | `spec/DEPLOYMENT.md` · `deployment-profile.ts` · `DEPLOYMENT_PROFILE` | **部署边界** |
+| FR-DEP-002 | Compose core/dev/prod/external-db/control-plane/smoke | deploy, MetaRepo | `deploy/docker-compose.*.yml` · `deploy/env/*` · `pnpm run compose:config\|preflight` | **部署边界** |
+| FR-DEP-003 | `/ready` 降级返回 503 | api | `health/probe.controller.ts` | **部署边界** |
+| FR-DEP-004 | `/version` + `/capabilities` 与启动期 fail-closed 校验 | api | `health/version.controller.ts` · `health/deployment-profile.ts` · `main.ts` | **部署边界** |
+| FR-DEP-005 | Trading/Integrations 跨租户读写守卫一致 | api | `commerce/tenant-scope.ts` · trading/integrations controller | **部署边界** |
+| FR-SITE-001 | smart-site 档位与稳定 env | spec, api | `spec/SMART_SITE.md` · `SMART_SITE_REMOTE_DEEP_LINK_TEMPLATE` | **smart-site 实验室** |
+| FR-SITE-002 | 人工介入深链（不自动远控） | api | `commerce/smart-site.ts` · `remoteIntervention.mode="manual"` | **smart-site 实验室** |
+| FR-SITE-003 | DataLuminary 导出事件最小契约 | api | `com.dataluminary.export.v1` · `integration_events` | **smart-site 实验室** |
+| FR-SITE-004 | 不自动 resolve | api | 介入回执/导出不改终态 | **smart-site 实验室** |
+| FR-SITE-005 | 无 runtime import（仅 CloudEvents + REST + OIDC） | api, spec | 深链为字符串模板 | **smart-site 实验室** |
 | FR-PAY-006 | Merkle Root 批量清算 | contracts, api, shared | `MicroPaymentSettler` + `/ledger/snapshot`；10 万笔 → 1 Root | **v0.2 / M2** ✅ |
 | FR-PAY-007 | 双向轧差净额 | contracts, api, shared | `CreditLineNetting` + `/ledger/nets` · Vault `internalTransfer` | **v1.0 ✅** |
 | FR-PAY-008 | Bundler 微支付批次 | contracts, api | `SettlementBatcher` + `LabEntryPoint` + `SettlementPaymaster` · `/ledger/bundle` | **v1.0 ✅** |
@@ -135,6 +145,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-PRV-003 | 每 Skill HMAC + SSRF 限制 | api, shared/sdk | `verifyDoerFlowWebhook`；loopback HTTP / 公网 HTTPS | **v1.1-channels-lab** ✅ |
 | FR-EP-001~003 | Endpoint 注册/心跳/白名单执行 | api | `/endpoints` · `ENDPOINT.md` | **v1.1-channels-lab** ✅ |
 | FR-IOT-007 | 实验室 Device HTTP（非链上 Registry） | api | `/devices` 注册·心跳·telemetry | **v1.1-channels-lab** ✅ |
+| FR-IOT-008 | TB 时间窗 digest → 账本入账 | spec, api | `POST /integrations/syncrobrain/telemetry-credits` · [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md) | **实验室 REST** |
 
 ## MVP v0.1 验收对照
 
