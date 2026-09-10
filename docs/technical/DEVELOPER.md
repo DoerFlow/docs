@@ -107,7 +107,7 @@ print(client.quote("0", 1)["amount"])
 # then verify_webhook(raw_body, signature, webhook_secret)
 ```
 
-EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt`。
+EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt`。`submit_receipt` 返回 API `data`（含 `ledgerApplied` / `ledgerError`）；HTTP 200 时 `ledgerApplied` 仍可能为 false。
 
 ---
 

@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # MetaDEX · 轻量 ve 模型 DEX
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-09  
+**版本**: v0.1-draft · **最后更新**: 2026-09-10  
 **路线图**: v0.15（**合约优先**，见 [ROADMAP.md](./ROADMAP.md) § M1b）  
 **合约计划**: [METADEX_CONTRACTS.md](./METADEX_CONTRACTS.md) ← **当前实施入口**  
 **链下架构**: [METADEX_ARCHITECTURE.md](./METADEX_ARCHITECTURE.md)  
@@ -110,7 +110,7 @@ LP Token ──lock──▶ veNFT ──vote──▶ Gauge 权重
 - [x] 集成测试：Add LP → Swap → Lock → Vote
 - [x] `export-abi` 可供 shared/api 使用
 
-Hardhat（本机、无网络）：`repos/contracts/test/metadex/Router.test.ts`、`VotingEscrow.test.ts`、`integration.test.ts` 均已通过。`export-abi.ts` 含 MetaFactory/Pair/Router/VotingEscrow/Voter/Gauge；`repos/api/src/abis/` 已有对应 JSON。Sepolia MetaDEX 与 web Swap **未**勾。  
+Hardhat（本机、无网络）：`repos/contracts/test/metadex/Router.test.ts`、`VotingEscrow.test.ts`、`integration.test.ts` 均已通过。本地合约集成保持 `pnpm run smoke:metadex:local`（包装 `test/metadex/integration.test.ts`：Add LP → Swap → Lock → Vote → Gauge reward）。`export-abi.ts` 含 MetaFactory/Pair/Router/VotingEscrow/Voter/Gauge；`repos/api/src/abis/` 已有对应 JSON。Sepolia MetaDEX 与 web Swap **未**勾。  
 
 ### Phase B/C — api & web（v0.15.1–.2）
 
@@ -118,7 +118,7 @@ Hardhat（本机、无网络）：`repos/contracts/test/metadex/Router.test.ts`�
 - [ ] web Swap 页完成一笔 Swap  
 - [ ] Lock LP → ve → 投 1 个 Gauge  
 
-Phase C lab（web `/dex`）：quote/pools UI 已落地。Swap CTA 在 `health.router` 为 0x、已报价且钱包已连接时调用 `swapExactTokensForTokens`（先 ERC-20 approve）。Lock/Vote 在 `GET /dex/gauges` 返回真实 VotingEscrow/Voter 且已填金额/tokenId/gauge 时调用 `createLockForToken` / `vote`（权重 100，与合约集成测试一致）。本验收未挖出 Swap 或 Vote，故对应两项保持打开。  
+本地合约集成仍走 `pnpm run smoke:metadex:local`；web Swap / Lock 框保持未勾（需 web `/dex` 页 + DApp 挖出的交易）。Phase C lab（web `/dex`）：quote/pools UI 已落地。Swap CTA 在 `health.router` 为 0x、已报价且钱包已连接时调用 `swapExactTokensForTokens`（先 ERC-20 approve）。Lock/Vote 在 `GET /dex/gauges` 返回真实 VotingEscrow/Voter 且已填金额/tokenId/gauge 时调用 `createLockForToken` / `vote`（权重 100，与合约集成测试一致）。本验收未挖出 Swap 或 Vote，故对应两项保持打开。  
 
 ### Phase D — 分析（可选）
 

@@ -122,7 +122,7 @@ infrastructure/
 
 **替代**：无链上 USDC 时用法币 Onramp 买到用户 Base 地址，见 [ONRAMP.md](./ONRAMP.md)。Coinbase 账户可直接提现到 Base（无需桥）。
 
-**Lab canonical list**：`GET /api/v1/tokens/canonical?chainId=` 返回 `{ chainId, configured, tokens: [{ symbol, address, kind }] }`。Base 主网（`8453`）仅 Circle 原生 USDC（`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`，公开常量，非伪造 DoerFlow 部署）。实验室链 `84532` / `31337` 使用现有 `deployments.json` / 匹配 env 的 Vault asset 与 mock USDC（及 localhost WETH）；未知 `chainId` 为 `configured: false` 且 `tokens: []`。该接口为只读目录，**不是** CanonicalTokenRegistry（FR-BRIDGE-003），也不是 OP Stack / CCTP。
+**Lab canonical list**：`GET /api/v1/tokens/canonical?chainId=` 返回 `{ chainId, configured, tokens: [{ symbol, address, kind }] }`。web `/payments` 以只读卡片展示该列表（无 Vault 时也可显示）。Base 主网（`8453`）仅 Circle 原生 USDC（`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`，公开常量，非伪造 DoerFlow 部署）。实验室链 `84532` / `31337` 使用现有 `deployments.json` / 匹配 env 的 Vault asset 与 mock USDC（及 localhost WETH）；未知 `chainId` 为 `configured: false` 且 `tokens: []`。该接口为只读目录，**不是** CanonicalTokenRegistry（FR-BRIDGE-003），也不是 OP Stack / CCTP。
 
 Phase 1 **不**交付 CCTP、LayerZero、OP Stack 原生桥、Agent L2 或 CanonicalTokenRegistry。
 
