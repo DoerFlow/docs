@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 开发者接入（Agent Trading SDK · M4）
 
-**版本**: v0.4 · **最后更新**: 2026-08-29  
+**版本**: v0.4 · **最后更新**: 2026-09-10  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [ROADMAP.md](./ROADMAP.md) · [SPEC.md](./SPEC.md) §8.1
 
 第三方 **无 App** 即可：发现 Skill → 报价 → Session Key 授权 → `signReceipt` → 链下记账 → 参与 Merkle 清算。
@@ -52,6 +52,9 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/integrations/syncrobrain/telemetry-credits` | 时间窗 digest 账本入账（FR-IOT-008） |
 | PUT | `/integrations/syncrobrain/payee-bindings` | assetId → checksum payee（实验室可 M2M 无 SIWE） |
 | GET | `/integrations/syncrobrain/payee-bindings` | 查询 `(sourceTenantId, sourceId)` 绑定 |
+| POST | `/devices/register` | P4 实验室设备 `{ kind?, label, payee }` |
+| POST | `/devices/:id/heartbeat` | 设备心跳 |
+| POST | `/devices/:id/telemetry` | `{ reading, unit? }` → telemetry hash + 账本入账 |
 
 企业回调：创建 job 时带 `callbackUrl`；结算后 POST **CloudEvents 1.0** JSON，头 `X-DoerFlow-Signature: sha256=<hmac>`（`TRADING_WEBHOOK_SECRET`）。信封含 `id` / `source` / `type` / `data`。
 
@@ -138,6 +141,36 @@ if (!verifyDoerFlowWebhook(rawBody, req.headers["x-doerflow-signature"], skill.w
 4. 结算仍走 Receipt + 账本；对方 2xx 才标记 `execution.adapter=http-provider`。
 
 本机验收含在 `pnpm run smoke:channels`（P1b）。
+
+---
+
+## 4.2 P4 实验室设备（register → heartbeat → telemetry）
+
+实验室 HTTP 设备，**不是**链上 `DeviceRegistry` / 车桩收款。活路径证明：`pnpm run smoke:channels`（P4）。
+
+```ts
+import { DoerFlowClient } from "@vibe-agent/shared/sdk";
+
+const api = new DoerFlowClient({ baseUrl: "http://localhost:13008/api/v1" });
+const device = await api.registerDevice({
+  kind: "sensor",
+  label: "lab-temp",
+  payee: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+});
+await api.heartbeatDevice(device.id);
+const tel = await api.postDeviceTelemetry(device.id, { reading: "22.5", unit: "C" });
+// tel.telemetryHash 以 sha256: 开头；payee 账本入账 credited
+```
+
+Python（可选）：
+
+```python
+from doerflow import DoerFlowClient
+client = DoerFlowClient("http://localhost:13008/api/v1")
+device = client.register_device("lab-temp", "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", kind="sensor")
+client.heartbeat_device(device["id"])
+tel = client.post_device_telemetry(device["id"], "22.5", unit="C")
+```
 
 ---
 

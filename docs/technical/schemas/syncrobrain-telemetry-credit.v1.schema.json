@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://doerflow.dev/schemas/syncrobrain-telemetry-credit.v1.schema.json",
+  "title": "SyncroBrain telemetry window ledger credit",
+  "description": "CloudEvents 1.0 posted to DoerFlow POST /integrations/syncrobrain/telemetry-credits. Window digest only. Not TelemetryEnvelope, not TB MQTT, not /integrations/events.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["specversion", "id", "source", "type", "data"],
+  "properties": {
+    "specversion": { "type": "string", "const": "1.0" },
+    "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "source": { "type": "string", "minLength": 1 },
+    "type": {
+      "type": "string",
+      "const": "com.syncrobrain.telemetry-credit.v1"
+    },
+    "subject": { "type": "string" },
+    "time": { "type": "string", "format": "date-time" },
+    "datacontenttype": { "type": "string" },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceTenantId",
+        "sourceId",
+        "offeringCode",
+        "window",
+        "digestSha256",
+        "amount",
+        "payee"
+      ],
+      "properties": {
+        "sourceTenantId": { "type": "string", "minLength": 1 },
+        "sourceId": { "type": "string", "minLength": 1 },
+        "sourceRef": { "type": "string" },
+        "orgId": { "type": "string" },
+        "callbackUrl": { "type": "string" },
+        "offeringCode": {
+          "type": "string",
+          "const": "syncrobrain.telemetry-digest.v1"
+        },
+        "window": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end"],
+          "properties": {
+            "start": { "type": "string", "format": "date-time" },
+            "end": { "type": "string", "format": "date-time" }
+          }
+        },
+        "digestSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "sampleCount": { "type": "integer", "minimum": 0 },
+        "assetCount": { "type": "integer", "minimum": 0 },
+        "amount": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "asset": { "type": "string" },
+        "payee": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$"
+        },
+        "payer": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$",
+          "description": "Optional buyer. When set, DoerFlow applyReceipt(payer, payee, …) and must not mint. Omitted: lab ledger.credit(payee)."
+        },
+        "channel": { "type": "string", "const": "agent-iot" },
+        "settlementRail": { "type": "string", "const": "ledger" }
+      }
+    }
+  }
+}

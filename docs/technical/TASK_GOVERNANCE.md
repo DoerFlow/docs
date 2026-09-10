@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 任务治理与发布审批
 
-**版本**: v0.2-draft · **最后更新**: 2026-08-26
+**版本**: v0.2-draft · **最后更新**: 2026-09-10
 
 ## 1. 任务状态机
 
@@ -79,10 +79,12 @@ draft → pending_review → published → assigned → submitted → verifying 
 
 ## 5. 发单方确认清单（wallet）
 
-- [ ] 描述真实、报酬合理  
-- [ ] 禁止刷量/违法/危害人类内容  
-- [ ] 理解 Escrow 与手续费（AA 等级费率）  
-- [ ] 社交类须声明 App 与步骤  
+- [x] 描述真实、报酬合理  
+- [x] 禁止刷量/违法/危害人类内容  
+- [x] 理解 Escrow 与手续费（AA 等级费率）  
+- [x] 社交类须声明 App 与步骤  
+
+证据：wallet `app/(tabs)/publish.tsx` 四项勾选；`publisherChecklistReady` 未齐则禁用提交；社交项仅 `isSocial` 必勾。
 
 ## 6. API 模块
 

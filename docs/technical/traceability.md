@@ -9,7 +9,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 将 `SPEC.md` 中的需求 ID 映射到实现仓库与模块，用于 Spec 驱动开发与 Code Review。
 
-**最后更新**: 2026-09-09
+**最后更新**: 2026-09-10
 
 | 需求 ID | 简述 | 主仓库 | 模块/路径 | 版本 |
 |---------|------|--------|-----------|------|
@@ -58,7 +58,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-DEX-004 | Rust Sidecar 替换 | api + dex-engine | `RustDexSidecar` | 盈利后 |
 | FR-DEX-005 | 分析外接 | api | DataLuminary Adapter | v0.15.x |
 | FR-DEX-UI-001 | Swap/LP/Vote UI | web | `/dex` | v0.15.2 |
-| FR-BRIDGE-001 | Base 官方桥引导 | wallet, web | deep link | v0.3 |
+| FR-BRIDGE-001 | Base 官方桥引导；lab canonical 只读列表 | wallet, web, api | deep link；`GET /api/v1/tokens/canonical`（非 Registry / 非 OP Stack） | v0.3 |
 | FR-BRIDGE-002 | OP Stack + Standard Bridge | infrastructure, contracts | v0.7 | v0.7 |
 | FR-BRIDGE-003 | CanonicalTokenRegistry | contracts | `bridge/` | v0.7 |
 | FR-BRIDGE-004 | 桥状态 API Port | api | `bridge` 模块 | v0.7 |
@@ -68,6 +68,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-ONRAMP-001 | Onramp Port + shared | shared | `@vibe-agent/onramp` | v0.3 |
 | FR-ONRAMP-002 | MoonPay + Stripe Adapter | wallet, web, api | Widget | v0.3 |
 | FR-ONRAMP-003 | wallet 买币页 | wallet | WebView | v0.3 |
+| FR-ONRAMP-004 | web Creator 买币 Modal | web | `/payments` `OnrampBuyModal` · GET `/onramp/providers` · POST `/onramp/session` · en+zh · 非 live charge | **v0.3 / M3** 🟡 |
 | FR-ONRAMP-005 | 地区路由 + 披露 | api, docs | v0.3 | v0.3 |
 | FR-ONRAMP-007 | 入金向导 Onramp+Bridge | wallet | v0.7 | v0.7 |
 | FR-PAY-001 | 公链/现成 L2 only（弃联盟链） | spec, docs | **已定** | **已定** |
@@ -144,16 +145,16 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-PRV-002 | 付款后才 invoke 对方 endpoint | api | execute 校验 Receipt；CloudEvents `job.invoke` | **v1.1-channels-lab** ✅ |
 | FR-PRV-003 | 每 Skill HMAC + SSRF 限制 | api, shared/sdk | `verifyDoerFlowWebhook`；loopback HTTP / 公网 HTTPS | **v1.1-channels-lab** ✅ |
 | FR-EP-001~003 | Endpoint 注册/心跳/白名单执行 | api | `/endpoints` · `ENDPOINT.md` | **v1.1-channels-lab** ✅ |
-| FR-IOT-007 | 实验室 Device HTTP（非链上 Registry） | api | `/devices` 注册·心跳·telemetry | **v1.1-channels-lab** ✅ |
-| FR-IOT-008 | TB 时间窗 digest → 账本入账 | spec, api, SyncroBrain Gateway | `POST /integrations/syncrobrain/telemetry-credits` · `PUT`/`GET …/payee-bindings` · Gateway UTC 窗闭合出站 · [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md) | **实验室 REST + 出站 + asset↔payee 绑定** |
+| FR-IOT-007 | 实验室 Device HTTP（非链上 Registry） | api, shared/sdk, sdk/python | `/devices` 注册·心跳·telemetry；SDK `registerDevice` / `heartbeatDevice` / `postDeviceTelemetry` | **v1.1-channels-lab** ✅ |
+| FR-IOT-008 | TB 时间窗 digest → 账本入账 | spec, api, SyncroBrain Gateway | `POST /integrations/syncrobrain/telemetry-credits` · 可选 `data.payer` → `applyReceipt` · `PUT`/`GET …/payee-bindings` · Gateway UTC 窗闭合出站 · [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md) | **实验室 REST + 出站 + asset↔payee 绑定 + 可选买方划转** |
 
 ## MVP v0.1 验收对照
 
 | SPEC §11 条目 | 仓库 | 状态 |
 |---------------|------|------|
 | Agent 铸造与市场展示 | contracts, api, web | 进行中 |
-| Skill 注册与绑定 | contracts, web | 进行中 |
-| Escrow 全流程 | contracts, api, web | 进行中 |
+| Skill 注册与绑定 | contracts, web | **v0.1** 代码就绪 / 需本机链 |
+| Escrow 全流程 | contracts, api, web | **v0.1 ✅** `smoke:escrow:local` · `smoke:m3` |
 | 任务治理双通道 | api, wallet, worker, admin | MVP+ |
 | P2P Beacon | p2p | 未开始 |
 | IoT 设备支付 | contracts, sdk | v0.4 |

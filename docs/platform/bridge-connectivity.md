@@ -19,7 +19,24 @@ DoerFlow 让用户与 Agent 在链上 **安全持有和使用 USDC、USDT、PYUS
 
 部署在 **Base**（以及 Arbitrum 等现成 L2）时，使用各链 **官方桥** 存入 USDC/ETH。
 
-wallet / web 提供 **「跨链充值」** 引导；**不做定制 L3**；不自建 L1 桥合约。
+wallet 在 **「入金」** Tab 提供 **「从 Ethereum 充值到 Base」** 引导（打开 Base 官方桥入口）；**不做定制 L3**；不自建 L1 桥合约。
+
+## Ethereum → Base USDC（当前主路径）
+
+已有 Ethereum 上资产、要进入 DoerFlow 结算域时，按下列顺序操作：
+
+1. **官方桥**  
+   打开 wallet **入金** → **从 Ethereum 充值到 Base**。该按钮 deep link 到 [Base Bridge](https://bridge.base.org)。该入口现导向 Base 官方文档 [Bridge to Base](https://docs.base.org/base-chain/network-information/bridges)；Ethereum L1 路线以文档当前列出的 Superchain 桥为准。只从官方页面进入，不要使用搜索广告或不明第三方桥。
+
+2. **Canonical USDC**  
+   到账后请使用 Circle 在 Base 发行的 **原生 USDC**（Vault / 账本的结算资产）。标准 OP 桥可能得到 bridged USDC（常称 USDbC）——名称相似但 **不是** Vault 认的资产，不要存入金库。
+
+3. **DoerFlow Vault / Escrow**  
+   回到 wallet 入金页，将原生 USDC 存入 **PaymentVault**；发任务锁定报酬走 **Escrow**（ETH）。高频微支付走 [链下账本 + Merkle](/platform/async-payments)，不经过再一次跨链。
+
+**替代路径**：没有链上 USDC 时，用法币 [Onramp](/platform/fiat-onramp) 直接买到你的 Base 地址。若资金在 Coinbase 账户，可选择提现到 Base 网络（无需桥）。
+
+Phase 1 **不**提供自建 L1 桥、定制 L3、Circle CCTP 产品化入口或自建 Agent L2。
 
 ## 自建链（远期可选）
 
@@ -37,3 +54,5 @@ wallet / web 提供 **「跨链充值」** 引导；**不做定制 L3**；不自
 - [BRIDGE 完整规格](/technical/BRIDGE)  
 - [异步支付 / 链下账本](/platform/async-payments)  
 - [Onramp 法币入口](/platform/fiat-onramp)
+
+*最后更新：2026-09-10*

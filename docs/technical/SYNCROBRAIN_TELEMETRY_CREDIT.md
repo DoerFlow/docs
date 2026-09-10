@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # SyncroBrain 遥测时间窗 → DoerFlow 账本入账
 
-**版本**: v0.2-lab · **最后更新**: 2026-09-09  
+**版本**: v0.3-lab · **最后更新**: 2026-09-10  
 **需求**: [FR-IOT-008](./traceability.md)  
 **关联**: [IOT.md](./IOT.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [CHANNELS.md](./CHANNELS.md) `agent-iot` · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)
 
@@ -24,7 +24,9 @@ SyncroBrain 侧镜像：[SyncroBrain `spec/integrations/doerflow.md`](https://gi
                  └── Gateway 时间窗聚合（digestSha256，无原始点序列）
                         └── HTTPS CloudEvents ──► DoerFlow
                               POST /api/v1/integrations/syncrobrain/telemetry-credits
-                              └── 解析 payee（绑定表优先）→ 幂等 ledger.credit(payee)
+                              └── 解析 payee（绑定表优先）
+                                    ├── 无 data.payer → 幂等 ledger.credit(payee)（实验室铸造）
+                                    └── 有 data.payer → 余额足够则 ILedger.applyReceipt(payer, payee, …)
 ```
 
 | 产品 | 拥有 | 本步不拥有 |
@@ -56,7 +58,7 @@ SyncroBrain 侧镜像：[SyncroBrain `spec/integrations/doerflow.md`](https://gi
 | 鉴权 | 与 inbox 相同：`CommerceAuthGuard`。生产 M2M scope `integration.event.submit`；`COMMERCE_AUTH_MODE=lab\|off` 供本机 smoke |
 | 档位 | `DEPLOYMENT_PROFILE=agent-commerce+`，或本机 `lab\|off`（与三类商业入站同一例外）。`standalone` + `production` **关** |
 | 幂等 | CloudEvents `id`；去重键 `sourceProduct=syncrobrain` + `eventId`。账本 `operationId=telemetry-credit:{id}` |
-| 结算轨 | 仅 `ledger`（实验室铸造式 `credit`，与 P4 相同；**不是** Job `capture`，也不是买方扣款） |
+| 结算轨 | 仅 `ledger`。无 `data.payer`：实验室铸造 `ledger.credit(payee)`（Gateway 出站暂不带 payer）。有 `data.payer`：`ILedger.applyReceipt(payer, payee, asset, amount, telemetry-credit:{id})`，**禁止**再铸造。**不是** Job `authorize`/`capture` |
 | 绑定 | `PUT` / `GET` `/api/v1/integrations/syncrobrain/payee-bindings`（同一 `CommerceAuthGuard`；写操作生产 M2M scope `integration.event.submit`） |
 
 推荐 `id`：
@@ -89,7 +91,8 @@ sb:telemetry-credit:{sourceTenantId}:{assetId}:{window.start}
 | `digestSha256` | 是 | 64 位小写 hex；时间窗摘要，**不是**逐点 hash |
 | `amount` | 是 | 正整数字符串（wei/最小单位，与 P4 `1000` 同形） |
 | `asset` | 否 | 默认 `USDC`（符号或 `0x` 地址） |
-| `payee` | 是 | EIP-55 / 任意 checksum 的 20 字节地址 |
+| `payee` | 是 | EIP-55 / 任意 checksum 的 20 字节地址（信封字段；实际收款方见 §5） |
+| `payer` | 否 | EIP-55 / 任意 checksum 的 20 字节地址。出现则 **划转**（`applyReceipt`），**不** `ledger.credit`。省略则维持实验室铸造。SyncroBrain Gateway 出站 **暂不**发此字段 |
 | `sampleCount` / `assetCount` | 否 | 非负整数计数；**无** min/max/avg 序列 |
 | `channel` | 否 | 默认 `agent-iot` |
 | `settlementRail` | 否 | 若出现必须是 `ledger` |
@@ -163,6 +166,7 @@ sb:telemetry-credit:{sourceTenantId}:{assetId}:{window.start}
 | 400 | `INVALID_EVENT` / `SENSITIVE_FIELD_REJECTED` | 信封/白名单 |
 | 401 | `COMMERCE_AUTH_REQUIRED` | 生产缺 M2M |
 | 403 | `PAYEE_NOT_BOUND` | 生产模式且 `(sourceTenantId, sourceId)` **无**绑定；**不入账** |
+| 403 | `INSUFFICIENT_BALANCE` | `data.payer` 存在且该 `asset` 余额不足 `amount`；**不**调用 `applyReceipt`、**不铸造**、事件 **不**标 `credited` |
 | 403 | `CROSS_TENANT` / `POLICY_DENIED` | 租户或 Casbin |
 
 `GET /capabilities` 的 `integrations.settlement` 列出本 `type`（**不**并进任务 inbox 的 `integrations.inbound`）。
@@ -181,7 +185,7 @@ DoerFlow 表 `syncrobrain_payee_bindings`（**SQLite 索引库**，与 `integrat
 
 | 条件 | 行为 |
 |------|------|
-| 存在 `(sourceTenantId, sourceId)` 绑定 | 入账 **绑定 payee**。信封 `payee` 若不同则忽略，**不** `400`；实验室铸造仍打到绑定地址 |
+| 存在 `(sourceTenantId, sourceId)` 绑定 | 入账 **绑定 payee**。信封 `payee` 若不同则忽略，**不** `400`；铸造或 `applyReceipt` 的收款方都是绑定地址 |
 | 无绑定且 `COMMERCE_AUTH_MODE=lab\|off` | 维持现状：信任信封 `payee` |
 | 无绑定且 `COMMERCE_AUTH_MODE=production` | `403 PAYEE_NOT_BOUND`，**不入账** |
 
@@ -209,10 +213,11 @@ DoerFlow 表 `syncrobrain_payee_bindings`（**SQLite 索引库**，与 `integrat
 - 按遥测点计费、把 `series` 写进账本
 - 自动注册 `/devices` 或链上 `DeviceRegistry`
 - Gateway 在未设 `DOERFLOW_ENABLED=true` 时出站（必须 no-op）
-- 把本事件当 Job `authorize`/`capture`（那是买方付费买 digest 的另一条路）
-- **买方扣款**（仍为实验室铸造 `ledger.credit`）
+- 把本事件当 Job `authorize`/`capture`（那是买方付费买 digest 的另一条路；Job capture **仍**不在本合同范围）
 
-Gateway 时间窗自动出站（UTC 对齐、`DOERFLOW_ENABLED` 门控、`postTelemetryCredit`）已实现。**下一步**：真实买方扣款而非实验室铸造。
+**在范围内**：可选 `data.payer` 实验室划转（`applyReceipt` + 余额不足 `403 INSUFFICIENT_BALANCE`）。省略 `payer` 时仍为实验室铸造。Gateway 时间窗自动出站（UTC 对齐、`DOERFLOW_ENABLED` 门控、`postTelemetryCredit`）已实现，**出站暂不带 payer**。
+
+**下一步**：Gateway / Job 路径发出真实买方 `payer`，而不是仅靠实验室铸造。
 
 ---
 
@@ -225,3 +230,7 @@ Gateway 时间窗自动出站（UTC 对齐、`DOERFLOW_ENABLED` 门控、`postTe
 - [x] 单元测试：`repos/api` `telemetry-credit.service.spec.ts` · `payee-binding.service.spec.ts`
 - [x] Gateway：时间窗闭合后 per-asset digest 出站；`DOERFLOW_ENABLED` 未开 no-op；空窗不入账
 - [x] asset ↔ payee 绑定：lab 未绑定用信封；绑定覆盖信封；生产未绑定 `PAYEE_NOT_BOUND`；`PUT`/`GET` 往返
+- [x] 省略 `data.payer`：仍实验室 `ledger.credit(payee)`（单元测试）
+- [x] 有 `data.payer` 且余额足够：`applyReceipt`，payer 减、payee 增；**不**铸造（单元测试）
+- [x] 有 `data.payer` 且余额不足：`403 INSUFFICIENT_BALANCE`，双方余额不变，事件不标 credited（单元测试）
+- [x] 同一 CloudEvents `id` 重放：`deduped: true`，不第二次划转（单元测试）

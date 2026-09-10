@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 物联网交易与设备经济
 
-**版本**: v0.3-lab · **最后更新**: 2026-09-09  
+**版本**: v0.3-lab · **最后更新**: 2026-09-10  
 **路线图**: 实验室 P4 = v1.1-channels-lab HTTP 设备；TB 时间窗入账 = **FR-IOT-008**；规模化车桩/能源/冷链 = **v1.2+**（见 [ROADMAP.md](./ROADMAP.md) · [CHANNELS.md](./CHANNELS.md)）
 
 ## 1. 愿景
@@ -127,6 +127,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ### v1.1-channels-lab（P4）
 
 - [x] `POST /devices/register` + heartbeat + telemetry hash → 账本入账（`pnpm run smoke:channels`）
+- [x] SDK wrap：`registerDevice` / `heartbeatDevice` / `postDeviceTelemetry`（TS + Python；见 [DEVELOPER.md](./DEVELOPER.md) §4.2）
 - [ ] 链上 `DeviceRegistry` / 稳定币充电（仍为 v1.2+）
 
 ### FR-IOT-008（TB 时间窗入账 · 实验室）
@@ -136,6 +137,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - [x] REST：`POST /integrations/syncrobrain/telemetry-credits`（CloudEvents `com.syncrobrain.telemetry-credit.v1`）
 - [x] SyncroBrain Gateway 在 TB 遥测时间窗闭合后自动出站（仍须 `DOERFLOW_ENABLED`）
 - [x] asset ↔ SIWE payee 绑定表（`PUT`/`GET /integrations/syncrobrain/payee-bindings`；生产未绑定拒绝入账）
+- [x] 可选信封 `data.payer`：余额足够则 `applyReceipt`（不足 `403 INSUFFICIENT_BALANCE`）；省略 payer 仍实验室铸造
 
 ### v1.2+ 车桩
 

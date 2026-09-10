@@ -6,6 +6,8 @@ title: 法币买币 · 合规 Onramp
 
 VibeAgent **不申请支付牌照、不托管法币、不收集 KYC**。用户通过 **持牌合作伙伴** 用法币购买 crypto，资产 **直接进入自托管钱包**。
 
+VibeAgent **不是收单商户（merchant of record）**：法币合同、KYC 与银行卡处理均在合作伙伴域内完成。
+
 ## 为什么这样设计？
 
 | 优势 | 说明 |
@@ -16,12 +18,14 @@ VibeAgent **不申请支付牌照、不托管法币、不收集 KYC**。用户�
 
 ## 合作伙伴
 
-| 伙伴 | 场景 |
-|------|------|
-| **Stripe Crypto Onramp** | 美国等 Stripe 覆盖区 |
-| **MoonPay** | 全球 fallback |
-| **Transak** | 多地区、多资产 |
-| **Alchemy Pay** | 亚太、欧洲本地法币 |
+用户直接与下列持牌方建立法律关系（非 VibeAgent 收单）：
+
+| 伙伴 | 场景 | 链接 |
+|------|------|------|
+| **Stripe Crypto Onramp** | 美国等 Stripe 覆盖区 | [stripe.com/docs/crypto/onramp](https://stripe.com/docs/crypto/onramp) |
+| **MoonPay** | 全球 fallback | [moonpay.com](https://www.moonpay.com) |
+| **Transak** | 多地区、多资产 | [transak.com](https://transak.com) |
+| **Alchemy Pay** | 亚太、欧洲本地法币 | [alchemypay.org](https://alchemypay.org) |
 
 ## 用户流程
 
@@ -32,8 +36,8 @@ VibeAgent **不申请支付牌照、不托管法币、不收集 KYC**。用户�
 
 ## 合规披露
 
-- 法币交易合同主体为 **合作伙伴**，非 VibeAgent  
-- 不可用地区将显示 **交易所 / 跨链桥** 替代引导  
+- 法币交易 **merchant of record / 收单主体** 为上表合作伙伴，**非 VibeAgent**
+- 不可用地区将显示 **交易所 / [Base Bridge](https://bridge.base.org)** 替代引导
 - 详见 [ONRAMP 技术规格](/technical/ONRAMP)
 
 ## 技术规格

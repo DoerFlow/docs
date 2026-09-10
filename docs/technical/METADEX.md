@@ -118,11 +118,11 @@ Hardhat（本机、无网络）：`repos/contracts/test/metadex/Router.test.ts`�
 - [ ] web Swap 页完成一笔 Swap  
 - [ ] Lock LP → ve → 投 1 个 Gauge  
 
-Phase C lab（web `/dex`）：quote/pools UI 已落地；Swap CTA 在 Router 未接线时保持禁用（不伪造链上成交）。  
+Phase C lab（web `/dex`）：quote/pools UI 已落地。Swap CTA 在 `health.router` 为 0x、已报价且钱包已连接时调用 `swapExactTokensForTokens`（先 ERC-20 approve）。Lock/Vote 在 `GET /dex/gauges` 返回真实 VotingEscrow/Voter 且已填金额/tokenId/gauge 时调用 `createLockForToken` / `vote`（权重 100，与合约集成测试一致）。本验收未挖出 Swap 或 Vote，故对应两项保持打开。  
 
 ### Phase D — 分析（可选）
 
-- [ ] 配置 `DATALUMINARY_*` 后 analytics 外接  
+- [x] 配置 `DATALUMINARY_*` 后 analytics 外接（Jest mock：`dataluminary-analytics.adapter.spec.ts`；未配置 `source: none`；密钥不进响应；quote 不走 analytics）  
 
 ## 8. 明确不做（直到盈利后 Rust 阶段）
 

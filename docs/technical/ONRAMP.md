@@ -1,12 +1,13 @@
-﻿---
+---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
-> **瑙勮寖婧愭枃浠?*锛氱敱 MetaRepo `spec/` 鍚屾锛岃鍕跨洿鎺ョ紪杈戞湰椤点€?
+> **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
+
 # 法币入口 · 合规第三方 Onramp
 
-**版本**: v0.1-draft · **最后更新**: 2025-01-14  
+**版本**: v0.1-draft · **最后更新**: 2026-09-10  
 **关联**: [WALLET.md](./WALLET.md) · [BRIDGE.md](./BRIDGE.md) · [ROADMAP.md](./ROADMAP.md) § M3
 
 ## 1. 合规策略：不自建汇款
@@ -145,13 +146,25 @@ ONRAMP_GEO_BLOCKLIST=CN,KP,...   # 法务维护
 | FR-ONRAMP-006 | Transak + Alchemy Pay Adapter | wallet, web | v0.4 |
 | FR-ONRAMP-007 | 入金向导（Onramp + Bridge 链式） | wallet | v0.7 |
 
+FR-ONRAMP-004 证据：web `/payments` 已接买币 Modal（`OnrampBuyModal`，非 live charge）。
+
 ## 8. 验收（v0.3）
 
 - [ ] 测试网/主网：MoonPay sandbox 完成一笔 USDC → 测试钱包  
 - [ ] Stripe Onramp sandbox（可用地区）  
-- [ ] 不支持地区 fallback 文案 + 桥引导  
-- [ ] api 日志 **无 PII** 审计通过  
-- [ ] 公开 docs 披露：非 VibeAgent 收单、合作伙伴链接  
+- [x] 不支持地区 fallback 文案 + 桥引导  
+- [x] api 日志 **无 PII** 审计通过  
+- [x] 公开 docs 披露：非 VibeAgent 收单、合作伙伴链接  
+
+**证据（2026-09-10，自动化；不含 live charge）**
+
+| 条 | 证据 |
+|----|------|
+| 不支持地区 fallback | shared `onramp.service.test.ts`（`geoBlocklist` → `fallback.type=bridge` / `https://bridge.base.org`）；api `onramp.service.spec.ts`（`listProviders`/`createSession` 对 CN 返回 `widget: null` + Base Bridge）；wallet `app/onramp.tsx` 在 `blocked` 时展示 `onramp.unsupportedRegion` / `onramp.openBaseBridge`（en+zh 均含 Base Bridge），`src/i18n/onramp-fallback.test.ts` 断言文案与无 `defaultValue`；web `/payments` `OnrampBuyModal` 对 blocked 展示同一文案并打开 Base Bridge（`onramp-widget.test.ts`，非 live charge） |
+| api 日志无 PII | `ONRAMP_SESSION_ALLOWED_KEYS`（walletAddress / chainId / countryCode / providerId / defaultAsset / fiatCurrency / locale）+ `ONRAMP_PII_FORBIDDEN_KEYS`；`onrampPayloadPiiKeys` 断言 blocked 响应无 email/ssn/card；`onramp.service.spec.ts` 扫描 adapters/service 的 `logger.*` 不含 KYC/卡/邮箱字段；MoonPay adapter 仅日志 chainId |
+| 公开 docs | `repos/docs/docs/platform/fiat-onramp.md`：非 merchant of record / 非收单，Stripe · MoonPay · Transak · Alchemy Pay 链接 |
+| FR-ONRAMP-004 web 买币入口 | `repos/web` `/payments` `OnrampBuyModal`：country → GET `/onramp/providers` → POST `/onramp/session` → HTTPS iframe 或新标签；blocked → Base Bridge。**无 live charge** |
+| MoonPay / Stripe sandbox live | **人工** — 本验收不跑 live charge |  
 
 ## 9. 明确不做
 
@@ -163,4 +176,3 @@ ONRAMP_GEO_BLOCKLIST=CN,KP,...   # 法务维护
 ---
 
 *跨链见 [BRIDGE.md](./BRIDGE.md)；钱包见 [WALLET.md](./WALLET.md)。*
-

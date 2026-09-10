@@ -211,12 +211,12 @@ sequenceDiagram
 
 #### 4.2.1 Job 授权收据（FR-PAY-018）
 
-Trading Job **不得**在 `POST /payments/receipts` 被 Vault accept 后立刻 `applyReceipt`（该路径仅保留给非 Job 微支付与旧 SDK）。
+Trading Job **不得**在 `POST /payments/receipts` 被 Vault accept 后立刻 `applyReceipt`（该路径仅保留给非 Job 微支付与旧 SDK）。非 Job 路径 Vault accept 后仍 `applyReceipt`，但失败不得空吞、不得回滚 Vault：HTTP 保持 success、收据 `pending`，`data.ledgerApplied` 标明是否入账，失败时带 `data.ledgerError`（不足为 `INSUFFICIENT_BALANCE`）。
 
 | 步骤 | 行为 |
 |------|------|
 | `authorize` | 验 EIP-712 + Session allowlist/预算/nonce；Receipt 以 `authorized` 落库（不进 `listPending`）；`recordSpend` 预留预算；写入 `payment_authorizations`；**payee 余额不变** |
-| `capture` | 要求 authorization=`authorized` 且 Job 已持久化 output hash；`applyReceipt` **一次**；Receipt → `pending`（进入 Merkle 管道）；authorization → `captured` |
+| `capture` | 要求 authorization=`authorized` 且 Job 已持久化 output hash；`applyReceipt` **一次**（payer 不足则 `INSUFFICIENT_BALANCE`，不贷记 payee）；Receipt → `pending`（进入 Merkle 管道）；authorization → `captured` |
 | `void` | 仅 `authorized`；`releaseSpend`；Receipt → `voided`；**不** `applyReceipt` |
 
 持久化实体：`payment_authorizations`（jobId、receiptId、idempotencyKey、sessionId、amount、status、ledgerApplied）。Nonce/幂等与 capture 一次性由该实体 + Vault nonce 共同保证。

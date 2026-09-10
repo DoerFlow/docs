@@ -1,9 +1,10 @@
-﻿---
+---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
-> **瑙勮寖婧愭枃浠?*锛氱敱 MetaRepo `spec/` 鍚屾锛岃鍕跨洿鎺ョ紪杈戞湰椤点€?
+> **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
+
 # 等级费率 · ERC-4337 账户抽象
 
 **版本**: v0.1-draft · **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)（Session Keys）
@@ -25,7 +26,7 @@ doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-t
 | T2 | 质押 ≥ X ETH 或 DAO 徽章 | 150 | 贡献者 |
 | T3 | 验证 Skill Creator | 100 | 生态伙伴 |
 
-MVP：API 返回静态表；v0.2 在 `contracts` 部署 `FeeTierRegistry` + AA Paymaster 读取。
+MVP：API 返回静态表；**v1.0** 实验室 `SettlementPaymaster` 已部署（FR-PAY-008）；链上 `FeeTierRegistry` 仍见 v0.2+ 验收。
 
 ## 3. ERC-4337 集成要点
 
@@ -63,3 +64,4 @@ Smart Account 持有主密钥；Agent 运行时仅加载 **Session Key**，泄�
 - [ ] Sepolia 上 Smart Account 完成一笔带等级费率的 Escrow 结算  
 - [ ] 链下索引与 `GET /fees/tiers` 一致  
 
+MVP 的 `GET /api/v1/fees/tiers` 仍返回本文件第 2 节静态 T0–T3 表（`FeesService`），尚无链上 `FeeTierRegistry` 索引。

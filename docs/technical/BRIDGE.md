@@ -1,12 +1,13 @@
-﻿---
+---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
-> **瑙勮寖婧愭枃浠?*锛氱敱 MetaRepo `spec/` 鍚屾锛岃鍕跨洿鎺ョ紪杈戞湰椤点€?
+> **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
+
 # 跨链互通 · 官方桥与 Omnichain
 
-**版本**: v0.2-draft · **最后更新**: 2025-01-14  
+**版本**: v0.3 · **最后更新**: 2026-09-10  
 **关联**: [AGENT_CHAIN.md](./AGENT_CHAIN.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [ROADMAP.md](./ROADMAP.md) · [ONRAMP.md](./ONRAMP.md)
 
 ## 1. 设计原则
@@ -108,10 +109,22 @@ infrastructure/
 
 | 项 | 做法 |
 |----|------|
-| 跨链 | 引导用户使用 [Base Bridge](https://bridge.base.org)（Ethereum ↔ Base） |
-| 资产 | Base 上官方 USDC、USDbC、WETH 地址写入 `deployments.json` |
-| wallet/web | 「充值」页 deep link 至 Base Bridge + 二维码 |
-| 验收 | 文档 + UI 引导完成一笔 L1→Base USDC 存款 |
+| 跨链 | 引导用户使用 [Base Bridge](https://bridge.base.org)（Ethereum ↔ Base）；路线说明见 [Bridge to Base](https://docs.base.org/base-chain/network-information/bridges) |
+| 资产 | Vault / 账本认 Circle 在 Base 发行的 **原生 USDC**（非任意 wrapped）；USDbC / WETH 仅作生态对照，不写入本页部署表 |
+| wallet | 「入金 / Fund」Tab 主按钮 deep link 至 Base Bridge（非埋在二级页） |
+| 验收 | 文档 + UI 引导完成一笔 Ethereum → Base USDC 路径说明 |
+
+#### Ethereum → Base USDC（用户路径）
+
+1. **官方桥**：wallet「入金」打开 [Base Bridge](https://bridge.base.org)（Ethereum → Base）。该入口导向 Base 官方文档列出的 Superchain 桥路线；勿使用搜索广告或不明第三方桥。  
+2. **Canonical USDC**：到账后使用 Circle 在 Base 发行的原生 USDC，再进入结算。标准 OP 桥可能得到 bridged USDC（USDbC），**不要**把非 canonical 代币存入 Vault。  
+3. **Vault / Escrow**：回到 wallet 将原生 USDC 存入 PaymentVault；发任务报酬走 Escrow（ETH）。链下微支付见 [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)。  
+
+**替代**：无链上 USDC 时用法币 Onramp 买到用户 Base 地址，见 [ONRAMP.md](./ONRAMP.md)。Coinbase 账户可直接提现到 Base（无需桥）。
+
+**Lab canonical list**：`GET /api/v1/tokens/canonical?chainId=` 返回 `{ chainId, configured, tokens: [{ symbol, address, kind }] }`。Base 主网（`8453`）仅 Circle 原生 USDC（`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`，公开常量，非伪造 DoerFlow 部署）。实验室链 `84532` / `31337` 使用现有 `deployments.json` / 匹配 env 的 Vault asset 与 mock USDC（及 localhost WETH）；未知 `chainId` 为 `configured: false` 且 `tokens: []`。该接口为只读目录，**不是** CanonicalTokenRegistry（FR-BRIDGE-003），也不是 OP Stack / CCTP。
+
+Phase 1 **不**交付 CCTP、LayerZero、OP Stack 原生桥、Agent L2 或 CanonicalTokenRegistry。
 
 ## 4. Omnichain 协议（Phase 3）
 
@@ -158,7 +171,7 @@ infrastructure/
 
 | 客户端 | 原生桥 | Omnichain | 版本 |
 |--------|--------|-----------|------|
-| **wallet** | 「跨链充值」→ Base Bridge（Phase 1）/ Agent 桥 UI（Phase 2） | 高级入口（v0.8） | v0.3 引导 · v0.7 完整 |
+| **wallet** | 「入金」→ 从 Ethereum 充值到 Base（Phase 1）/ Agent 桥 UI（Phase 2） | 高级入口（v0.8） | v0.3 引导 · v0.7 完整 |
 | **web** | Creator 充值引导 | 同 wallet | v0.3 · v0.7 |
 | **admin** | 桥监控、canonical 资产审批 | — | v0.7 |
 
@@ -176,7 +189,7 @@ infrastructure/
 
 | ID | 简述 | 主仓库 | 版本 |
 |----|------|--------|------|
-| FR-BRIDGE-001 | Base 官方桥引导（Phase 1） | wallet, web, docs | v0.3 |
+| FR-BRIDGE-001 | Base 官方桥引导（Phase 1）；lab `GET /api/v1/tokens/canonical` 只读列表 | wallet, web, docs, api | v0.3 |
 | FR-BRIDGE-002 | OP Stack 创世 + Standard Bridge 部署 | infrastructure, contracts | v0.7 |
 | FR-BRIDGE-003 | CanonicalTokenRegistry + deployments | contracts, shared | v0.7 |
 | FR-BRIDGE-004 | 桥状态 Indexer / API Port | api | v0.7 |
@@ -188,14 +201,16 @@ infrastructure/
 ## 8. 验收
 
 ### Phase 1（v0.3）
-- [ ] wallet「充值」deep link Base Bridge  
-- [ ] 文档说明 Ethereum → Base USDC 路径  
+- [x] wallet「充值」deep link Base Bridge  
+- [x] 文档说明 Ethereum → Base USDC 路径  
 
 ### Phase 2（v0.7）
 - [ ] Sepolia ↔ Agent L2 测试网：L1 存 0.01 ETH → L2 收到 WETH  
 - [ ] L1 存 USDC → L2 canonical USDC 到账  
 - [ ] 集成测试：提款发起 → 挑战期后 L1 到账（测试网可缩短）  
 - [ ] MetaDEX / Escrow 仅接受 canonical 代币  
+
+实验室已提供 `GET /api/v1/tokens/canonical` 只读列表。上框须等 Escrow 与 MetaRouter **对未知代币 revert** 后再勾；当前 Escrow 只收原生 ETH、Router 只要求 pair 存在，**不得勾选**。
 
 ### Phase 3（v0.8 / v1.1）
 - [ ] CCTP：Base USDC → Agent L2 USDC（burn/mint）  
@@ -204,4 +219,3 @@ infrastructure/
 ---
 
 *法币入口见 [ONRAMP.md](./ONRAMP.md)；链经济见 [AGENT_CHAIN.md](./AGENT_CHAIN.md)。*
-

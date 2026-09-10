@@ -1,9 +1,10 @@
-﻿---
+---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
-> **瑙勮寖婧愭枃浠?*锛氱敱 MetaRepo `spec/` 鍚屾锛岃鍕跨洿鎺ョ紪杈戞湰椤点€?
+> **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
+
 # DataLuminary 外接分析
 
 **版本**: v0.1-draft · **外项目**: [DataLuminary-Platform](https://github.com/DataLuminary/DataLuminary-Platform)
@@ -79,7 +80,10 @@ DATALUMINARY_DASHBOARD_URL=
 | v0.15 MetaDEX Lite 上线 | 提供 Base MetaDEX 只读 Dashboard |
 | v0.7 Agent L2 | 跨链分析扩展（各自排期） |
 
+## 6. 验收证据
+
+配置路径由 `repos/api` Jest mock fetch 覆盖（无需 live DataLuminary）：`src/modules/dex/adapters/external/dataluminary-analytics.adapter.spec.ts`。
+
 ---
 
 *MetaDEX 产品见 [METADEX.md](./METADEX.md)。*
-
