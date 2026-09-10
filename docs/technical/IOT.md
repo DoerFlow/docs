@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -134,8 +134,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps
 合同：[SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md)。
 
 - [x] REST：`POST /integrations/syncrobrain/telemetry-credits`（CloudEvents `com.syncrobrain.telemetry-credit.v1`）
-- [ ] SyncroBrain Gateway 在 TB 遥测时间窗闭合后自动出站（仍须 `DOERFLOW_ENABLED`）
-- [ ] 生产 asset ↔ SIWE payee 绑定表（本步实验室信任 Gateway 提供的 `payee`）
+- [x] SyncroBrain Gateway 在 TB 遥测时间窗闭合后自动出站（仍须 `DOERFLOW_ENABLED`）
+- [x] asset ↔ SIWE payee 绑定表（`PUT`/`GET /integrations/syncrobrain/payee-bindings`；生产未绑定拒绝入账）
 
 ### v1.2+ 车桩
 

@@ -1,17 +1,17 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
 
 # SyncroBrain 遥测时间窗 → DoerFlow 账本入账
 
-**版本**: v0.1-lab · **最后更新**: 2026-09-09  
+**版本**: v0.2-lab · **最后更新**: 2026-09-09  
 **需求**: [FR-IOT-008](./traceability.md)  
 **关联**: [IOT.md](./IOT.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [CHANNELS.md](./CHANNELS.md) `agent-iot` · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)
 
-本文件是 **「TB 遥测 → DoerFlow 链下账本入账」** 的 REST 合同。第一步只冻结这条入账路径；**不**在 DoerFlow 建 MQTT broker，**不**把 Matter 当结算轨，**不**把 ThingsBoard topic 当跨产品总线。
+本文件是 **「TB 遥测 → DoerFlow 链下账本入账」** 的 REST 合同。实验室已接 REST 接收端与 Gateway 时间窗自动出站；**不**在 DoerFlow 建 MQTT broker，**不**把 Matter 当结算轨，**不**把 ThingsBoard topic 当跨产品总线。
 
 SyncroBrain 侧镜像：[SyncroBrain `spec/integrations/doerflow.md`](https://github.com/syncrobrain/syncrobrain/blob/main/spec/integrations/doerflow.md) · schema `contracts/schemas/doerflow-telemetry-credit.schema.json`。字段表冲突时 **以本文件为准**（钱在 DoerFlow）。
 
@@ -24,7 +24,7 @@ SyncroBrain 侧镜像：[SyncroBrain `spec/integrations/doerflow.md`](https://gi
                  └── Gateway 时间窗聚合（digestSha256，无原始点序列）
                         └── HTTPS CloudEvents ──► DoerFlow
                               POST /api/v1/integrations/syncrobrain/telemetry-credits
-                              └── 幂等 ledger.credit(payee)
+                              └── 解析 payee（绑定表优先）→ 幂等 ledger.credit(payee)
 ```
 
 | 产品 | 拥有 | 本步不拥有 |
@@ -57,6 +57,7 @@ SyncroBrain 侧镜像：[SyncroBrain `spec/integrations/doerflow.md`](https://gi
 | 档位 | `DEPLOYMENT_PROFILE=agent-commerce+`，或本机 `lab\|off`（与三类商业入站同一例外）。`standalone` + `production` **关** |
 | 幂等 | CloudEvents `id`；去重键 `sourceProduct=syncrobrain` + `eventId`。账本 `operationId=telemetry-credit:{id}` |
 | 结算轨 | 仅 `ledger`（实验室铸造式 `credit`，与 P4 相同；**不是** Job `capture`，也不是买方扣款） |
+| 绑定 | `PUT` / `GET` `/api/v1/integrations/syncrobrain/payee-bindings`（同一 `CommerceAuthGuard`；写操作生产 M2M scope `integration.event.submit`） |
 
 推荐 `id`：
 
@@ -97,7 +98,7 @@ sb:telemetry-credit:{sourceTenantId}:{assetId}:{window.start}
 
 **禁止**（出现即 `400 SENSITIVE_FIELD_REJECTED`）：`video` / `rtsp` / 凭据 / `mqtt*` / `token` / `tbDeviceId` / `deviceToken` / `series` / `reading(s)` / `value` / 原始点 / TelemetryEnvelope 全文。卖方 digest 的 `series[]` 聚合曲线也 **不得** 出现在本入账信封里——入账只带 hash 与计数。
 
-实验室 **信任** Gateway 提供的 `payee`。生产映射表（asset → 已链接 SIWE 钱包）是后续步，本版不冻结。
+信封 **`payee` 仍允许**（实验室 Gateway 继续在信封里带地址）。入账实际收款方按 [§5](#5-asset--payee-绑定) 解析：有绑定则用绑定地址，**不得**因信封 `payee` 与绑定不一致而 `400`。
 
 ---
 
@@ -161,6 +162,7 @@ sb:telemetry-credit:{sourceTenantId}:{assetId}:{window.start}
 | 400 | `EVENT_TYPE_NOT_ALLOWED` | 档位未开，或 `type` 不是本事件 |
 | 400 | `INVALID_EVENT` / `SENSITIVE_FIELD_REJECTED` | 信封/白名单 |
 | 401 | `COMMERCE_AUTH_REQUIRED` | 生产缺 M2M |
+| 403 | `PAYEE_NOT_BOUND` | 生产模式且 `(sourceTenantId, sourceId)` **无**绑定；**不入账** |
 | 403 | `CROSS_TENANT` / `POLICY_DENIED` | 租户或 Casbin |
 
 `GET /capabilities` 的 `integrations.settlement` 列出本 `type`（**不**并进任务 inbox 的 `integrations.inbound`）。
@@ -169,22 +171,57 @@ sb:telemetry-credit:{sourceTenantId}:{assetId}:{window.start}
 
 ---
 
-## 5. 明确不做（本步）
+## 5. Asset ↔ payee 绑定
+
+DoerFlow 表 `syncrobrain_payee_bindings`（**SQLite 索引库**，与 `integration_events` 同一连接；**不是**账本 Postgres）。唯一键 `(sourceTenantId, sourceId)`，`sourceId` = 领域 **assetId**。`payee` 存 EIP-55 checksum。
+
+绑定证明复用现有 **`WalletLinksService` / `wallet_links`**（平台主体 + 新鲜 SIWE）。**不得**再做第二套 SIWE。
+
+### 5.1 入账解析（`POST …/telemetry-credits`）
+
+| 条件 | 行为 |
+|------|------|
+| 存在 `(sourceTenantId, sourceId)` 绑定 | 入账 **绑定 payee**。信封 `payee` 若不同则忽略，**不** `400`；实验室铸造仍打到绑定地址 |
+| 无绑定且 `COMMERCE_AUTH_MODE=lab\|off` | 维持现状：信任信封 `payee` |
+| 无绑定且 `COMMERCE_AUTH_MODE=production` | `403 PAYEE_NOT_BOUND`，**不入账** |
+
+响应 `data.payee` 为实际入账地址（绑定优先）。
+
+### 5.2 绑定 REST
+
+均走 `CommerceAuthGuard`（与其它 integrations 相同）。
+
+| 方法 / 路径 | 说明 |
+|-------------|------|
+| `PUT /api/v1/integrations/syncrobrain/payee-bindings` | upsert。body `{ sourceTenantId, sourceId, payee }` |
+| `GET /api/v1/integrations/syncrobrain/payee-bindings?sourceTenantId=&sourceId=` | 查一条。缺查询参数 `400`；无行 `404 PAYEE_NOT_BOUND` |
+
+`PUT` 规则：
+
+- **生产**：调用者必须是已鉴权**平台主体**（Logto，非 M2M）。`payee` 必须是该主体的 `wallet_links` 行，且 SIWE 证明新鲜（与 Provider 注册相同：`lastVerifiedAt` / `PAYEE_SIWE_MAX_AGE_MS`）。否则 `403 PAYEE_WALLET_UNLINKED` 或 `PAYEE_SIWE_STALE`。
+- **实验室例外**（`COMMERCE_AUTH_MODE=lab\|off`）：允许 **M2M（及本机无令牌）直接写入 checksum payee，不要求 SIWE**。仅供 smoke / 联调；生产不得开此例外。
+
+---
+
+## 6. 明确不做（本步）
 
 - DoerFlow 订阅 TB MQTT / 解析 `v1/devices/me/telemetry`
 - 按遥测点计费、把 `series` 写进账本
 - 自动注册 `/devices` 或链上 `DeviceRegistry`
 - Gateway 在未设 `DOERFLOW_ENABLED=true` 时出站（必须 no-op）
 - 把本事件当 Job `authorize`/`capture`（那是买方付费买 digest 的另一条路）
+- **买方扣款**（仍为实验室铸造 `ledger.credit`）
 
-下一步（未立项实现）：Gateway 在 TB 遥测落入时间窗后 **聚合 digest** 再调本接口；asset↔payee 绑定表；真实买方扣款而非实验室铸造。
+Gateway 时间窗自动出站（UTC 对齐、`DOERFLOW_ENABLED` 门控、`postTelemetryCredit`）已实现。**下一步**：真实买方扣款而非实验室铸造。
 
 ---
 
-## 6. 验收
+## 7. 验收
 
-- [ ] 规范 + JSON Schema 与 SyncroBrain 镜像一致（无 TB topic / token）
-- [ ] `POST /integrations/syncrobrain/telemetry-credits` 入账；相同 `id` 第二次 `deduped: true`、余额不变
-- [ ] 带 `series` / `tbDeviceId` / MQTT 口令 → `SENSITIVE_FIELD_REJECTED`
-- [ ] 同事件打到 `/integrations/events` → `USE_TELEMETRY_CREDIT_PATH`，不建任务、不入账
-- [ ] 单元测试：`repos/api` `telemetry-credit.service.spec.ts`
+- [x] 规范 + JSON Schema 与 SyncroBrain 镜像一致（无 TB topic / token）
+- [x] `POST /integrations/syncrobrain/telemetry-credits` 入账；相同 `id` 第二次 `deduped: true`、余额不变
+- [x] 带 `series` / `tbDeviceId` / MQTT 口令 → `SENSITIVE_FIELD_REJECTED`
+- [x] 同事件打到 `/integrations/events` → `USE_TELEMETRY_CREDIT_PATH`、不建任务、不入账
+- [x] 单元测试：`repos/api` `telemetry-credit.service.spec.ts` · `payee-binding.service.spec.ts`
+- [x] Gateway：时间窗闭合后 per-asset digest 出站；`DOERFLOW_ENABLED` 未开 no-op；空窗不入账
+- [x] asset ↔ payee 绑定：lab 未绑定用信封；绑定覆盖信封；生产未绑定 `PAYEE_NOT_BOUND`；`PUT`/`GET` 往返

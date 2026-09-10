@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -322,6 +322,8 @@ gross(A→B) = 100,  gross(B→A) = 80
 | POST | `/api/v1/trading/jobs/:id/void` | Job 专用：释放预算预留；5xx/超时；**不**入账 |
 | POST | `/api/v1/integrations/events` | CloudEvents inbox（严格 data 白名单；拒绝视频/凭据） |
 | POST | `/api/v1/integrations/syncrobrain/telemetry-credits` | TB 时间窗 digest → 链下入账（FR-IOT-008；非 inbox） |
+| PUT | `/api/v1/integrations/syncrobrain/payee-bindings` | asset ↔ checksum payee 绑定（生产须 SIWE wallet_link） |
+| GET | `/api/v1/integrations/syncrobrain/payee-bindings` | 查询绑定 |
 | POST | `/api/v1/trading/providers/skills/:skillId/rotate-secret` | 轮换 HMAC webhook secret（只返回一次） |
 | GET | `/api/v1/payments/receipts/stats?payer=0x…` | payer nonce / pending 数 |
 | GET | `/api/v1/payments/receipts/pending?limit=100` | 待批量清算列表 |

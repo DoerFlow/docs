@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -145,7 +145,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps
 | FR-PRV-003 | 每 Skill HMAC + SSRF 限制 | api, shared/sdk | `verifyDoerFlowWebhook`；loopback HTTP / 公网 HTTPS | **v1.1-channels-lab** ✅ |
 | FR-EP-001~003 | Endpoint 注册/心跳/白名单执行 | api | `/endpoints` · `ENDPOINT.md` | **v1.1-channels-lab** ✅ |
 | FR-IOT-007 | 实验室 Device HTTP（非链上 Registry） | api | `/devices` 注册·心跳·telemetry | **v1.1-channels-lab** ✅ |
-| FR-IOT-008 | TB 时间窗 digest → 账本入账 | spec, api | `POST /integrations/syncrobrain/telemetry-credits` · [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md) | **实验室 REST** |
+| FR-IOT-008 | TB 时间窗 digest → 账本入账 | spec, api, SyncroBrain Gateway | `POST /integrations/syncrobrain/telemetry-credits` · `PUT`/`GET …/payee-bindings` · Gateway UTC 窗闭合出站 · [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md) | **实验室 REST + 出站 + asset↔payee 绑定** |
 
 ## MVP v0.1 验收对照
 

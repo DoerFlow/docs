@@ -1,12 +1,13 @@
-﻿---
+---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
-> **瑙勮寖婧愭枃浠?*锛氱敱 MetaRepo `spec/` 鍚屾锛岃鍕跨洿鎺ョ紪杈戞湰椤点€?
+> **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
+
 # MetaDEX · 轻量 ve 模型 DEX
 
-**版本**: v0.1-draft · **最后更新**: 2025-01-14  
+**版本**: v0.1-draft · **最后更新**: 2026-09-09  
 **路线图**: v0.15（**合约优先**，见 [ROADMAP.md](./ROADMAP.md) § M1b）  
 **合约计划**: [METADEX_CONTRACTS.md](./METADEX_CONTRACTS.md) ← **当前实施入口**  
 **链下架构**: [METADEX_ARCHITECTURE.md](./METADEX_ARCHITECTURE.md)  
@@ -103,17 +104,21 @@ LP Token ──lock──▶ veNFT ──vote──▶ Gauge 权重
 
 ### Phase A — 合约（v0.15.0，必达）
 
-- [ ] Factory / Pair / Router 单测通过  
-- [ ] VotingEscrow / Voter / Gauge 单测通过  
-- [ ] Base Sepolia 部署 + `deployments.json`  
-- [ ] 集成测试：Add LP → Swap → Lock → Vote  
-- [ ] `export-abi` 可供 shared/api 使用  
+- [x] Factory / Pair / Router 单测通过
+- [x] VotingEscrow / Voter / Gauge 单测通过
+- [ ] Base Sepolia 部署 + `deployments.json`（当前仅 localhost `31337.metadex`；禁止填假 Sepolia 地址）
+- [x] 集成测试：Add LP → Swap → Lock → Vote
+- [x] `export-abi` 可供 shared/api 使用
+
+Hardhat（本机、无网络）：`repos/contracts/test/metadex/Router.test.ts`、`VotingEscrow.test.ts`、`integration.test.ts` 均已通过。`export-abi.ts` 含 MetaFactory/Pair/Router/VotingEscrow/Voter/Gauge；`repos/api/src/abis/` 已有对应 JSON。Sepolia MetaDEX 与 web Swap **未**勾。  
 
 ### Phase B/C — api & web（v0.15.1–.2）
 
-- [ ] API `quote/pools` 读真实 Router/Pair  
+- [x] API `quote/pools` 读真实 Router/Pair  
 - [ ] web Swap 页完成一笔 Swap  
 - [ ] Lock LP → ve → 投 1 个 Gauge  
+
+Phase C lab（web `/dex`）：quote/pools UI 已落地；Swap CTA 在 Router 未接线时保持禁用（不伪造链上成交）。  
 
 ### Phase D — 分析（可选）
 
@@ -128,4 +133,3 @@ LP Token ──lock──▶ veNFT ──vote──▶ Gauge 权重
 ---
 
 *合约 Fork 清单见 [METADEX_CONTRACTS.md](./METADEX_CONTRACTS.md)；Port 接口见 [METADEX_ARCHITECTURE.md](./METADEX_ARCHITECTURE.md)。*
-

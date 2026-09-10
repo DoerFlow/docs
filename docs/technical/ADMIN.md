@@ -63,7 +63,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 ### FR-ADM-006 仪表盘
 - 今日发布/完成/**GMV（已完成任务 `rewardEth` 合计，单位 ETH）**、待审数量、告警数  
-- 首页须可干活：待审队列预览（点进 `/review?id=`）、开放争议数、Indexer 健康（`GET /health` 的 `indexer.rpcOk` / `catchupPercent`）、最近审计  
+- 首页须可干活：待审队列预览（点进 `/review?id=`）、开放争议数、Indexer 健康（`GET /health` 的 `indexer.rpcOk` / `catchupPercent` / `leader`）、最近审计  
 - 不得展示占位假金额（如固定 `$128,400 USDC`）  
 - **实现（M3）**：KPI 条接 `GET /admin/stats/overview`（含 `gmvSettledTodayEth`、`needsRevision`、`openDisputes`）  
 - **图表**：不做自建图表；后续嵌入 [DataLuminary](./DATALUMINARY.md) Dashboard（iframe / 外链）  
@@ -143,8 +143,8 @@ admin → shared（类型）
 - [x] L3 告警任务默认不在 worker 可见（`alertFlag` 过滤；审批通过后清 flag）  
 - [x] 驳回任务发单方 wallet 可见原因（`alertReason` → 收益「我发布的任务」）  
 - [x] 运营界面用户文案走 en + zh-CN locale（审批 / 任务 / 仪表盘 / 治理 / 发单方 / 审计 / 告警 / 登录）  
-- [ ] 无 API `permissions.review|manage` 时写控件不可用，即使 JWT 带同名角色
-- [ ] `401` 返回登录，`402` 显示套餐/配额上下文，`403` 显示资源无权且不展示升级误导
+- [x] 无 API `permissions.review|manage` 时写控件不可用，即使 JWT 带同名角色
+- [x] `401` 返回登录，`402` 显示套餐/配额上下文，`403` 显示资源无权且不展示升级误导
 
 ---
 

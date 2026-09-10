@@ -1,13 +1,13 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
 
 # 部署边界与档位（DEPLOYMENT）
 
-**版本**: v0.1-profiles · **最后更新**: 2026-09-06
+**版本**: v0.1-profiles · **最后更新**: 2026-09-09
 **关联**: [PRODUCTION.md](./PRODUCTION.md) · [PORTS.md](./PORTS.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [SMART_SITE.md](./SMART_SITE.md) · [CHANNELS.md](./CHANNELS.md)
 
 本文件定义 **DoerFlow 能独立部署到什么程度**，以及哪些能力必须依赖 LuminaryWorks 控制面。
@@ -242,11 +242,13 @@ pnpm run smoke:ecosystem-commerce
 
 清单：
 
-- [ ] `/ready` 降级时返回 **503**，`/live` 仍 `200`
-- [ ] `/version` 含 `profile` 与 `manifestHash`
-- [ ] `/capabilities` 的 `integrations.inbound` 与档位一致，未开档位为空数组
-- [ ] `NODE_ENV=production` + `COMMERCE_AUTH_MODE=lab` **启动失败**
-- [ ] `profile=control-plane` + `ENTITLEMENT_MODE=off` **启动失败**
-- [ ] 生产 compose 里 `postgres` / `redis` 无 `ports:`
-- [ ] 任何 compose 文件无 `container_name` / `host.docker.internal`
-- [ ] `production` 模式下 `GET /trading/jobs` 与 `GET /integrations/events` 均需鉴权且需显式 `sourceTenantId`
+- [x] `/ready` 降级时返回 **503**，`/live` 仍 `200`
+- [x] `/version` 含 `profile` 与 `manifestHash`
+- [x] `/capabilities` 的 `integrations.inbound` 与档位一致，未开档位为空数组
+- [x] `NODE_ENV=production` + `COMMERCE_AUTH_MODE=lab` **启动失败**
+- [x] `profile=control-plane` + `ENTITLEMENT_MODE=off` **启动失败**
+- [x] 生产 compose 里 `postgres` / `redis` 无 `ports:`
+- [x] 任何 compose 文件无 `container_name` / `host.docker.internal`
+- [x] `production` 模式下 `GET /trading/jobs` 与 `GET /integrations/events` 均需鉴权且需显式 `sourceTenantId`
+
+证据：`probe.controller.spec.ts`（degraded → 503）；`deployment-profile.spec.ts`（inbound 按档位、lab 启动失败、control-plane + `ENTITLEMENT_MODE=off` 启动失败、manifestHash）；`commerce-auth.guard.spec.ts`（production 下 GET `/trading/jobs` 与 `/integrations/events` 无 bearer → 401）；`tenant-scope.spec.ts`（`TENANT_SCOPE_REQUIRED`）；`scripts/compose-preflight.mjs` / `pnpm run smoke:m5`（无 `container_name` / `host.docker.internal`、prod 不映射 postgres/redis `ports:`；`/version` profile+manifestHash）。`/live` 恒 200 见 `probe.controller.ts` 与 `m5-production-gate.mjs`。

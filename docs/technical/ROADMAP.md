@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -344,7 +344,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 |----|------|
 | Job 授权结算 | `authorize` 不入账 → 2xx+hash 后 `capture`；5xx `void` |
 | Inbox | `POST /integrations/events` CloudEvents |
-| TB 时间窗入账 | `POST /integrations/syncrobrain/telemetry-credits`（FR-IOT-008） |
+| TB 时间窗入账 | `POST /integrations/syncrobrain/telemetry-credits`；asset↔payee 绑定；Gateway UTC 窗闭合后自动出站（FR-IOT-008） |
 | 回调 | durable outbox |
 | 鉴权 | 生产 M2M+Entitlement+Casbin；`COMMERCE_AUTH_MODE=lab\|off`（生产禁用） |
 | 验收 | `pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`） |

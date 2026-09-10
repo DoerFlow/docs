@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -233,7 +233,7 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 - **Job 专用** signed receipt：`authorize` 验 EIP-712 / Session / 预算，**不得**给 payee 入账；provider **2xx 且输出 hash 已持久化**后**原子 capture**；**5xx / 超时 void**。禁止再把「Receipt Vault accepted + `applyReceipt` best-effort」当作 Job 结算
 - `POST /payments/receipts` 旧路径保持兼容（非 Job 微支付仍可入账）
 - `POST /integrations/events` 接收 CloudEvents 1.0：`com.vistacast.alert.v1`、`com.syncrobrain.incident.v1`、`com.syncrobrain.work-order.v1`；按 `sourceProduct+eventId` 去重；持久化 issuer/subject/org/sourceTenant 映射、`sourceRef`、callback
-- **FR-IOT-008**：`POST /integrations/syncrobrain/telemetry-credits` 接收 `com.syncrobrain.telemetry-credit.v1`（时间窗 digest → 链下 `ledger.credit`）；**不得**经 `/integrations/events` 入账；细则 [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md)
+- **FR-IOT-008**：`POST /integrations/syncrobrain/telemetry-credits` 接收 `com.syncrobrain.telemetry-credit.v1`（时间窗 digest → 链下 `ledger.credit`）；asset↔payee 绑定 `PUT`/`GET /integrations/syncrobrain/payee-bindings`（生产未绑定 `403 PAYEE_NOT_BOUND`）；**不得**经 `/integrations/events` 入账；细则 [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md)
 - 由事件创建 Agent/Human 任务必须走 [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) 门禁；无法安全复用任务服务时只标记 `correlated`（**不得伪称已创建任务**）
 - 回调为签名 CloudEvents + durable outbox 重试；**不得**自动修改源产品业务状态
 - 生产默认 M2M bearer + Entitlement + Casbin；显式 `COMMERCE_AUTH_MODE=lab|off` 供 smoke。供应方 payee 必须关联**平台主体 + SIWE 钱包**；Logto 会话**不是**钱包证明；生产禁止开放注册 Provider
@@ -553,7 +553,7 @@ integration_events / outbox_callbacks
 | Storage | `/api/v1/storage` | 元数据 pin。默认本地目录；`STORAGE_BACKEND=pinata` 才用 Pinata。`backend: "local"` 均为成功 |
 | Payments | `/api/v1/payments` | 收据、账本、`ledger/credit` / `ledger/credit-batch`、snapshot / proof、披露；Job 授权走 `/trading/jobs/:id/authorize|capture|void` |
 | Trading | `/api/v1/trading` | 目录 / 报价 / 作业 / `execute` / `authorize` / Provider HTTP Skill / SSE / WebSocket；CloudEvents + HMAC |
-| Integrations | `/api/v1/integrations` | CloudEvents inbox（`POST /events`）；SyncroBrain 时间窗入账 `POST /syncrobrain/telemetry-credits`；按 sourceProduct+eventId 去重；`production` 模式读写均需鉴权 + 显式 `sourceTenantId` |
+| Integrations | `/api/v1/integrations` | CloudEvents inbox（`POST /events`）；SyncroBrain 时间窗入账 `POST /syncrobrain/telemetry-credits`；asset↔payee `PUT`/`GET /syncrobrain/payee-bindings`；按 sourceProduct+eventId 去重；`production` 模式读写均需鉴权 + 显式 `sourceTenantId` |
 | Ready | `/api/v1/ready` · `/live` | M5 生产探针。`ready` 降级 **503**；`live` 恒 200 |
 | Version | `/api/v1/version` · `/capabilities` | 版本 / `gitSha` / `profile` / `manifestHash`；能力清单（FR-DEP-004） |
 | Stats | `/api/v1/stats` | 市场统计 |

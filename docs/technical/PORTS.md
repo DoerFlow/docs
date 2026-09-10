@@ -13,12 +13,16 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 |------|------|----------|
 | **API** | **13008** | `PORT` |
 | Site 官网 | 13010 | `next dev --port` |
-| Admin 运营台 | 13011 | `next dev --port` |
-| Web DApp | 5174 | Rsbuild dev |
+| Web DApp | 5174 (compose publishes `${DOERFLOW_WEB_BIND:-127.0.0.1}:${DOERFLOW_WEB_PORT:-5174}`) | `DOERFLOW_WEB_BIND` / `DOERFLOW_WEB_PORT` |
+| Admin 运营台 | 13011 | `DOERFLOW_ADMIN_BIND` / `DOERFLOW_ADMIN_PORT` |
 | Hardhat | 8545 | — |
 | **Ledger Postgres** | **5439** | `LEDGER_DATABASE_URL`（compose 映射，避开本机 5432 与 Identity :5433；账本 **与** Agent/Skill/Escrow 索引行。跨机器 API 必须共用同一 URL） |
 | **Ledger Redis** | **6379** | `REDIS_URL`（BullMQ + 账本缓存 + Indexer 选主/心跳） |
+| **Entitlement 控制面** | **3040** | `ENTITLEMENT_BASE_URL`（仅 `control-plane` 及以上档位；必须是服务名或域名，**禁止** `host.docker.internal`） |
+| Logto Identity | 3001 | `IDP_ISSUER`（`pnpm id:up`；仅 `control-plane` 及以上） |
 | Expo Metro | 8081+ | — |
+
+部署档位与哪些端口属于「最小后端」见 [DEPLOYMENT.md](./DEPLOYMENT.md)。`standalone` 档位不需要 3040 / 3001。
 
 ```bash
 # API

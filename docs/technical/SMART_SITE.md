@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # smart-site 场景最小契约（SMART_SITE）
 
-**版本**: v0.1-smart-site-lab · **最后更新**: 2026-09-06
+**版本**: v0.1-smart-site-lab · **最后更新**: 2026-09-09
 **关联**: [DEPLOYMENT.md](./DEPLOYMENT.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [CHANNELS.md](./CHANNELS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) · [DATALUMINARY.md](./DATALUMINARY.md)
 
 `smart-site` 是 `agent-commerce` 之上的站点/工地场景档位（见 [DEPLOYMENT.md](./DEPLOYMENT.md) §1）。本文件只定义 **稳定的 env 与契约面**，实现是 **工程实验室**，`DEPLOYMENT_PROFILE` 未设为 `smart-site` 时**默认关**。
@@ -116,11 +116,13 @@ pnpm run compose:preflight
 pnpm run smoke:ecosystem-commerce              # 默认档位下这两类事件必须被拒
 ```
 
-清单：
+清单（实验室单测已对照；未接真实对端前 `commerce.readiness` 仍为 `lab`）：
 
-- [ ] 档位非 `smart-site` 时 `com.dataluminary.export.v1` → `EVENT_TYPE_NOT_ALLOWED`
-- [ ] 模板缺 `{sourceRef}` → 启动失败
-- [ ] `sourceRef` 含 `/` `&` `?` 时深链已编码
-- [ ] 无 `sourceRef` 的事件不返回 `remoteIntervention`
-- [ ] `capabilities.integrations.autoRemoteControl` 与 `autoResolve` 恒 `false`
-- [ ] 代码里没有对兄弟产品包的 `import`
+- [x] 档位非 `smart-site` 时 `com.dataluminary.export.v1` → `EVENT_TYPE_NOT_ALLOWED`
+- [x] 模板缺 `{sourceRef}` → 启动失败
+- [x] `sourceRef` 含 `/` `&` `?` 时深链已编码
+- [x] 无 `sourceRef` 的事件不返回 `remoteIntervention`
+- [x] `capabilities.integrations.autoRemoteControl` 与 `autoResolve` 恒 `false`
+- [x] 代码里没有对兄弟产品包的 `import`
+
+证据：`repos/api` `integrations.service.spec.ts`（非 smart-site → `EVENT_TYPE_NOT_ALLOWED`）、`deployment-profile.spec.ts`（`assertCapabilityManifest` 拒缺 `{sourceRef}`；inbound 在 lab 也不含 export 类型；`autoRemoteControl`/`autoResolve` 恒 false）、`smart-site.spec.ts`（占位符 `encodeURIComponent`；无 sourceRef → `null`）。`pnpm run smoke:ecosystem-commerce` / `smoke:m5` 同样断言档位外拒收与恒 false。`package.json` 无 `@vistaremote` / `@dataluminary` / `@vistacast` / `@syncrobrain`；`src/` 无对应 runtime import。

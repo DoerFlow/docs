@@ -1,6 +1,6 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
@@ -73,7 +73,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps
 |---|---|
 | 卖出 invoke + authorize/capture/void | **已实现的工程实验室**；`pnpm run smoke:ecosystem-commerce` 覆盖 |
 | VistaCast / SyncroBrain 入站 | **已实现**，`DEPLOYMENT_PROFILE` 未开时 **默认关** |
-| SyncroBrain 时间窗账本入账 | **实验室 REST 已实现**；Gateway 自动出站与生产 payee 绑定仍为后续步 |
+| SyncroBrain 时间窗账本入账 | **实验室 REST + asset↔payee 绑定已实现**；Gateway 自动出站已接；真实买方扣款仍为后续步 |
 | VistaRemote 人工介入深链 / DataLuminary 导出 | **最小契约已实现**，`smart-site` 档位外 **默认关**；见 [SMART_SITE.md](./SMART_SITE.md) |
 | 真实生产对端 | **未接**。`/capabilities` 的 `commerce.readiness` 保持 `lab`，文档不得写「已上线」 |
 

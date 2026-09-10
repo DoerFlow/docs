@@ -7,8 +7,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 生产就绪（M5 工程闸门）
 
-**版本**: v1.0-rc · **最后更新**: 2026-09-05  
-**关联**: [ROADMAP.md](./ROADMAP.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [COMMERCIAL.md](./COMMERCIAL.md) · [ONRAMP.md](./ONRAMP.md)
+**版本**: v1.0-rc · **最后更新**: 2026-09-09  
+**关联**: [ROADMAP.md](./ROADMAP.md) · [DEPLOYMENT.md](./DEPLOYMENT.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [COMMERCIAL.md](./COMMERCIAL.md) · [ONRAMP.md](./ONRAMP.md)
 
 本文件是 **AI 可自动验收** 的生产工程清单。  
 **不能** 用 Creator DApp 迭代代替：主网真实地址与资金须人类部署。  
@@ -18,14 +18,18 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 ## 1. 探针
 
-| 路径 | 用途 |
-|------|------|
-| `GET /api/v1/live` | 进程存活 |
-| `GET /api/v1/ready` | SQLite 任务库 / Postgres 账本+链上索引(Agent/Skill/Escrow)+Receipt Vault+Session / 披露可读则 200；Indexer RPC 失败为 `degraded` 仍 200 |
-| `GET /api/v1/health` | 链配置 + Indexer 游标 |
-| `GET /api/v1/payments/disclosure` | 异步支付模型与强制提现路径 |
+| 路径 | 用途 | 状态码 |
+|------|------|--------|
+| `GET /api/v1/live` | 进程存活；容器 liveness | 恒 **200** |
+| `GET /api/v1/ready` | SQLite 任务库 / Postgres 账本+链上索引(Agent/Skill/Escrow)+Receipt Vault+Session / 披露可读 | 就绪 **200**；**降级 `503`**（FR-DEP-003） |
+| `GET /api/v1/version` | 服务名 / 版本 / `gitSha` / `chainId` / `profile` / `manifestHash` | 200 |
+| `GET /api/v1/capabilities` | 能力清单（AuthN 双轨、Entitlement、入站事件、`autoRemoteControl`/`autoResolve`） | 200 |
+| `GET /api/v1/health` | 链配置 + Indexer 游标 | 200 |
+| `GET /api/v1/payments/disclosure` | 异步支付模型与强制提现路径 | 200 |
 
-监控：Prometheus 抓 `ready`/`health`；告警规则见 `deploy/prometheus/alerts.yml`。
+**`/ready` 不再用 200 表示降级**：返回 200 的降级会让负载均衡把流量打进坏副本，Prometheus 的 `probe_success` 也看不出问题。`live` 保持 200，容器不会被反复重启。
+
+监控：Prometheus 抓 `ready`/`health`；告警规则见 `deploy/prometheus/alerts.yml`。部署档位与 Compose 叠加见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 
 ---
 
@@ -54,6 +58,12 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | `PAYMENTS_PAUSED` | `true` 时拒绝 credit / credit-batch / receipts；snapshot、proof、健康检查仍可用 |
 | `COMMERCIAL_AUDITED` | 默认 false；审计报告公开后才可 `true`（M5b） |
 | `COMMERCIAL_COMPENSATION` | 默认 **`none`**（不予赔付）。仅当有可支付赏金池时改为 `bounty` |
+| `DEPLOYMENT_PROFILE` | `standalone` \| `control-plane` \| `agent-commerce` \| `smart-site`；未设置按 `standalone`（见 [DEPLOYMENT.md](./DEPLOYMENT.md)） |
+| `COMMERCE_AUTH_MODE` | 生产必须 `production`；**`NODE_ENV=production` 时 `lab`/`off` 启动即失败** |
+| `ENTITLEMENT_MODE` | `standalone` 可 `off` / `offline_license`；其余档位必须 `shadow_read`/`enforce` |
+| `ENTITLEMENT_BASE_URL` | 非 `standalone` 必填；服务名或域名 + `:3040`，**禁止** `host.docker.internal` |
+
+**启动期 fail-closed**（FR-DEP-004）：上面几条由 capability manifest 在 bootstrap 校验，配置矛盾时进程直接退出，不进入「跑起来但不安全」状态。
 
 主网 Vault **资产必须是** Base 原生 USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`。部署脚本在 chainId 8453 **禁止**再部 MockERC20。
 
@@ -87,9 +97,10 @@ Hardhat 网络 `base`（chainId **8453**）。部署顺序与 Sepolia 相同：A
 1. `GOVERNANCE=1` `VAULT_ASSET=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` 部署核心合约 + Vault + Settler + Netting/Batcher  
 2. 把真实地址写入 `repos/api/deployments.json` 的 `"8453"`（含 `vault.asset`）  
 3. `pnpm run use:base`（缺 8453 则失败）  
-4. 复制 `deploy/production.env.example` → 主机 `production.env`：`COMMERCIAL_MODE=beta`、白名单、限额、`INDEXER_ROLE=http`  
-5. `docker compose -f deploy/docker-compose.prod.yml --env-file production.env up -d`（API + indexer + Postgres + Redis）  
-6. 白名单钱包小额 Vault 充值 / Escrow 锁定 → 再请受邀用户  
+4. 复制 `deploy/production.env.example` → `deploy/env/api.env`：`COMMERCIAL_MODE=beta`、白名单、限额、`INDEXER_ROLE=http`、`DEPLOYMENT_PROFILE`、`COMMERCE_AUTH_MODE=production`；再按 `deploy/env/*.example` 填 `indexer.env` / `db.env`（口令只在 db.env）  
+5. `docker compose -f deploy/docker-compose.core.yml -f deploy/docker-compose.prod.yml up -d`（API + indexer + Postgres + Redis；DB **不**映射宿主端口）。托管 DB 用 `-f deploy/docker-compose.external-db.yml`；控制面档位再叠 `-f deploy/docker-compose.control-plane.yml`  
+6. `pnpm run compose:preflight` 绿灯（无 `container_name` / `host.docker.internal`、生产 DB 未暴露）  
+7. 白名单钱包小额 Vault 充值 / Escrow 锁定 → 再请受邀用户  
 
 `pnpm run smoke:vault` 须在 **Sepolia** 先绿灯（deposit → snapshot/`commitRoot` → `forceWithdraw`）。
 
@@ -139,25 +150,33 @@ Hardhat 网络 `base`（chainId **8453**）。部署顺序与 Sepolia 相同：A
 ## 7. AI 验收
 
 ```bash
+pnpm run compose:config     # 四种 overlay 组合的 docker compose config 语法校验
+pnpm run compose:preflight  # Compose 硬约束静态断言（不需要 Docker 守护进程）
 pnpm run smoke:m5
 pnpm run smoke:vault   # Sepolia；需测试 ETH / Mock USDC 与 operator 钥
 ```
 
-`smoke:m5` 检查：生产文档与 env 模板（含 `COMMERCIAL_MODE`）、Hardhat `base`、探针与 disclosure、M4 SDK、compose 生产文件、`use:base`。  
+`smoke:m5` 检查：生产文档与 env 模板（含 `COMMERCIAL_MODE`）、Hardhat `base`、探针与 disclosure（含 `/ready` 状态码与 `/version` 的 `profile`/`manifestHash`）、M4 SDK、compose 基座与 overlay、`use:base`。  
 `smoke:vault` 检查：已部署 Sepolia Vault 上真实 `deposit` → `commitRoot` → `forceWithdraw`。
 
 ---
 
 ## 8. M5a 检查表（封闭 Beta）
 
-- [ ] `COMMERCIAL_MODE=beta` 且 `COMMERCIAL_ALLOWLIST` 非空  
-- [ ] 非白名单写路径 → `403 COMMERCIAL_NOT_ALLOWLISTED`  
-- [ ] 超额 → `403 COMMERCIAL_CAP_EXCEEDED`  
-- [ ] `PAYMENTS_PAUSED=true` 或 Vault `pause()` 后无法新充值；`forceWithdraw` 仍可用  
-- [ ] web `/payments` 与雇佣页展示未审计封闭测试文案（限额 / 白名单 / pause；**不**反复展示不予赔付）  
-- [ ] 不予赔付仅出现在文档 `legal/terms` 与注册/登录勾选协议  
-- [ ] `GET /payments/disclosure` 含 `commercialMode`、`unaudited`、`compensationPolicy`/`noCompensation`、限额  
-- [ ] `pnpm run use:base` 在无 `"8453"` 时失败  
-- [ ] 未填写伪造主网地址  
+- [ ] `COMMERCIAL_MODE=beta` 且 `COMMERCIAL_ALLOWLIST` 非空（托管环境真人配置，AI 不勾）
+- [x] 非白名单写路径 → `403 COMMERCIAL_NOT_ALLOWLISTED`（`commercial.service.spec.ts`）
+- [x] 超额 → `403 COMMERCIAL_CAP_EXCEEDED`（单笔 / 地址敞口 / TVL / Escrow；同上）
+- [x] `PAYMENTS_PAUSED=true` 或 Vault `pause()` 后无法新充值；`forceWithdraw` 仍可用
+- [x] web `/payments` 与雇佣页展示未审计封闭测试文案（限额 / 白名单 / pause；**不**反复展示不予赔付）
+- [x] 不予赔付仅出现在文档 `legal/terms` 与注册/登录勾选协议
+- [x] `GET /payments/disclosure` 含 `commercialMode`、`unaudited`、`compensationPolicy`/`noCompensation`、限额
+- [x] `pnpm run use:base` 在无 `"8453"` 时失败
+- [ ] 未填写伪造主网地址（`deployments.json` 当前无 `"8453"`；真人确认后才可勾。禁止填假地址）
+- [x] `/ready` 降级返回 **503**，`/live` 仍 200
+- [x] `/version` 的 `profile` 与实际 `DEPLOYMENT_PROFILE` 一致；`/capabilities` 未开档位的 `integrations.inbound` 为空
+- [x] `COMMERCE_AUTH_MODE=production`；`lab`/`off` 在 `NODE_ENV=production` 下启动失败
+- [x] 生产 compose 的 `postgres` / `redis` 无 `ports:`；无 `container_name` / `host.docker.internal`
+
+工程闸门证据（非托管 live）：`pnpm run smoke:m5` → `scripts/m5-production-gate.mjs`（探针 503/200、`/version` profile+manifestHash、disclosure 字段、`autoRemoteControl`/`autoResolve` 恒 false、compose preflight、无 `"8453"` 时不伪造）；`compose:preflight`；`use-chain.mjs` `ensureBaseProfiles`；`commercial-config.spec.ts`；`commercial.service.spec.ts`（`COMMERCIAL_NOT_ALLOWLISTED` / `COMMERCIAL_CAP_EXCEEDED` / `PAYMENTS_PAUSED`）；`deployment-profile.spec.ts`；`probe.controller.spec.ts`；`PaymentVault.t.ts`（`pause()` 拦 deposit、`forceWithdraw` 仍可用）。web `CommercialBanner` 在 `/payments` 与雇佣页展示未审计/限额/白名单/pause，不展示不予赔付；不予赔付在 `repos/docs/docs/legal/terms.md` 与 web `/login`、wallet、worker 勾选协议。  
 
 公开收款与审计包见 [COMMERCIAL.md](./COMMERCIAL.md)（M5b）。
