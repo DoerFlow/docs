@@ -212,7 +212,7 @@ Phase 1 **不**交付 CCTP、LayerZero、OP Stack 原生桥、Agent L2 或 Canon
 
 实验室已提供 `GET /api/v1/tokens/canonical` 只读列表。上框须等 Escrow 与 MetaRouter **对未知代币 revert** 后再勾；当前 Escrow 只收原生 ETH、Router 只要求 pair 存在，**不得勾选**。
 
-NOTE：链下账本 `POST /payments/ledger/credit`（及 `credit-batch`）在目录 `configured: true` 时拒绝未知 ERC-20（`UNKNOWN_ASSET`；原生 ETH / 零地址跳过）；`configured: false` 时 fail-open。此为 **off-chain ledger credit**，**不是** Escrow ETH allowlist，**不得**据此勾选「MetaDEX / Escrow 仅接受 canonical」。
+NOTE：链下账本 `POST /payments/ledger/credit`（及 `credit-batch`）与非 Job 收据 `applyReceipt`（`POST /payments/receipts` / `apply-ledger`）在目录 `configured: true` 时拒绝未知 ERC-20（`UNKNOWN_ASSET`；原生 ETH / 零地址跳过）；`configured: false` 时 fail-open。收据路径形状与余额不足相同（`success: true`、`ledgerApplied: false`、`ledgerError: UNKNOWN_ASSET`，Vault 仍 `pending`）。此为 **off-chain ledger** 门控，**不是** Escrow ETH allowlist，**不得**据此勾选「MetaDEX / Escrow 仅接受 canonical」。
 
 ### Phase 3（v0.8 / v1.1）
 - [ ] CCTP：Base USDC → Agent L2 USDC（burn/mint）  

@@ -153,6 +153,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - [ ] 100+ 模拟传感器 + 1 个买方 Agent，秒级微额扣费演示  
 - [ ] 批量结算降低链上笔数  
 
+实验室小批量微收据（`pnpm run example:micropay`，默认 N=5）仅证明 SDK 批量 `payQuote` + snapshot `batchedCount` 回路，**不勾选**上列「100+ 传感器」验收。
+
 ### v0.6
 
 - [ ] 能源竞价撮合 PoC（模拟户用光伏）  

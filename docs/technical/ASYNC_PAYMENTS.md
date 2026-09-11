@@ -211,7 +211,7 @@ sequenceDiagram
 
 #### 4.2.1 Job 授权收据（FR-PAY-018）
 
-Trading Job **不得**在 `POST /payments/receipts` 被 Vault accept 后立刻 `applyReceipt`（该路径仅保留给非 Job 微支付与旧 SDK）。非 Job 路径 Vault accept 后仍 `applyReceipt`，但失败不得空吞、不得回滚 Vault：HTTP 保持 success、收据 `pending`，`data.ledgerApplied` 标明是否入账，失败时带 `data.ledgerError`（不足为 `INSUFFICIENT_BALANCE`）。`applyReceipt` 失败时不得 `recordSpend`（`sessionSpent` 保持不变）。
+Trading Job **不得**在 `POST /payments/receipts` 被 Vault accept 后立刻 `applyReceipt`（该路径仅保留给非 Job 微支付与旧 SDK）。非 Job 路径 Vault accept 后仍 `applyReceipt`，但失败不得空吞、不得回滚 Vault：HTTP 保持 success、收据 `pending`，`data.ledgerApplied` 标明是否入账，失败时带 `data.ledgerError`（不足为 `INSUFFICIENT_BALANCE`；当前链 canonical 目录 `configured: true` 时未知 ERC-20 为 `UNKNOWN_ASSET`，`configured: false` 时 fail-open）。`applyReceipt` 失败时不得 `recordSpend`（`sessionSpent` 保持不变）。
 
 同一签名收据再次 `POST /payments/receipts` 会命中 Vault `DUPLICATE`，**不会**重试入账。付款方补余额后应调用 `POST /payments/receipts/:receiptId/apply-ledger`：按已受理收据重试 `applyReceipt`；成功则 `ledgerApplied: true`，且仅在该收据尚未记过 session spend 时 `recordSpend`；若账本已入账则直接返回 `ledgerApplied: true`（不二次划转、不重复记 spend）。`ledgerApplied` 存在 Vault 已受理收据上（布尔字段，不改 `pending`/`batched` 等 status），API 重启后重试不会二次划转或重复 `recordSpend`。仍不足时形状与 submit 相同（`success: true`、`ledgerApplied: false`、`ledgerError: INSUFFICIENT_BALANCE`）。Job `authorize` / `capture` / `void` 收据不走此路径。实验室亦可 `POST /payments/receipts/apply-ledger-batch`（`{ receiptIds? }` ≤50；省略则取 pending 且 `ledgerApplied===false`）批量重试；整批 `success: true`，单条 `NOT_FOUND` 落在该行 `error`。
 

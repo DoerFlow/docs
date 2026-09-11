@@ -42,6 +42,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | GET | `/trading/events?jobId=` | SSE 作业事件 |
 | WS | `/trading/ws` | WebSocket 作业事件（`{"jobId"}` 订阅） |
 | POST | `/payments/sessions` | 注册 Session Key（EIP-712 `SessionAuthorization`） |
+| GET | `/payments/sessions` | 列出会话；TS `listSessions` / Python `list_sessions` |
+| POST | `/payments/sessions/:id/revoke` | 撤销会话；TS `revokeSession` / Python `revoke_session` |
 | POST | `/payments/receipts` | 提交已签名收据（payer = session key） |
 | POST | `/payments/receipts/apply-ledger-batch` | Lab 批量重试入账（`{ receiptIds? }` ≤50；省略则 pending 且 `ledgerApplied===false`）；返回 `data.results`；TS `applyReceiptLedgerBatch` |
 | POST | `/payments/receipts/:receiptId/apply-ledger` | 对已受理收据重试账本入账（Vault `DUPLICATE` 后补余额）；TS `applyReceiptLedger` |
@@ -100,6 +102,8 @@ const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT,
 
 本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后 `applyReceiptLedgerBatch` 再幂等 `applyReceiptLedger`；snapshot 后断言 `batchedCount >= 1` 且 `GET /payments/receipts?status=batched` 含至少一笔本轮已入账 id）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
 
+小批量微收据实验室（N 笔 `payQuote` → 必要时 `applyReceiptLedgerBatch` → `snapshot` `enqueue=0`，日志 `batchedCount`）：`pnpm run example:micropay`（`scripts/example-micropay-batch.mjs`；`MICRO_N` 默认 5、上限 20；**API 须已在 :13008**）。这是 lab N-receipt 演示，**不是** [IOT.md](./IOT.md) v0.5「100+ 模拟传感器」验收。
+
 ---
 
 ## 4. Python
@@ -122,6 +126,8 @@ EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt
 
 - `list_canonical_tokens(chain_id=None)` → `GET /tokens/canonical`（实验室只读目录，非 CCTP / LayerZero）
 - `list_fee_tiers()` → `GET /fees/tiers`（静态 AA 协议费等级表；非链上 FeeTierRegistry）
+- `list_sessions()` → `GET /payments/sessions`
+- `revoke_session(session_id)` → `POST /payments/sessions/{id}/revoke`
 - `apply_receipt_ledger(receipt_id)` → `POST /payments/receipts/{receipt_id}/apply-ledger`（Vault 已受理后重试入账，勿重放同一签名体）
 - `apply_receipt_ledger_batch(receipt_ids=None)` → `POST /payments/receipts/apply-ledger-batch`（body `receiptIds?`；返回 `data.results`）
 - `list_pending_receipts(limit=None, ledger_applied=None)` → `GET /payments/receipts/pending`（`ledgerApplied=true|false`）
