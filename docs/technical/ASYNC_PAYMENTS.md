@@ -213,7 +213,7 @@ sequenceDiagram
 
 Trading Job **不得**在 `POST /payments/receipts` 被 Vault accept 后立刻 `applyReceipt`（该路径仅保留给非 Job 微支付与旧 SDK）。非 Job 路径 Vault accept 后仍 `applyReceipt`，但失败不得空吞、不得回滚 Vault：HTTP 保持 success、收据 `pending`，`data.ledgerApplied` 标明是否入账，失败时带 `data.ledgerError`（不足为 `INSUFFICIENT_BALANCE`）。`applyReceipt` 失败时不得 `recordSpend`（`sessionSpent` 保持不变）。
 
-同一签名收据再次 `POST /payments/receipts` 会命中 Vault `DUPLICATE`，**不会**重试入账。付款方补余额后应调用 `POST /payments/receipts/:receiptId/apply-ledger`：按已受理收据重试 `applyReceipt`；成功则 `ledgerApplied: true`，且仅在该收据尚未记过 session spend 时 `recordSpend`；若账本已入账则直接返回 `ledgerApplied: true`（不二次划转、不重复记 spend）。`ledgerApplied` 存在 Vault 已受理收据上（布尔字段，不改 `pending`/`batched` 等 status），API 重启后重试不会二次划转或重复 `recordSpend`。仍不足时形状与 submit 相同（`success: true`、`ledgerApplied: false`、`ledgerError: INSUFFICIENT_BALANCE`）。Job `authorize` / `capture` / `void` 收据不走此路径。
+同一签名收据再次 `POST /payments/receipts` 会命中 Vault `DUPLICATE`，**不会**重试入账。付款方补余额后应调用 `POST /payments/receipts/:receiptId/apply-ledger`：按已受理收据重试 `applyReceipt`；成功则 `ledgerApplied: true`，且仅在该收据尚未记过 session spend 时 `recordSpend`；若账本已入账则直接返回 `ledgerApplied: true`（不二次划转、不重复记 spend）。`ledgerApplied` 存在 Vault 已受理收据上（布尔字段，不改 `pending`/`batched` 等 status），API 重启后重试不会二次划转或重复 `recordSpend`。仍不足时形状与 submit 相同（`success: true`、`ledgerApplied: false`、`ledgerError: INSUFFICIENT_BALANCE`）。Job `authorize` / `capture` / `void` 收据不走此路径。实验室亦可 `POST /payments/receipts/apply-ledger-batch`（`{ receiptIds? }` ≤50；省略则取 pending 且 `ledgerApplied===false`）批量重试；整批 `success: true`，单条 `NOT_FOUND` 落在该行 `error`。
 
 本地 `pnpm run smoke:m4` 在成功 `payQuote` 之外另走一笔隔离路径：submit 返回 `ledgerApplied: false`（HTTP 200）→ 同一签名体再 POST 为 Vault `DUPLICATE` → 补余额后 `applyReceiptLedger` 为 true，再调一次仍为 true（幂等）。
 
@@ -321,6 +321,7 @@ gross(A→B) = 100,  gross(B→A) = 80
 | GET | `/api/v1/payments/sessions` | 列出会话 |
 | POST | `/api/v1/payments/sessions/:id/revoke` | 撤销会话 |
 | POST | `/api/v1/payments/receipts` | 提交签名收据（须已注册 Session）；**立即** `applyReceipt`（实验室/非 Job 兼容路径） |
+| POST | `/api/v1/payments/receipts/apply-ledger-batch` | Lab：批量重试入账（body `{ receiptIds?: string[] }`，最多 50；省略则取最多 50 条 `ledgerApplied===false` 的 pending）；逐条结果，单条 `NOT_FOUND` 不失败整批 |
 | POST | `/api/v1/payments/receipts/:receiptId/apply-ledger` | Vault 已受理但账本未入账时重试 `applyReceipt`（补余额后；幂等） |
 | POST | `/api/v1/trading/jobs/:id/authorize` | Job 专用：验签+Session+预算预留；Vault 记 `authorized`；**不**给 payee 入账 |
 | POST | `/api/v1/trading/jobs/:id/capture` | Job 专用：仅在 provider 2xx 且输出 hash 已持久化后原子入账（一次性） |

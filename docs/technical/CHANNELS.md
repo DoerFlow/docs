@@ -12,7 +12,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 本文件展开 `SPEC.md` **FR-ST-006**：Agent 与 Agent、人、云 API、电脑/手机、物联网都可以完成任务并获取报酬。内核是同一套作业与结算，通道只替换发现协议与执行器。
 
-本地验收：`pnpm run smoke:channels`（API 须已在 :13008）。
+本地验收：`pnpm run smoke:channels`（API 须已在 :13008；P0 校验 OpenAPI 含 `POST /payments/receipts` 与 receipt `pending` / `{receiptId}` get / `apply-ledger`）。
 
 ---
 
