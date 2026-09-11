@@ -238,7 +238,7 @@ Job 状态：`awaiting_payment → authorized → running → succeeded → capt
 
 **批量路径（v0.2 / M2+）**：
 
-`markBatched` 仅将 `pending` 且 `ledgerApplied===true` 的收据标为 `batched`；入账未成功的 pending 收据不得进入 Merkle intake。
+`markBatched` 仅将 `pending` 且 `ledgerApplied===true` 的收据标为 `batched`；入账未成功的 pending 收据不得进入 Merkle intake。`POST /payments/ledger/snapshot` 在 `ledger.snapshot()` 成功后对最多 10_000 条 pending 且已入账的收据调用 `markBatched`，响应 `data.batchedCount` 为实际翻转数；`ledgerApplied===false`（如余额不足）的收据保持 `pending`。
 
 ```
 Vault 充值（链上）
@@ -339,7 +339,7 @@ gross(A→B) = 100,  gross(B→A) = 80
 | POST | `/api/v1/payments/ledger/credit` | 记入链下余额（PoC；镜像 Vault 充值）；当前链 canonical 目录 `configured: true` 时拒绝未知 ERC-20（`UNKNOWN_ASSET`），`configured: false` 时 fail-open |
 | POST | `/api/v1/payments/ledger/credit-batch` | 批量入账，单次最多 10000 笔（PaymentServiceGuard）；资产校验同 credit |
 | GET | `/api/v1/payments/ledger/balances?account=0x…` | 查询链下余额 |
-| POST | `/api/v1/payments/ledger/snapshot` | 余额快照 → Merkle Root；**PaymentServiceGuard**；`enqueue=0` 时只出 Root 不上链 |
+| POST | `/api/v1/payments/ledger/snapshot` | 余额快照 → Merkle Root；成功后 `markBatched`（pending+`ledgerApplied`）；`data.batchedCount`；**PaymentServiceGuard**；`enqueue=0` 时只出 Root 不上链 |
 | GET | `/api/v1/payments/ledger/snapshots/latest` | 最新 Root / epoch |
 | GET | `/api/v1/payments/ledger/proof?account=&asset=&epoch=` | 强制提现用 Merkle proof |
 | GET | `/api/v1/payments/ledger/commits?status=pending` | Root 上链任务列表 |

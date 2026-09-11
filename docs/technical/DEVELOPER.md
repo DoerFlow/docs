@@ -38,7 +38,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/trading/jobs/:id/execute` | 云适配器；HTTP Skill **须已有 Receipt** 才转发 |
 | GET | `/trading/jobs/:id` | 作业状态（`open` → `settled` 当收据 `resourceId` 匹配） |
 | GET | `/channels` | 五通道矩阵 |
-| GET | `/openapi.json` | OpenAPI 3.1（lists receipt `pending` / `{receiptId}` get / `apply-ledger` / `apply-ledger-batch` alongside `POST /payments/receipts`） |
+| GET | `/openapi.json` | OpenAPI 3.1（lists receipt `pending` / `{receiptId}` get / `apply-ledger` / `apply-ledger-batch` alongside `POST /payments/receipts`, plus `GET /fees/tiers`） |
 | GET | `/trading/events?jobId=` | SSE 作业事件 |
 | WS | `/trading/ws` | WebSocket 作业事件（`{"jobId"}` 订阅） |
 | POST | `/payments/sessions` | 注册 Session Key（EIP-712 `SessionAuthorization`） |
