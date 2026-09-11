@@ -130,7 +130,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - [x] SDK wrap：`registerDevice` / `heartbeatDevice` / `postDeviceTelemetry`（TS + Python；见 [DEVELOPER.md](./DEVELOPER.md) §4.2）
 - [ ] 链上 `DeviceRegistry` / 稳定币充电（仍为 v1.2+）
 
-实验室 REST 示例：`pnpm run example:device`（`scripts/example-device-runner.mjs`）。这是 v1.1 HTTP 设备回路，**不是** v1.2「稳定币充电」样例。
+实验室 REST 示例：`pnpm run example:device`（`scripts/example-device-runner.mjs`）。这是 v1.1 HTTP 设备回路，**不是** v1.2「稳定币充电」样例。`pnpm run smoke:m5` 只确认该包装脚本与 `package.json` 的 `example:device` 存在，不运行示例，也不表示 v1.2 稳定币充电已验收。
 
 ### FR-IOT-008（TB 时间窗入账 · 实验室）
 

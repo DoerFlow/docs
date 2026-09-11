@@ -44,6 +44,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/payments/sessions` | 注册 Session Key（EIP-712 `SessionAuthorization`） |
 | POST | `/payments/receipts` | 提交已签名收据（payer = session key） |
 | POST | `/payments/receipts/:receiptId/apply-ledger` | 对已受理收据重试账本入账（Vault `DUPLICATE` 后补余额）；TS `applyReceiptLedger` |
+| GET | `/payments/receipts/pending?limit=` | 待批量清算列表；TS `listPendingReceipts` |
+| GET | `/payments/receipts/:receiptId` | 查询已存 Vault 收据（含 `ledgerApplied`）；缺失 `success: false` `NOT_FOUND`；TS `getReceipt` |
 | GET | `/payments/ledger/balances?account=` | 链下余额 |
 | POST | `/payments/ledger/snapshot?enqueue=0` | Merkle Root（`PaymentServiceGuard`） |
 | GET | `/payments/ledger/proof?account=&asset=` | 强制提现 proof |
@@ -114,6 +116,8 @@ EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt
 
 - `list_canonical_tokens(chain_id=None)` → `GET /tokens/canonical`（实验室只读目录，非 CCTP / LayerZero）
 - `apply_receipt_ledger(receipt_id)` → `POST /payments/receipts/{receipt_id}/apply-ledger`（Vault 已受理后重试入账，勿重放同一签名体）
+- `list_pending_receipts(limit=None)` → `GET /payments/receipts/pending`
+- `get_receipt(receipt_id)` → `GET /payments/receipts/{id}`
 
 ---
 
