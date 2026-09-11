@@ -215,7 +215,7 @@ Trading Job **不得**在 `POST /payments/receipts` 被 Vault accept 后立刻 `
 
 同一签名收据再次 `POST /payments/receipts` 会命中 Vault `DUPLICATE`，**不会**重试入账。付款方补余额后应调用 `POST /payments/receipts/:receiptId/apply-ledger`：按已受理收据重试 `applyReceipt`；成功则 `ledgerApplied: true`，且仅在该收据尚未记过 session spend 时 `recordSpend`；若账本已入账则直接返回 `ledgerApplied: true`（不二次划转、不重复记 spend）。`ledgerApplied` 存在 Vault 已受理收据上（布尔字段，不改 `pending`/`batched` 等 status），API 重启后重试不会二次划转或重复 `recordSpend`。仍不足时形状与 submit 相同（`success: true`、`ledgerApplied: false`、`ledgerError: INSUFFICIENT_BALANCE`）。Job `authorize` / `capture` / `void` 收据不走此路径。实验室亦可 `POST /payments/receipts/apply-ledger-batch`（`{ receiptIds? }` ≤50；省略则取 pending 且 `ledgerApplied===false`）批量重试；整批 `success: true`，单条 `NOT_FOUND` 落在该行 `error`。
 
-本地 `pnpm run smoke:m4` 在成功 `payQuote` 之外另走一笔隔离路径：submit 返回 `ledgerApplied: false`（HTTP 200）→ 同一签名体再 POST 为 Vault `DUPLICATE` → 补余额后 `applyReceiptLedger` 为 true，再调一次仍为 true（幂等）。
+本地 `pnpm run smoke:m4` 在成功 `payQuote` 之外另走一笔隔离路径：submit 返回 `ledgerApplied: false`（HTTP 200）→ 同一签名体再 POST 为 Vault `DUPLICATE` → 补余额后 `applyReceiptLedgerBatch([receiptId])` 为 true，再单笔 `applyReceiptLedger` 仍为 true（幂等）。
 
 | 步骤 | 行为 |
 |------|------|
@@ -237,6 +237,8 @@ Job 状态：`awaiting_payment → authorized → running → succeeded → capt
 | **状态通道终态**（拓展） | 1:1 流式计费 | 通道关闭时提交终态 |
 
 **批量路径（v0.2 / M2+）**：
+
+`markBatched` 仅将 `pending` 且 `ledgerApplied===true` 的收据标为 `batched`；入账未成功的 pending 收据不得进入 Merkle intake。
 
 ```
 Vault 充值（链上）

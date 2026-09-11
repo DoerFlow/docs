@@ -156,7 +156,7 @@ pnpm run smoke:m5
 pnpm run smoke:vault   # Sepolia；需测试 ETH / Mock USDC 与 operator 钥
 ```
 
-`smoke:m5` 检查：生产文档与 env 模板（含 `COMMERCIAL_MODE`）、Hardhat `base`、探针与 disclosure（含 `/ready` 状态码与 `/version` 的 `profile`/`manifestHash`）、OpenAPI 源文件收据重试路径字符串、M4 SDK、compose 基座与 overlay、`use:base`。  
+`smoke:m5` 检查：生产文档与 env 模板（含 `COMMERCIAL_MODE`）、Hardhat `base`、探针与 disclosure（含 `/ready` 状态码与 `/version` 的 `profile`/`manifestHash`）、OpenAPI 源文件收据重试路径字符串（含 `apply-ledger-batch`）、M4 SDK、compose 基座与 overlay、`use:base`。  
 `smoke:vault` 检查：已部署 Sepolia Vault 上真实 `deposit` → `commitRoot` → `forceWithdraw`。
 
 ---

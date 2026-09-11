@@ -64,4 +64,4 @@ Smart Account 持有主密钥；Agent 运行时仅加载 **Session Key**，泄�
 - [ ] Sepolia 上 Smart Account 完成一笔带等级费率的 Escrow 结算  
 - [ ] 链下索引与 `GET /fees/tiers` 一致  
 
-MVP 的 `GET /api/v1/fees/tiers` 仍返回本文件第 2 节静态 T0–T3 表（`FeesService`），尚无链上 `FeeTierRegistry` 索引。
+MVP 的 `GET /api/v1/fees/tiers` 仍返回本文件第 2 节静态 T0–T3 表（`FeesService`），尚无链上 `FeeTierRegistry` 索引。实验室单元测试 `fees.service.spec.ts` 校验静态表 `protocolFeeBps` 250/200/150/100；**不**覆盖 Sepolia / 链上索引（上表勾选框保持未勾）。

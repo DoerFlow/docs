@@ -43,9 +43,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | WS | `/trading/ws` | WebSocket 作业事件（`{"jobId"}` 订阅） |
 | POST | `/payments/sessions` | 注册 Session Key（EIP-712 `SessionAuthorization`） |
 | POST | `/payments/receipts` | 提交已签名收据（payer = session key） |
-| POST | `/payments/receipts/apply-ledger-batch` | Lab 批量重试入账（`{ receiptIds? }` ≤50；省略则 pending 且 `ledgerApplied===false`）；TS `applyReceiptLedgerBatch` |
+| POST | `/payments/receipts/apply-ledger-batch` | Lab 批量重试入账（`{ receiptIds? }` ≤50；省略则 pending 且 `ledgerApplied===false`）；返回 `data.results`；TS `applyReceiptLedgerBatch` |
 | POST | `/payments/receipts/:receiptId/apply-ledger` | 对已受理收据重试账本入账（Vault `DUPLICATE` 后补余额）；TS `applyReceiptLedger` |
-| POST | `/payments/receipts/apply-ledger-batch` | 批量重试账本入账（body `receiptIds?`）；TS `applyReceiptLedgerBatch`；返回 `data.results` |
 | GET | `/payments/receipts/pending?limit=&ledgerApplied=` | 待批量清算；可选 `ledgerApplied=true\|false`（omit=全部；非法值忽略）；TS `listPendingReceipts({ limit?, ledgerApplied? })`（数字首参仍为 limit） |
 | GET | `/payments/receipts/:receiptId` | 查询已存 Vault 收据（含 `ledgerApplied`）；缺失 `success: false` `NOT_FOUND`；TS `getReceipt` |
 | GET | `/payments/ledger/balances?account=` | 链下余额 |
@@ -61,6 +60,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/devices/:id/heartbeat` | 设备心跳 |
 | POST | `/devices/:id/telemetry` | `{ reading, unit? }` → telemetry hash + 账本入账 |
 | GET | `/tokens/canonical?chainId=` | Lab canonical 目录；TS `listCanonicalTokens` |
+| GET | `/fees/tiers` | 静态 AA 协议费等级表（T0–T3）；TS `listFeeTiers` / Python `list_fee_tiers`（非链上索引） |
 
 企业回调：创建 job 时带 `callbackUrl`；结算后 POST **CloudEvents 1.0** JSON，头 `X-DoerFlow-Signature: sha256=<hmac>`（`TRADING_WEBHOOK_SECRET`）。信封含 `id` / `source` / `type` / `data`。
 
@@ -94,7 +94,7 @@ const paid = await api.payQuote({ session, quote, resourceId: job.resourceId });
 const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT, enqueue: false });
 ```
 
-本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后幂等 `applyReceiptLedger`）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
+本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后 `applyReceiptLedgerBatch` 再幂等 `applyReceiptLedger`）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
 
 ---
 
@@ -117,6 +117,7 @@ print(client.quote("0", 1)["amount"])
 EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt`。`submit_receipt` 返回 API `data`（含 `ledgerApplied` / `ledgerError`）；HTTP 200 时 `ledgerApplied` 仍可能为 false。此时勿重放同一签名体（Vault `DUPLICATE`）；补余额后 `POST /payments/receipts/:receiptId/apply-ledger`。
 
 - `list_canonical_tokens(chain_id=None)` → `GET /tokens/canonical`（实验室只读目录，非 CCTP / LayerZero）
+- `list_fee_tiers()` → `GET /fees/tiers`（静态 AA 协议费等级表；非链上 FeeTierRegistry）
 - `apply_receipt_ledger(receipt_id)` → `POST /payments/receipts/{receipt_id}/apply-ledger`（Vault 已受理后重试入账，勿重放同一签名体）
 - `apply_receipt_ledger_batch(receipt_ids=None)` → `POST /payments/receipts/apply-ledger-batch`（body `receiptIds?`；返回 `data.results`）
 - `list_pending_receipts(limit=None, ledger_applied=None)` → `GET /payments/receipts/pending`（`ledgerApplied=true|false`）
