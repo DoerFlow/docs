@@ -38,13 +38,13 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/trading/jobs/:id/execute` | 云适配器；HTTP Skill **须已有 Receipt** 才转发 |
 | GET | `/trading/jobs/:id` | 作业状态（`open` → `settled` 当收据 `resourceId` 匹配） |
 | GET | `/channels` | 五通道矩阵 |
-| GET | `/openapi.json` | OpenAPI 3.1 |
+| GET | `/openapi.json` | OpenAPI 3.1（lists receipt `pending` / `{receiptId}` get / `apply-ledger` alongside `POST /payments/receipts`） |
 | GET | `/trading/events?jobId=` | SSE 作业事件 |
 | WS | `/trading/ws` | WebSocket 作业事件（`{"jobId"}` 订阅） |
 | POST | `/payments/sessions` | 注册 Session Key（EIP-712 `SessionAuthorization`） |
 | POST | `/payments/receipts` | 提交已签名收据（payer = session key） |
 | POST | `/payments/receipts/:receiptId/apply-ledger` | 对已受理收据重试账本入账（Vault `DUPLICATE` 后补余额）；TS `applyReceiptLedger` |
-| GET | `/payments/receipts/pending?limit=` | 待批量清算列表；TS `listPendingReceipts` |
+| GET | `/payments/receipts/pending?limit=&ledgerApplied=` | 待批量清算；可选 `ledgerApplied=true\|false`（omit=全部；非法值忽略）；TS `listPendingReceipts({ limit?, ledgerApplied? })`（数字首参仍为 limit） |
 | GET | `/payments/receipts/:receiptId` | 查询已存 Vault 收据（含 `ledgerApplied`）；缺失 `success: false` `NOT_FOUND`；TS `getReceipt` |
 | GET | `/payments/ledger/balances?account=` | 链下余额 |
 | POST | `/payments/ledger/snapshot?enqueue=0` | Merkle Root（`PaymentServiceGuard`） |
@@ -92,7 +92,7 @@ const paid = await api.payQuote({ session, quote, resourceId: job.resourceId });
 const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT, enqueue: false });
 ```
 
-本机验收：`pnpm run smoke:m4`（API 须已启动；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后幂等 `applyReceiptLedger`）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
+本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后幂等 `applyReceiptLedger`）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
 
 ---
 
@@ -116,7 +116,7 @@ EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt
 
 - `list_canonical_tokens(chain_id=None)` → `GET /tokens/canonical`（实验室只读目录，非 CCTP / LayerZero）
 - `apply_receipt_ledger(receipt_id)` → `POST /payments/receipts/{receipt_id}/apply-ledger`（Vault 已受理后重试入账，勿重放同一签名体）
-- `list_pending_receipts(limit=None)` → `GET /payments/receipts/pending`
+- `list_pending_receipts(limit=None, ledger_applied=None)` → `GET /payments/receipts/pending`（`ledgerApplied=true|false`）
 - `get_receipt(receipt_id)` → `GET /payments/receipts/{id}`
 
 ---
