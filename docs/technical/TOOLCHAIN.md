@@ -1,18 +1,19 @@
-﻿---
+---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
-> **瑙勮寖婧愭枃浠?*锛氱敱 MetaRepo `spec/` 鍚屾锛岃鍕跨洿鎺ョ紪杈戞湰椤点€?
+> **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
+
 # 工具链规范
 
-**最后更新**: 2025-01-14
+**最后更新**: 2026-08-25
 
 | 仓库 | 构建 | 测试 | 代码规范 |
 |------|------|------|----------|
 | **docs** | [Rspress](https://rspress.rs/) | — | Biome |
 | **web** | [Rsbuild](https://rsbuild.rs/) + React | [Rstest](https://rstest.rs/) | Biome |
-| **api** | NestJS CLI（`nest build`） | Jest（逐步迁 Rstest） | Biome |
+| **api** | NestJS CLI + **Fastify**（`nest build`） | Jest（逐步迁 Rstest） | Biome |
 | **shared** | [Rslib](https://lib.rsbuild.dev/) | Rstest | Biome |
 | **p2p** | Rslib | Rstest | Biome |
 | **contracts** | Hardhat | `hardhat test` | Biome（仅 TS 脚本） |
@@ -30,10 +31,11 @@ doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-t
 ## 常用命令
 
 ```bash
-pnpm check    # biome check（各仓）
-pnpm format   # biome format --write
-pnpm build    # 构建
-pnpm test     # 测试（rstest / jest / hardhat）
+pnpm run setup   # MetaRepo 一键 clone + install（macOS / Linux / Windows）
+pnpm check       # biome check（各仓）
+pnpm format      # biome format --write
+pnpm build       # 构建
+pnpm test        # 测试（rstest / jest / hardhat）
 ```
 
 MetaRepo 同步 Biome 配置：
@@ -41,4 +43,3 @@ MetaRepo 同步 Biome 配置：
 ```powershell
 .\scripts\sync-tooling.ps1
 ```
-

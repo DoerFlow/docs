@@ -1,12 +1,13 @@
-﻿---
+---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
-> **瑙勮寖婧愭枃浠?*锛氱敱 MetaRepo `spec/` 鍚屾锛岃鍕跨洿鎺ョ紪杈戞湰椤点€?
+> **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
+
 # Agent 链经济 · 现成 L2 优先 · 自建应用链延期
 
-**版本**: v0.2-draft · **最后更新**: 2025-01-14  
+**版本**: v0.2-draft · **最后更新**: 2025-01-08  
 **路线图**: MasterChef / SDK 仍可走 v0.7；**自建 L2/L3 延后**（见 [ROADMAP.md](./ROADMAP.md)）
 
 ## 1. 背景与挑战
@@ -42,7 +43,7 @@ Agent 交易特征：**高频、微额、自动化、对 Gas 与延迟极度敏�
 | **FeeModule** | 链上 | 与 [FEE_TIERS_AA.md](./FEE_TIERS_AA.md) AA 等级联动 |
 | **Vault / MicroPaymentSettler** | 链上 | 充提 + Merkle Root（[ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)） |
 
-团队早期通过 **Proxy Admin / Timelock** 掌握升级权；路线图后期移交 DAO。
+团队早期通过 **SimpleMultisig + DoerFlowTimelock** 掌握 **admin**（换 operator、换 Settler、Vault `owner`）；`commitRoot` 热钥不经 Timelock。路线图后期 Timelock proposer 移交 DAO / Gnosis Safe。
 
 ### 3.2 链层策略
 
@@ -98,8 +99,9 @@ v1.0   安全审计；主网 hardening
 | FR-CHAIN-001 | （延期）超低 Gas 自建 L2 测试网 | **远期评估** · 非微支付前置 |
 | FR-CHAIN-002 | MasterChef 激励分配（现成 L2） | v0.7 |
 | FR-CHAIN-003 | UUPS 可升级 Escrow/费率/Vault | v0.7 |
+| FR-CHAIN-007 | 部署 admin → Multisig + Timelock（热 operator 除外） | **v1.0 ✅** 见 PRODUCTION §3 |
 | FR-CHAIN-004 | （延期）团队 Sequencer 运维 | 随自建链 |
-| FR-CHAIN-005 | Agent Trading SDK 模板 | v0.7 |
+| FR-CHAIN-005 | Agent Trading SDK 模板 | **v0.4 / M4 ✅** |
 | FR-CHAIN-006 | DAO 费率治理 | v1.0 |
 | FR-BRIDGE-002~005 | 原生桥（随自建链） | **延期**；现阶段用 Base/官方桥 |
 | FR-PAY-006/012/013 | Merkle Vault 清算与强制提现 | **v0.2 / M2**（见 ASYNC_PAYMENTS · ROADMAP） |
@@ -115,4 +117,3 @@ v1.0   安全审计；主网 hardening
 ---
 
 *与 [ECOSYSTEM.md](./ECOSYSTEM.md)、[IOT.md](./IOT.md)、[ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) 配套阅读。*
-

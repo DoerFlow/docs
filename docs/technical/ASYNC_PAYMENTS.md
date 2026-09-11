@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # Agent 异步支付 · 链下账本 + Merkle 批量结算
 
-**版本**: v0.2.8 · **最后更新**: 2026-09-05  
+**版本**: v0.2.8 · **最后更新**: 2026-09-10  
 **关联**: [SPEC.md](./SPEC.md) · [AGENT_CHAIN.md](./AGENT_CHAIN.md) · [FEE_TIERS_AA.md](./FEE_TIERS_AA.md) · [IOT.md](./IOT.md) · [BRIDGE.md](./BRIDGE.md)
 
 ## 0. 架构决策（已定）
@@ -213,6 +213,8 @@ sequenceDiagram
 
 Trading Job **不得**在 `POST /payments/receipts` 被 Vault accept 后立刻 `applyReceipt`（该路径仅保留给非 Job 微支付与旧 SDK）。非 Job 路径 Vault accept 后仍 `applyReceipt`，但失败不得空吞、不得回滚 Vault：HTTP 保持 success、收据 `pending`，`data.ledgerApplied` 标明是否入账，失败时带 `data.ledgerError`（不足为 `INSUFFICIENT_BALANCE`）。`applyReceipt` 失败时不得 `recordSpend`（`sessionSpent` 保持不变）。
 
+同一签名收据再次 `POST /payments/receipts` 会命中 Vault `DUPLICATE`，**不会**重试入账。付款方补余额后应调用 `POST /payments/receipts/:receiptId/apply-ledger`：按已受理收据重试 `applyReceipt`；成功则 `ledgerApplied: true`，且仅在该收据尚未记过 session spend 时 `recordSpend`；若账本已入账则直接返回 `ledgerApplied: true`（不二次划转、不重复记 spend）。仍不足时形状与 submit 相同（`success: true`、`ledgerApplied: false`、`ledgerError: INSUFFICIENT_BALANCE`）。Job `authorize` / `capture` / `void` 收据不走此路径。
+
 | 步骤 | 行为 |
 |------|------|
 | `authorize` | 验 EIP-712 + Session allowlist/预算/nonce；Receipt 以 `authorized` 落库（不进 `listPending`）；`recordSpend` 预留预算；写入 `payment_authorizations`；**payee 余额不变** |
@@ -317,6 +319,7 @@ gross(A→B) = 100,  gross(B→A) = 80
 | GET | `/api/v1/payments/sessions` | 列出会话 |
 | POST | `/api/v1/payments/sessions/:id/revoke` | 撤销会话 |
 | POST | `/api/v1/payments/receipts` | 提交签名收据（须已注册 Session）；**立即** `applyReceipt`（实验室/非 Job 兼容路径） |
+| POST | `/api/v1/payments/receipts/:receiptId/apply-ledger` | Vault 已受理但账本未入账时重试 `applyReceipt`（补余额后；幂等） |
 | POST | `/api/v1/trading/jobs/:id/authorize` | Job 专用：验签+Session+预算预留；Vault 记 `authorized`；**不**给 payee 入账 |
 | POST | `/api/v1/trading/jobs/:id/capture` | Job 专用：仅在 provider 2xx 且输出 hash 已持久化后原子入账（一次性） |
 | POST | `/api/v1/trading/jobs/:id/void` | Job 专用：释放预算预留；5xx/超时；**不**入账 |
@@ -327,8 +330,8 @@ gross(A→B) = 100,  gross(B→A) = 80
 | POST | `/api/v1/trading/providers/skills/:skillId/rotate-secret` | 轮换 HMAC webhook secret（只返回一次） |
 | GET | `/api/v1/payments/receipts/stats?payer=0x…` | payer nonce / pending 数 |
 | GET | `/api/v1/payments/receipts/pending?limit=100` | 待批量清算列表 |
-| POST | `/api/v1/payments/ledger/credit` | 记入链下余额（PoC；镜像 Vault 充值） |
-| POST | `/api/v1/payments/ledger/credit-batch` | 批量入账，单次最多 10000 笔（PaymentServiceGuard） |
+| POST | `/api/v1/payments/ledger/credit` | 记入链下余额（PoC；镜像 Vault 充值）；当前链 canonical 目录 `configured: true` 时拒绝未知 ERC-20（`UNKNOWN_ASSET`），`configured: false` 时 fail-open |
+| POST | `/api/v1/payments/ledger/credit-batch` | 批量入账，单次最多 10000 笔（PaymentServiceGuard）；资产校验同 credit |
 | GET | `/api/v1/payments/ledger/balances?account=0x…` | 查询链下余额 |
 | POST | `/api/v1/payments/ledger/snapshot` | 余额快照 → Merkle Root；**PaymentServiceGuard**；`enqueue=0` 时只出 Root 不上链 |
 | GET | `/api/v1/payments/ledger/snapshots/latest` | 最新 Root / epoch |

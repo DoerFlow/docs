@@ -43,6 +43,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | WS | `/trading/ws` | WebSocket 作业事件（`{"jobId"}` 订阅） |
 | POST | `/payments/sessions` | 注册 Session Key（EIP-712 `SessionAuthorization`） |
 | POST | `/payments/receipts` | 提交已签名收据（payer = session key） |
+| POST | `/payments/receipts/:receiptId/apply-ledger` | 对已受理收据重试账本入账（Vault `DUPLICATE` 后补余额）；TS `applyReceiptLedger` |
 | GET | `/payments/ledger/balances?account=` | 链下余额 |
 | POST | `/payments/ledger/snapshot?enqueue=0` | Merkle Root（`PaymentServiceGuard`） |
 | GET | `/payments/ledger/proof?account=&asset=` | 强制提现 proof |
@@ -55,6 +56,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/devices/register` | P4 实验室设备 `{ kind?, label, payee }` |
 | POST | `/devices/:id/heartbeat` | 设备心跳 |
 | POST | `/devices/:id/telemetry` | `{ reading, unit? }` → telemetry hash + 账本入账 |
+| GET | `/tokens/canonical?chainId=` | Lab canonical 目录；TS `listCanonicalTokens` |
 
 企业回调：创建 job 时带 `callbackUrl`；结算后 POST **CloudEvents 1.0** JSON，头 `X-DoerFlow-Signature: sha256=<hmac>`（`TRADING_WEBHOOK_SECRET`）。信封含 `id` / `source` / `type` / `data`。
 
@@ -84,6 +86,7 @@ await api.authorizeSession({
   sessionBudget: quote.amount,
 });
 const paid = await api.payQuote({ session, quote, resourceId: job.resourceId });
+// if paid.submitted.ledgerApplied === false: await api.applyReceiptLedger(paid.submitted.receiptId)
 const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT, enqueue: false });
 ```
 
@@ -107,7 +110,10 @@ print(client.quote("0", 1)["amount"])
 # then verify_webhook(raw_body, signature, webhook_secret)
 ```
 
-EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt`。`submit_receipt` 返回 API `data`（含 `ledgerApplied` / `ledgerError`）；HTTP 200 时 `ledgerApplied` 仍可能为 false。
+EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt`。`submit_receipt` 返回 API `data`（含 `ledgerApplied` / `ledgerError`）；HTTP 200 时 `ledgerApplied` 仍可能为 false。此时勿重放同一签名体（Vault `DUPLICATE`）；补余额后 `POST /payments/receipts/:receiptId/apply-ledger`。
+
+- `list_canonical_tokens(chain_id=None)` → `GET /tokens/canonical`（实验室只读目录，非 CCTP / LayerZero）
+- `apply_receipt_ledger(receipt_id)` → `POST /payments/receipts/{receipt_id}/apply-ledger`（Vault 已受理后重试入账，勿重放同一签名体）
 
 ---
 

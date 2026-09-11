@@ -110,7 +110,7 @@ LP Token ──lock──▶ veNFT ──vote──▶ Gauge 权重
 - [x] 集成测试：Add LP → Swap → Lock → Vote
 - [x] `export-abi` 可供 shared/api 使用
 
-Hardhat（本机、无网络）：`repos/contracts/test/metadex/Router.test.ts`、`VotingEscrow.test.ts`、`integration.test.ts` 均已通过。本地合约集成保持 `pnpm run smoke:metadex:local`（包装 `test/metadex/integration.test.ts`：Add LP → Swap → Lock → Vote → Gauge reward）。`export-abi.ts` 含 MetaFactory/Pair/Router/VotingEscrow/Voter/Gauge；`repos/api/src/abis/` 已有对应 JSON。Sepolia MetaDEX 与 web Swap **未**勾。  
+Hardhat（本机、无网络）：`repos/contracts/test/metadex/Router.test.ts`、`VotingEscrow.test.ts`、`integration.test.ts` 均已通过。本地合约集成保持 `pnpm run smoke:metadex:local`（包装 `test/metadex/integration.test.ts`：Add LP → Swap → Lock → Vote → Gauge reward）。`pnpm run smoke:m5` 只确认该包装脚本与 `package.json` 的 `smoke:metadex:local` 存在，不运行 Hardhat，也不表示 web 已挖出 Swap。`export-abi.ts` 含 MetaFactory/Pair/Router/VotingEscrow/Voter/Gauge；`repos/api/src/abis/` 已有对应 JSON。Sepolia MetaDEX 与 web Swap **未**勾。  
 
 ### Phase B/C — api & web（v0.15.1–.2）
 

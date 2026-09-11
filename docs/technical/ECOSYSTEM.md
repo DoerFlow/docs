@@ -1,12 +1,13 @@
-﻿---
+---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-to-docs.ps1
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ---
 
-> **瑙勮寖婧愭枃浠?*锛氱敱 MetaRepo `spec/` 鍚屾锛岃鍕跨洿鎺ョ紪杈戞湰椤点€?
+> **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
+
 # 平台生态与壮大策略
 
-**版本**: v0.1-draft · **最后更新**: 2025-01-14
+**版本**: v0.1-draft · **最后更新**: 2024-10-10
 
 ## 1. 核心目标
 
@@ -44,6 +45,12 @@ doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-t
 3. **公开 docs + 测试网水龙头** — 30 分钟跑通第一笔收益  
 4. **Hackathon / Grant** — 垂直场景（充电、气象、冷链）  
 
+## 4.1 AI 边界
+
+- **ChainSkill ≠ AiTool**。Escrow / Merkle / SIWE / 结算留在协议仓。
+- 可选推理走 LuminaryWorks AI Platform。预留 Entitlement feature `ai.strategy.run`，**未实现前不得当已上线**。
+- 权威：[LuminaryWorks/spec/ai-platform.md](https://github.com/LuminaryWorks/LuminaryWorks/blob/main/spec/ai-platform.md)。
+
 ## 5. 与产品矩阵关系
 
 | 产品 | 生态角色 |
@@ -66,4 +73,3 @@ doNotEdit: 璇蜂慨鏀?MetaRepo spec/ 鍚庨噸鏂拌繍琛?scripts/sync-spec-t
 ---
 
 *投资者叙事见公开文档 `vision/investors`；版本排期见 [ROADMAP.md](./ROADMAP.md)。*
-

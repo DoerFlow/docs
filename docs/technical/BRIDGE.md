@@ -122,7 +122,7 @@ infrastructure/
 
 **替代**：无链上 USDC 时用法币 Onramp 买到用户 Base 地址，见 [ONRAMP.md](./ONRAMP.md)。Coinbase 账户可直接提现到 Base（无需桥）。
 
-**Lab canonical list**：`GET /api/v1/tokens/canonical?chainId=` 返回 `{ chainId, configured, tokens: [{ symbol, address, kind }] }`。web `/payments` 以只读卡片展示该列表（无 Vault 时也可显示）。Base 主网（`8453`）仅 Circle 原生 USDC（`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`，公开常量，非伪造 DoerFlow 部署）。实验室链 `84532` / `31337` 使用现有 `deployments.json` / 匹配 env 的 Vault asset 与 mock USDC（及 localhost WETH）；未知 `chainId` 为 `configured: false` 且 `tokens: []`。该接口为只读目录，**不是** CanonicalTokenRegistry（FR-BRIDGE-003），也不是 OP Stack / CCTP。
+**Lab canonical list**：`GET /api/v1/tokens/canonical?chainId=` 返回 `{ chainId, configured, tokens: [{ symbol, address, kind }] }`。web `/payments` 以只读卡片展示该列表（无 Vault 时也可显示）。Base 主网（`8453`）仅 Circle 原生 USDC（`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`，公开常量，非伪造 DoerFlow 部署）。实验室链 `84532` / `31337` 使用现有 `deployments.json` / 匹配 env 的 Vault asset 与 mock USDC（及 localhost WETH）；未知 `chainId` 为 `configured: false` 且 `tokens: []`。该接口为只读目录，**不是** CanonicalTokenRegistry（FR-BRIDGE-003），也不是 OP Stack / CCTP。TypeScript SDK 可用 `DoerFlowClient.listCanonicalTokens(chainId?)` 读取该目录。
 
 Phase 1 **不**交付 CCTP、LayerZero、OP Stack 原生桥、Agent L2 或 CanonicalTokenRegistry。
 
@@ -211,6 +211,8 @@ Phase 1 **不**交付 CCTP、LayerZero、OP Stack 原生桥、Agent L2 或 Canon
 - [ ] MetaDEX / Escrow 仅接受 canonical 代币  
 
 实验室已提供 `GET /api/v1/tokens/canonical` 只读列表。上框须等 Escrow 与 MetaRouter **对未知代币 revert** 后再勾；当前 Escrow 只收原生 ETH、Router 只要求 pair 存在，**不得勾选**。
+
+NOTE：链下账本 `POST /payments/ledger/credit`（及 `credit-batch`）在目录 `configured: true` 时拒绝未知 ERC-20（`UNKNOWN_ASSET`；原生 ETH / 零地址跳过）；`configured: false` 时 fail-open。此为 **off-chain ledger credit**，**不是** Escrow ETH allowlist，**不得**据此勾选「MetaDEX / Escrow 仅接受 canonical」。
 
 ### Phase 3（v0.8 / v1.1）
 - [ ] CCTP：Base USDC → Agent L2 USDC（burn/mint）  
