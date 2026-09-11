@@ -46,7 +46,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/payments/receipts/apply-ledger-batch` | Lab 批量重试入账（`{ receiptIds? }` ≤50；省略则 pending 且 `ledgerApplied===false`）；返回 `data.results`；TS `applyReceiptLedgerBatch` |
 | POST | `/payments/receipts/:receiptId/apply-ledger` | 对已受理收据重试账本入账（Vault `DUPLICATE` 后补余额）；TS `applyReceiptLedger` |
 | GET | `/payments/receipts/pending?limit=&ledgerApplied=` | 待批量清算；可选 `ledgerApplied=true\|false`（omit=全部；非法值忽略）；TS `listPendingReceipts({ limit?, ledgerApplied? })`（数字首参仍为 limit） |
-| GET | `/payments/receipts?status=&limit=` | 按 status 列表（`pending` \| `batched`；非法/省略 → `pending`）；含 `ledgerApplied`；形状同 pending |
+| GET | `/payments/receipts?status=&limit=` | 按 status 列表（`pending` \| `batched`；非法/省略 → `pending`）；含 `ledgerApplied`；形状同 pending；TS `listReceipts({ status?, limit? })` |
 | GET | `/payments/receipts/:receiptId` | 查询已存 Vault 收据（含 `ledgerApplied`）；缺失 `success: false` `NOT_FOUND`；TS `getReceipt` |
 | GET | `/payments/ledger/balances?account=` | 链下余额 |
 | POST | `/payments/ledger/snapshot?enqueue=0` | Merkle Root + `batchedCount`（`PaymentServiceGuard`）；TS `snapshot` → `LedgerSnapshotResult` |
@@ -98,7 +98,7 @@ const paid = await api.payQuote({ session, quote, resourceId: job.resourceId });
 const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT, enqueue: false });
 ```
 
-本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后 `applyReceiptLedgerBatch` 再幂等 `applyReceiptLedger`；snapshot 后断言 `batchedCount >= 1`）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
+本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后 `applyReceiptLedgerBatch` 再幂等 `applyReceiptLedger`；snapshot 后断言 `batchedCount >= 1` 且 `GET /payments/receipts?status=batched` 含至少一笔本轮已入账 id）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
 
 ---
 
