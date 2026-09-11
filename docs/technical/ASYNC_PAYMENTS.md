@@ -335,6 +335,7 @@ gross(A→B) = 100,  gross(B→A) = 80
 | POST | `/api/v1/trading/providers/skills/:skillId/rotate-secret` | 轮换 HMAC webhook secret（只返回一次） |
 | GET | `/api/v1/payments/receipts/stats?payer=0x…` | payer nonce / pending 数 |
 | GET | `/api/v1/payments/receipts/pending?limit=100&ledgerApplied=true\|false` | 待批量清算列表（每条含 `ledgerApplied`）；可选 `ledgerApplied=true\|false` 过滤（omit=全部；`false`=需重试入账；`true`=已入账仍 pending）；非 `true`/`false` 忽略该参数 |
+| GET | `/api/v1/payments/receipts?status=&limit=` | 按 Vault status 列表（`pending` \| `batched`；非法/省略 → `pending`）；形状同 pending（含 `ledgerApplied`）；`meta.status` 为实际过滤值 |
 | GET | `/api/v1/payments/receipts/:receiptId` | 查询已存 Vault 收据（id, payer, payee, amount, asset, nonce, status, ledgerApplied, submittedAt）；缺失 → `success: false` `NOT_FOUND` |
 | POST | `/api/v1/payments/ledger/credit` | 记入链下余额（PoC；镜像 Vault 充值）；当前链 canonical 目录 `configured: true` 时拒绝未知 ERC-20（`UNKNOWN_ASSET`），`configured: false` 时 fail-open |
 | POST | `/api/v1/payments/ledger/credit-batch` | 批量入账，单次最多 10000 笔（PaymentServiceGuard）；资产校验同 credit |
