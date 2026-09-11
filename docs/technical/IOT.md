@@ -130,6 +130,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - [x] SDK wrap：`registerDevice` / `heartbeatDevice` / `postDeviceTelemetry`（TS + Python；见 [DEVELOPER.md](./DEVELOPER.md) §4.2）
 - [ ] 链上 `DeviceRegistry` / 稳定币充电（仍为 v1.2+）
 
+实验室 REST 示例：`pnpm run example:device`（`scripts/example-device-runner.mjs`）。这是 v1.1 HTTP 设备回路，**不是** v1.2「稳定币充电」样例。
+
 ### FR-IOT-008（TB 时间窗入账 · 实验室）
 
 合同：[SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md)。
@@ -140,6 +142,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - [x] 可选信封 `data.payer`：余额足够则 `applyReceipt`（不足 `403 INSUFFICIENT_BALANCE`）；省略 payer 仍实验室铸造
 
 ### v1.2+ 车桩
+
+`example:device` 仅为实验室 REST，不勾选下列验收。
 
 - [ ] 认证充电桩 + 模拟车载 Agent 完成一笔稳定币充电支付（测试网）  
 - [ ] SDK 样例：设备注册 + 单次收款  

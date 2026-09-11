@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # Agent 异步支付 · 链下账本 + Merkle 批量结算
 
-**版本**: v0.2.8 · **最后更新**: 2026-09-10  
+**版本**: v0.2.8 · **最后更新**: 2026-09-11  
 **关联**: [SPEC.md](./SPEC.md) · [AGENT_CHAIN.md](./AGENT_CHAIN.md) · [FEE_TIERS_AA.md](./FEE_TIERS_AA.md) · [IOT.md](./IOT.md) · [BRIDGE.md](./BRIDGE.md)
 
 ## 0. 架构决策（已定）
@@ -213,7 +213,9 @@ sequenceDiagram
 
 Trading Job **不得**在 `POST /payments/receipts` 被 Vault accept 后立刻 `applyReceipt`（该路径仅保留给非 Job 微支付与旧 SDK）。非 Job 路径 Vault accept 后仍 `applyReceipt`，但失败不得空吞、不得回滚 Vault：HTTP 保持 success、收据 `pending`，`data.ledgerApplied` 标明是否入账，失败时带 `data.ledgerError`（不足为 `INSUFFICIENT_BALANCE`）。`applyReceipt` 失败时不得 `recordSpend`（`sessionSpent` 保持不变）。
 
-同一签名收据再次 `POST /payments/receipts` 会命中 Vault `DUPLICATE`，**不会**重试入账。付款方补余额后应调用 `POST /payments/receipts/:receiptId/apply-ledger`：按已受理收据重试 `applyReceipt`；成功则 `ledgerApplied: true`，且仅在该收据尚未记过 session spend 时 `recordSpend`；若账本已入账则直接返回 `ledgerApplied: true`（不二次划转、不重复记 spend）。仍不足时形状与 submit 相同（`success: true`、`ledgerApplied: false`、`ledgerError: INSUFFICIENT_BALANCE`）。Job `authorize` / `capture` / `void` 收据不走此路径。
+同一签名收据再次 `POST /payments/receipts` 会命中 Vault `DUPLICATE`，**不会**重试入账。付款方补余额后应调用 `POST /payments/receipts/:receiptId/apply-ledger`：按已受理收据重试 `applyReceipt`；成功则 `ledgerApplied: true`，且仅在该收据尚未记过 session spend 时 `recordSpend`；若账本已入账则直接返回 `ledgerApplied: true`（不二次划转、不重复记 spend）。`ledgerApplied` 存在 Vault 已受理收据上（布尔字段，不改 `pending`/`batched` 等 status），API 重启后重试不会二次划转或重复 `recordSpend`。仍不足时形状与 submit 相同（`success: true`、`ledgerApplied: false`、`ledgerError: INSUFFICIENT_BALANCE`）。Job `authorize` / `capture` / `void` 收据不走此路径。
+
+本地 `pnpm run smoke:m4` 在成功 `payQuote` 之外另走一笔隔离路径：submit 返回 `ledgerApplied: false`（HTTP 200）→ 同一签名体再 POST 为 Vault `DUPLICATE` → 补余额后 `applyReceiptLedger` 为 true，再调一次仍为 true（幂等）。
 
 | 步骤 | 行为 |
 |------|------|
@@ -351,7 +353,7 @@ gross(A→B) = 100,  gross(B→A) = 80
 |------|------|----------|------|
 | 账本持久化 | **PostgreSQL** | `LEDGER_STORE=postgres`（**默认**）· `LEDGER_DATABASE_URL` | 余额 / 快照 / leaf / commit 审计表 |
 | Receipt Vault / Session | **PostgreSQL** | 同 `LEDGER_STORE=postgres` | 收据、payer nonce、Session 预算；重启不丢、防双花 |
-| 热缓存（可选） | **Redis** | `REDIS_URL` | 余额 write-through；未配置则直读 PG |
+| 热缓存（可选） | **Redis** | `REDIS_URL` | 余额 write-through：Postgres 仅在事务 commit 之后写 Redis（回滚不写缓存）；未配置则直读 PG |
 | Root 上链队列 | **BullMQ** | `COMMIT_ROOT_QUEUE=bull`（**默认**）· `REDIS_URL` | 快照后异步 `MicroPaymentSettler.commitRoot` |
 | 无 Docker 回退 | memory | 显式 `LEDGER_STORE=memory` · `COMMIT_ROOT_QUEUE=off` | 仅 CI；账本 + Vault + Session 全部内存；**不是** 本地或生产默认 |
 | 操作员密钥 | — | `SETTLER_OPERATOR_KEY` | 仅 api 进程；对应 Settler / Netting / Batcher `operator`（热钥；**admin** 在 Timelock） |
@@ -385,7 +387,7 @@ import {
 |------|--------|------|------|
 | **v0.2** | **M2** | Vault + 链下记账引擎 + `MicroPaymentSettler` Merkle Root + 强制提现 | ✅ 实验室（2026-08-25）：1 万笔/分；≥10 万笔 → 1 Root；Hardhat `forceWithdraw` |
 | **v0.3** | M3 | 客户端对接 Vault 充提 / 余额；Session Key UX | ✅ `pnpm run smoke:m3`（2026-08-29） |
-| **v0.4** | M4 | SDK `signReceipt` / 对外支付 API；场景联调 | ✅ `pnpm run smoke:m4` |
+| **v0.4** | M4 | SDK `signReceipt` / 对外支付 API；场景联调 | ✅ `pnpm run smoke:m4`（含 apply-ledger 重试） |
 | **v1.0-rc** | M5 | 生产探针、Runbook、主网脚本 | ✅ `pnpm run smoke:m5`；商业宣布见 PRODUCTION §6 |
 | **v1.1+** | 支线 | 状态通道拓展；IoT 数据流规模化复用账本 | 可选 |
 | **远期** | — | 自建应用链（仅规模证明后） | 见 AGENT_CHAIN · **非微支付前置** |

@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 开发者接入（Agent Trading SDK · M4）
 
-**版本**: v0.4 · **最后更新**: 2026-09-10  
+**版本**: v0.4 · **最后更新**: 2026-09-11  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [ROADMAP.md](./ROADMAP.md) · [SPEC.md](./SPEC.md) §8.1
 
 第三方 **无 App** 即可：发现 Skill → 报价 → Session Key 授权 → `signReceipt` → 链下记账 → 参与 Merkle 清算。
@@ -90,7 +90,7 @@ const paid = await api.payQuote({ session, quote, resourceId: job.resourceId });
 const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT, enqueue: false });
 ```
 
-本机验收：`pnpm run smoke:m4`（API 须已启动）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
+本机验收：`pnpm run smoke:m4`（API 须已启动；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后幂等 `applyReceiptLedger`）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
 
 ---
 
@@ -152,7 +152,7 @@ if (!verifyDoerFlowWebhook(rawBody, req.headers["x-doerflow-signature"], skill.w
 
 ## 4.2 P4 实验室设备（register → heartbeat → telemetry）
 
-实验室 HTTP 设备，**不是**链上 `DeviceRegistry` / 车桩收款。活路径证明：`pnpm run smoke:channels`（P4）。
+实验室 HTTP 设备，**不是**链上 `DeviceRegistry` / 车桩收款。活路径证明：`pnpm run smoke:channels`（P4）。示例设备：`pnpm run example:device`（MetaRepo `scripts/example-device-runner.mjs`；实验室 REST，非 v1.2 稳定币充电）。
 
 ```ts
 import { DoerFlowClient } from "@vibe-agent/shared/sdk";
@@ -182,6 +182,6 @@ tel = client.post_device_telemetry(device["id"], "22.5", unit="C")
 
 ## 5. AI 验收（M4）
 
-> ① SDK 在无 App 情况下完成至少一笔链下微支付记账并出现在 Merkle 快照 / proof 中；  
+> ① SDK 在无 App 情况下完成至少一笔链下微支付记账并出现在 Merkle 快照 / proof 中；另覆盖 apply-ledger 重试（submit `ledgerApplied: false` → Vault `DUPLICATE` → 补余额后 `applyReceiptLedger` 幂等 true）；  
 > ② 人类发单→审批→接单→结算由 `pnpm run smoke:m3` 覆盖；  
 > ③ 本页 + 公开 `agent-trading-sdk` 可按步骤复现。
