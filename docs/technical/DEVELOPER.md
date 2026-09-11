@@ -38,7 +38,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/trading/jobs/:id/execute` | 云适配器；HTTP Skill **须已有 Receipt** 才转发 |
 | GET | `/trading/jobs/:id` | 作业状态（`open` → `settled` 当收据 `resourceId` 匹配） |
 | GET | `/channels` | 五通道矩阵 |
-| GET | `/openapi.json` | OpenAPI 3.1（lists receipt `pending` / `{receiptId}` get / `apply-ledger` / `apply-ledger-batch` alongside `POST /payments/receipts`, plus `GET /fees/tiers`） |
+| GET | `/openapi.json` | OpenAPI 3.1（lists receipt `pending` / `{receiptId}` get / `apply-ledger` / `apply-ledger-batch`, plus `POST /payments/ledger/snapshot` with `data.batchedCount`, `GET /payments/ledger/snapshots/latest` / `proof`, `GET /payments/disclosure`, and `GET /fees/tiers`） |
 | GET | `/trading/events?jobId=` | SSE 作业事件 |
 | WS | `/trading/ws` | WebSocket 作业事件（`{"jobId"}` 订阅） |
 | POST | `/payments/sessions` | 注册 Session Key（EIP-712 `SessionAuthorization`） |
@@ -48,7 +48,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | GET | `/payments/receipts/pending?limit=&ledgerApplied=` | 待批量清算；可选 `ledgerApplied=true\|false`（omit=全部；非法值忽略）；TS `listPendingReceipts({ limit?, ledgerApplied? })`（数字首参仍为 limit） |
 | GET | `/payments/receipts/:receiptId` | 查询已存 Vault 收据（含 `ledgerApplied`）；缺失 `success: false` `NOT_FOUND`；TS `getReceipt` |
 | GET | `/payments/ledger/balances?account=` | 链下余额 |
-| POST | `/payments/ledger/snapshot?enqueue=0` | Merkle Root（`PaymentServiceGuard`） |
+| POST | `/payments/ledger/snapshot?enqueue=0` | Merkle Root + `batchedCount`（`PaymentServiceGuard`）；TS `snapshot` → `LedgerSnapshotResult` |
+| GET | `/payments/ledger/snapshots/latest` | 最新 Root / epoch |
 | GET | `/payments/ledger/proof?account=&asset=` | 强制提现 proof |
 | GET | `/ready` | 生产就绪探针（k8s） |
 | GET | `/live` | 存活探针 |
@@ -94,7 +95,7 @@ const paid = await api.payQuote({ session, quote, resourceId: job.resourceId });
 const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT, enqueue: false });
 ```
 
-本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后 `applyReceiptLedgerBatch` 再幂等 `applyReceiptLedger`）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
+本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后 `applyReceiptLedgerBatch` 再幂等 `applyReceiptLedger`；snapshot 后断言 `batchedCount >= 1`）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
 
 ---
 
@@ -122,6 +123,8 @@ EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt
 - `apply_receipt_ledger_batch(receipt_ids=None)` → `POST /payments/receipts/apply-ledger-batch`（body `receiptIds?`；返回 `data.results`）
 - `list_pending_receipts(limit=None, ledger_applied=None)` → `GET /payments/receipts/pending`（`ledgerApplied=true|false`）
 - `get_receipt(receipt_id)` → `GET /payments/receipts/{id}`
+- `create_ledger_snapshot(enqueue=False)` → `POST /payments/ledger/snapshot`（`enqueue=False` → `?enqueue=0`；`True` 省略 query，对齐 TS）；**PaymentServiceGuard** 需 service JWT（构造 `DoerFlowClient(..., token=...)`，`_request` 已发 `Authorization: Bearer`）
+- `latest_ledger_snapshot()` → `GET /payments/ledger/snapshots/latest`
 
 ---
 
