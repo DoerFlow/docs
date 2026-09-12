@@ -62,6 +62,9 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/payments/ledger/net-settle` | 轧差上链并清零 pair gross（PaymentServiceGuard）；TS `settleLedgerNet` / Python `settle_ledger_net` |
 | POST | `/payments/ledger/bundle?includeCommit=` | 打包待轧差 + 可选 commitRoot（PaymentServiceGuard）；TS `createLedgerBundle({ includeCommit? })` / Python `create_ledger_bundle` |
 | GET | `/payments/ledger/proof?account=&asset=` | 强制提现 proof |
+| GET | `/payments/health` | 支付模块健康（非 `/health`）；TS `paymentsHealth` / Python `payments_health` |
+| GET | `/payments/disclosure` | 异步支付披露（含 `commercial`）；TS `disclosure` → `PaymentsDisclosure` / Python `payments_disclosure` |
+| POST | `/payments/commercial/assert` | 商业白名单 / Escrow 限额预检 `{ address?, escrowWei? }`；TS `assertCommercial` / Python `assert_commercial` |
 | GET | `/ready` | 生产就绪探针（k8s） |
 | GET | `/live` | 存活探针 |
 | POST | `/integrations/events` | CloudEvents inbox（VistaCast / SyncroBrain 任务事件） |
@@ -148,6 +151,9 @@ EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt
 - `get_ledger_commit(epoch)` → `GET /payments/ledger/commits/{epoch}`
 - `create_ledger_snapshot(enqueue=False)` → `POST /payments/ledger/snapshot`（`enqueue=False` → `?enqueue=0`；`True` 省略 query，对齐 TS）；**PaymentServiceGuard** 需 service JWT（构造 `DoerFlowClient(..., token=...)`，`_request` 已发 `Authorization: Bearer`）
 - `latest_ledger_snapshot()` → `GET /payments/ledger/snapshots/latest`
+- `payments_health()` → `GET /payments/health`（与 `health()` 的 `/health` 不同）
+- `payments_disclosure()` → `GET /payments/disclosure`
+- `assert_commercial(address=None, escrow_wei=None)` → `POST /payments/commercial/assert`
 
 ---
 
