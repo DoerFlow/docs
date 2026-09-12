@@ -97,7 +97,13 @@ flowchart TB
 |------|------|
 | `/devices` | 列出 `GET /devices`（HTTP 实验室库存，**不是**链上 DeviceRegistry） |
 
-## 8. admin 实验室路由
+## 8. web 实验室
+
+| 页面 | 职责 |
+|------|------|
+| Payments（挂载 `LabDevicesCard`） | 列出 HTTP `GET /devices`（轮询 + 状态筛选；**不是**链上 DeviceRegistry） |
+
+## 9. admin 实验室路由
 
 | 路由 | 职责 |
 |------|------|

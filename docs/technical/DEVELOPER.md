@@ -114,7 +114,7 @@ const paid = await api.payQuote({ session, quote, resourceId: job.resourceId });
 const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT, enqueue: false });
 ```
 
-本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后 `applyReceiptLedgerBatch` 再幂等 `applyReceiptLedger`；snapshot 后断言 `batchedCount >= 1` 且 `GET /payments/receipts?status=batched` 含至少一笔本轮已入账 id）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
+本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后 `applyReceiptLedgerBatch` 再幂等 `applyReceiptLedger`；snapshot 后断言 `batchedCount >= 1` 且 `GET /payments/receipts?status=batched` 含至少一笔本轮已入账 id）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。实验室烟测 `smoke:channels` / `smoke:m4` / `smoke:ecosystem-commerce` 软窥 Python `list_devices()`（空列表 OK；永不 `register_device`），适用处另软窥 TS `listDevices`。
 
 小批量微收据实验室（N 笔 `payQuote` → 必要时 `applyReceiptLedgerBatch` → `snapshot` `enqueue=0`，日志 `batchedCount`）：`pnpm run example:micropay`（`scripts/example-micropay-batch.mjs`；`MICRO_N` 默认 5、上限 20；**API 须已在 :13008**；注册会话后软断言 `listSessions` 非空且含本实验室会话，**不**调用 `revokeSession`）。这是 lab N-receipt 演示，**不是** [IOT.md](./IOT.md) v0.5「100+ 模拟传感器」验收。
 
