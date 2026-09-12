@@ -124,6 +124,8 @@ const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT,
 
 轧差预览（可选上链结算）：`pnpm run example:nets`（`scripts/example-nets.mjs`；`listLedgerNets` 实验室无需 JWT。**仅当 `EXAMPLE_NETS_SETTLE=1`** 才调用 `settleLedgerNet`；**API 须已在 :13008**）。**不是** IOT 100+ 传感器验收，也不勾选 BRIDGE Escrow。
 
+实验室 HTTP 设备列表：`pnpm run example:devices`（`scripts/example-devices.mjs`；`listDevices` 实验室无需 JWT。**仅当 `EXAMPLE_DEVICES_REGISTER=1`** 才调用 `registerDevice`；**API 须已在 :13008**）。**不是**链上 `DeviceRegistry`，也不勾选 IOT DeviceRegistry。
+
 ---
 
 ## 4. Python
