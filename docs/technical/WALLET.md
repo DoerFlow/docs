@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 钱包 App 规格（纯粹钱包 · React Native）
 
-**版本**: v0.2-draft  
+**版本**: v0.2-draft · **最后更新**: 2026-09-12  
 **仓库**: `repos/wallet` → `AgentSkillMesh/wallet`（私有）
 
 ---
@@ -98,6 +98,11 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - 环境：`EXPO_PUBLIC_PAYMENT_VAULT_ADDRESS` · `EXPO_PUBLIC_VAULT_ASSET_ADDRESS`  
 - 入金 Tab 与 Vault 页文案走 en/zh locale  
 - 见 [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)
+
+### 实验室设备库存（非链上 Registry）
+
+- 栈屏 `/devices` 列出 HTTP `GET /devices` 库存；**不是**链上 `DeviceRegistry`
+- 入金（Fund）Tab 链到该页
 
 ## 4. 技术栈
 

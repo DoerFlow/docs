@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 管理平台规格
 
-**版本**: v0.1-draft  
+**版本**: v0.1-draft · **最后更新**: 2026-09-12  
 **仓库**: `repos/admin` → `AgentSkillMesh/admin`（私有）
 
 ---
@@ -107,6 +107,10 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - 运营控制台用户可见文案走 locale：`lib/i18n/messages/en.json`（类型源）+ `zh-CN.json`（简体中文必填）
 - 另有 `zh-TW` 及其他语言包；缺 key 时与 `en` 对齐，禁止页面硬编码中文/英文 fallback
 - 禁止 `t(key) || "中文"`、`t(key) !== "key"` 这类缺 key 兜底；缺文案修 locale JSON
+
+### 实验室设备库存（只读，非链上 Registry）
+
+- 路由 `/devices`：只读列出 HTTP `GET /devices`（轮询 + 状态筛选）；**不是**链上 `DeviceRegistry`
 
 ## 3. 技术栈
 
