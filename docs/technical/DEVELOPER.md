@@ -58,6 +58,9 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | GET | `/payments/ledger/snapshots/latest` | 最新 Root / epoch |
 | GET | `/payments/ledger/commits?status=&limit=` | Root 上链任务列表；TS `listLedgerCommits({ status?, limit? })` |
 | GET | `/payments/ledger/commits/:epoch` | 单 epoch 上链任务；缺失 `NOT_FOUND`；TS `getLedgerCommit` |
+| GET | `/payments/ledger/nets` | 双向轧差预览；TS `listLedgerNets` / Python `list_ledger_nets` |
+| POST | `/payments/ledger/net-settle` | 轧差上链并清零 pair gross（PaymentServiceGuard）；TS `settleLedgerNet` / Python `settle_ledger_net` |
+| POST | `/payments/ledger/bundle?includeCommit=` | 打包待轧差 + 可选 commitRoot（PaymentServiceGuard）；TS `createLedgerBundle({ includeCommit? })` / Python `create_ledger_bundle` |
 | GET | `/payments/ledger/proof?account=&asset=` | 强制提现 proof |
 | GET | `/ready` | 生产就绪探针（k8s） |
 | GET | `/live` | 存活探针 |

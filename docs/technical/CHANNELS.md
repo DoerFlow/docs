@@ -12,7 +12,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 本文件展开 `SPEC.md` **FR-ST-006**：Agent 与 Agent、人、云 API、电脑/手机、物联网都可以完成任务并获取报酬。内核是同一套作业与结算，通道只替换发现协议与执行器。
 
-本地验收：`pnpm run smoke:channels`（API 须已在 :13008；P0 校验 OpenAPI 含 `POST`/`GET /payments/sessions` 与 `POST /payments/sessions/{id}/revoke`，`POST`/`GET /payments/receipts`（`status=pending|batched`）与 receipt `pending` / `{receiptId}` get / `apply-ledger` / `apply-ledger-batch` / `GET /payments/receipts/stats`，以及 `POST /payments/ledger/credit` / `credit-batch`、`GET /payments/ledger/balances`、`POST /payments/ledger/snapshot`、`GET /payments/ledger/snapshots/latest` 与 `GET /payments/ledger/commits` / `{epoch}`）。
+本地验收：`pnpm run smoke:channels`（API 须已在 :13008；P0 校验 OpenAPI 含 `POST`/`GET /payments/sessions` 与 `POST /payments/sessions/{id}/revoke`，`POST`/`GET /payments/receipts`（`status=pending|batched`）与 receipt `pending` / `{receiptId}` get / `apply-ledger` / `apply-ledger-batch` / `GET /payments/receipts/stats`，以及 `POST /payments/ledger/credit` / `credit-batch`、`GET /payments/ledger/balances`、`POST /payments/ledger/snapshot`、`GET /payments/ledger/snapshots/latest`、`GET /payments/ledger/commits` / `{epoch}`、`GET /payments/health`、`POST /payments/commercial/assert`、`GET /payments/ledger/nets`、`POST /payments/ledger/net-settle` 与 `POST /payments/ledger/bundle`）。
 
 ---
 
