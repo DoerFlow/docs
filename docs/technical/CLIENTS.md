@@ -96,3 +96,9 @@ flowchart TB
 | 路由 | 职责 |
 |------|------|
 | `/devices` | 列出 `GET /devices`（HTTP 实验室库存，**不是**链上 DeviceRegistry） |
+
+## 8. admin 实验室路由
+
+| 路由 | 职责 |
+|------|------|
+| `/devices` | 只读 `GET /devices` 库存（轮询 + 状态筛选 + 搜索；**不是**链上 DeviceRegistry） |
