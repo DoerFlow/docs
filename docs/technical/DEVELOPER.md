@@ -71,6 +71,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/integrations/syncrobrain/telemetry-credits` | 时间窗 digest 账本入账（FR-IOT-008） |
 | PUT | `/integrations/syncrobrain/payee-bindings` | assetId → checksum payee（实验室可 M2M 无 SIWE） |
 | GET | `/integrations/syncrobrain/payee-bindings` | 查询 `(sourceTenantId, sourceId)` 绑定 |
+| GET | `/devices` | 实验室设备列表；TS `listDevices` → `LabDevice[]` / Python `list_devices` |
 | POST | `/devices/register` | P4 实验室设备 `{ kind?, label, payee }` |
 | POST | `/devices/:id/heartbeat` | 设备心跳 |
 | POST | `/devices/:id/telemetry` | `{ reading, unit? }` → telemetry hash + 账本入账 |
