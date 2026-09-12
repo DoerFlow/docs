@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 客户端与平台总览
 
-**版本**: v0.2-draft · **最后更新**: 2026-08-26
+**版本**: v0.2-draft · **最后更新**: 2026-09-12
 
 ## 1. 产品矩阵
 
@@ -90,3 +90,9 @@ flowchart TB
 | 收款 `(tabs)/payout` · `/vault` | Vault 充提 |
 | `app/task/[id]` | 人类众包详情：接单、拍照、GPS、问卷、`deliverEscrow`、争议 |
 | `app/(tabs)/social/[id]` | 社交任务详情：打开目标首页 + 清单 + 截图交付（**M3 要做**；Accessibility Service 自动打开 App 为 v0.4 可选项） |
+
+## 7. wallet 实验室路由
+
+| 路由 | 职责 |
+|------|------|
+| `/devices` | 列出 `GET /devices`（HTTP 实验室库存，**不是**链上 DeviceRegistry） |
