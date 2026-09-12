@@ -7,12 +7,12 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 五通道任务经济（CHANNELS）
 
-**版本**: v1.2-ecosystem-commerce · **最后更新**: 2026-09-05  
+**版本**: v1.2-ecosystem-commerce · **最后更新**: 2026-09-12  
 **关联**: [AGENT_RUNTIME.md](./AGENT_RUNTIME.md) · [ENDPOINT.md](./ENDPOINT.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 本文件展开 `SPEC.md` **FR-ST-006**：Agent 与 Agent、人、云 API、电脑/手机、物联网都可以完成任务并获取报酬。内核是同一套作业与结算，通道只替换发现协议与执行器。
 
-本地验收：`pnpm run smoke:channels`（API 须已在 :13008；P0 校验 OpenAPI 含 `POST`/`GET /payments/sessions` 与 `POST /payments/sessions/{id}/revoke`，`POST`/`GET /payments/receipts`（`status=pending|batched`）与 receipt `pending` / `{receiptId}` get / `apply-ledger` / `apply-ledger-batch` / `GET /payments/receipts/stats`，以及 `POST /payments/ledger/credit` / `credit-batch`、`GET /payments/ledger/balances`、`POST /payments/ledger/snapshot`、`GET /payments/ledger/snapshots/latest`、`GET /payments/ledger/commits` / `{epoch}`、`GET /payments/health`、`POST /payments/commercial/assert`、`GET /payments/ledger/nets`、`POST /payments/ledger/net-settle` 与 `POST /payments/ledger/bundle`）。OpenAPI 源文件另含 P4 `POST /devices/register`、`POST /devices/{id}/heartbeat`、`POST /devices/{id}/telemetry` 与 `GET /onramp/health` · `/onramp/disclosure` · `/onramp/providers`、`POST /onramp/session`（`smoke:m5` 字符串断言）。
+本地验收：`pnpm run smoke:channels`（API 须已在 :13008；P0 校验 OpenAPI 含 `POST`/`GET /payments/sessions` 与 `POST /payments/sessions/{id}/revoke`，`POST`/`GET /payments/receipts`（`status=pending|batched`）与 receipt `pending` / `{receiptId}` get / `apply-ledger` / `apply-ledger-batch` / `GET /payments/receipts/stats`，以及 `POST /payments/ledger/credit` / `credit-batch`、`GET /payments/ledger/balances`、`POST /payments/ledger/snapshot`、`GET /payments/ledger/snapshots/latest`、`GET /payments/ledger/commits` / `{epoch}`、`GET /payments/health`、`POST /payments/commercial/assert`、`GET /payments/ledger/nets`、`POST /payments/ledger/net-settle` 与 `POST /payments/ledger/bundle`）。OpenAPI 源文件另含 P4 `GET /devices`（HTTP 实验室库存，空列表可接受，**不是**链上 DeviceRegistry；`pnpm run example:devices` 默认仅列出，多条 smoke/example 对 `listDevices` 做 soft peek）、`POST /devices/register`、`POST /devices/{id}/heartbeat`、`POST /devices/{id}/telemetry` 与 `GET /onramp/health` · `/onramp/disclosure` · `/onramp/providers`、`POST /onramp/session`（`smoke:m5` 字符串断言）。
 
 ---
 
