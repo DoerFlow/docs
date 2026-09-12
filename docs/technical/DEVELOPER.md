@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 开发者接入（Agent Trading SDK · M4）
 
-**版本**: v0.4 · **最后更新**: 2026-09-11  
+**版本**: v0.4 · **最后更新**: 2026-09-12  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [ROADMAP.md](./ROADMAP.md) · [SPEC.md](./SPEC.md) §8.1
 
 第三方 **无 App** 即可：发现 Skill → 报价 → Session Key 授权 → `signReceipt` → 链下记账 → 参与 Merkle 清算。
@@ -114,6 +114,10 @@ const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT,
 小批量微收据实验室（N 笔 `payQuote` → 必要时 `applyReceiptLedgerBatch` → `snapshot` `enqueue=0`，日志 `batchedCount`）：`pnpm run example:micropay`（`scripts/example-micropay-batch.mjs`；`MICRO_N` 默认 5、上限 20；**API 须已在 :13008**；注册会话后软断言 `listSessions` 非空且含本实验室会话，**不**调用 `revokeSession`）。这是 lab N-receipt 演示，**不是** [IOT.md](./IOT.md) v0.5「100+ 模拟传感器」验收。
 
 会话列表（可选软撤销）：`pnpm run example:sessions`（`scripts/example-sessions.mjs`；`listSessions` 实验室无需 JWT。仅当 `EXAMPLE_SESSIONS_REVOKE=1` 且 `EXAMPLE_SESSION_ID` 已设才调用 `revokeSession`）。**不是** IOT 100+ 传感器验收，也不勾选 BRIDGE Escrow。
+
+链下账本入账：`pnpm run example:credit`（`scripts/example-credit.mjs`；TS `creditLedger` 后打印 `balances`；**API 须已在 :13008**；PaymentServiceGuard JWT）。实验室入账演示，**不是** IOT 100+ 传感器验收，也不勾选 BRIDGE Escrow。
+
+轧差预览（可选上链结算）：`pnpm run example:nets`（`scripts/example-nets.mjs`；`listLedgerNets` 实验室无需 JWT。**仅当 `EXAMPLE_NETS_SETTLE=1`** 才调用 `settleLedgerNet`；**API 须已在 :13008**）。**不是** IOT 100+ 传感器验收，也不勾选 BRIDGE Escrow。
 
 ---
 
