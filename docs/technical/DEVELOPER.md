@@ -76,6 +76,10 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | POST | `/devices/:id/telemetry` | `{ reading, unit? }` → telemetry hash + 账本入账 |
 | GET | `/tokens/canonical?chainId=` | Lab canonical 目录；TS `listCanonicalTokens` |
 | GET | `/fees/tiers` | 静态 AA 协议费等级表（T0–T3）；TS `listFeeTiers` / Python `list_fee_tiers`（非链上索引） |
+| GET | `/onramp/health` | Onramp 模块健康（实验室，非 live charge）；TS `onrampHealth` / Python `onramp_health` |
+| GET | `/onramp/disclosure` | 合规披露（非托管、无 PII）；TS `onrampDisclosure` / Python `onramp_disclosure` |
+| GET | `/onramp/providers?country=` | 按地区伙伴列表；TS `listOnrampProviders` / Python `list_onramp_providers` |
+| POST | `/onramp/session` | 签发 Widget session（`CreateOnrampSessionDto`，非 live charge）；TS `createOnrampSession` / Python `create_onramp_session` |
 
 企业回调：创建 job 时带 `callbackUrl`；结算后 POST **CloudEvents 1.0** JSON，头 `X-DoerFlow-Signature: sha256=<hmac>`（`TRADING_WEBHOOK_SECRET`）。信封含 `id` / `source` / `type` / `data`。
 
@@ -141,6 +145,10 @@ EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt
 
 - `list_canonical_tokens(chain_id=None)` → `GET /tokens/canonical`（实验室只读目录，非 CCTP / LayerZero）
 - `list_fee_tiers()` → `GET /fees/tiers`（静态 AA 协议费等级表；非链上 FeeTierRegistry）
+- `onramp_health()` → `GET /onramp/health`（实验室模块探针，非 live charge）
+- `onramp_disclosure()` → `GET /onramp/disclosure`（非托管 / 无 PII）
+- `list_onramp_providers(country=None)` → `GET /onramp/providers?country=`
+- `create_onramp_session(wallet_address, chain_id, default_asset, country_code, fiat_currency=None, locale=None, provider_id=None)` → `POST /onramp/session`（body 对齐 `CreateOnrampSessionDto`；实验室 session，非 live charge）
 - `list_sessions()` → `GET /payments/sessions`
 - `revoke_session(session_id)` → `POST /payments/sessions/{id}/revoke`
 - `apply_receipt_ledger(receipt_id)` → `POST /payments/receipts/{receipt_id}/apply-ledger`（Vault 已受理后重试入账，勿重放同一签名体）
