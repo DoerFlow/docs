@@ -95,7 +95,7 @@ flowchart TB
 
 | 路由 | 职责 |
 |------|------|
-| `/devices` | 列出 `GET /devices`（HTTP 实验室库存，**不是**链上 DeviceRegistry） |
+| `/devices` | 列出 `GET /devices`（HTTP 实验室库存；状态 chips + 搜索；kind 缺失为 —；**不是**链上 DeviceRegistry） |
 
 ## 8. web 实验室
 
@@ -107,4 +107,4 @@ flowchart TB
 
 | 路由 | 职责 |
 |------|------|
-| `/devices` | 只读 `GET /devices` 库存（轮询 + 状态筛选 + 搜索；**不是**链上 DeviceRegistry） |
+| `/devices` | 只读 `GET /devices` 库存（轮询 + 状态筛选 + 搜索 + `lastSeenAt` 排序；**不是**链上 DeviceRegistry） |
