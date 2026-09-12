@@ -101,7 +101,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 ### 实验室设备库存（非链上 Registry）
 
-- 栈屏 `/devices` 列出 HTTP `GET /devices` 库存；**不是**链上 `DeviceRegistry`
+- 栈屏 `/devices` 列出 HTTP `GET /devices` 库存（状态 chips + 搜索；kind / payee 缺失为 —）；**不是**链上 `DeviceRegistry`
 - 入金（Fund）Tab 链到该页
 
 ## 4. 技术栈

@@ -101,7 +101,7 @@ flowchart TB
 
 | 页面 | 职责 |
 |------|------|
-| Payments（挂载 `LabDevicesCard`） | 列出 HTTP `GET /devices`（轮询 + 状态筛选；**不是**链上 DeviceRegistry） |
+| Payments（挂载 `LabDevicesCard`） | 列出 HTTP `GET /devices`（轮询 + 状态筛选 + 搜索；lastSeen/kind/payee 缺失为 —；**不是**链上 DeviceRegistry） |
 
 ## 9. admin 实验室路由
 
