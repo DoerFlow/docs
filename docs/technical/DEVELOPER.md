@@ -50,7 +50,10 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | GET | `/payments/receipts/pending?limit=&ledgerApplied=` | 待批量清算；可选 `ledgerApplied=true\|false`（omit=全部；非法值忽略）；TS `listPendingReceipts({ limit?, ledgerApplied? })`（数字首参仍为 limit） |
 | GET | `/payments/receipts?status=&limit=` | 按 status 列表（`pending` \| `batched`；非法/省略 → `pending`）；含 `ledgerApplied`；形状同 pending；TS `listReceipts({ status?, limit? })` |
 | GET | `/payments/receipts/:receiptId` | 查询已存 Vault 收据（含 `ledgerApplied`）；缺失 `success: false` `NOT_FOUND`；TS `getReceipt` |
+| GET | `/payments/receipts/stats?payer=` | payer lastNonce / pendingCount；TS `payerReceiptStats` / Python `payer_receipt_stats` |
 | GET | `/payments/ledger/balances?account=` | 链下余额 |
+| POST | `/payments/ledger/credit` | 链下入账（PaymentServiceGuard）；TS `creditLedger` / Python `credit_ledger` |
+| POST | `/payments/ledger/credit-batch` | 批量入账 `{ entries }` ≤10000；TS `creditLedgerBatch` / Python `credit_ledger_batch` |
 | POST | `/payments/ledger/snapshot?enqueue=0` | Merkle Root + `batchedCount`（`PaymentServiceGuard`）；TS `snapshot` → `LedgerSnapshotResult` |
 | GET | `/payments/ledger/snapshots/latest` | 最新 Root / epoch |
 | GET | `/payments/ledger/commits?status=&limit=` | Root 上链任务列表；TS `listLedgerCommits({ status?, limit? })` |
@@ -102,7 +105,7 @@ const snap = await api.snapshot({ serviceToken: process.env.PAYMENT_SERVICE_JWT,
 
 本机验收：`pnpm run smoke:m4`（API 须已启动；成功 `payQuote` 后覆盖 `getReceipt` / `listPendingReceipts`；含 apply-ledger 重试：underfunded submit → DUPLICATE → 补余额后 `applyReceiptLedgerBatch` 再幂等 `applyReceiptLedger`；snapshot 后断言 `batchedCount >= 1` 且 `GET /payments/receipts?status=batched` 含至少一笔本轮已入账 id）。五通道实验室：`pnpm run smoke:channels`。示例 Runtime：`pnpm run example:agent`。
 
-小批量微收据实验室（N 笔 `payQuote` → 必要时 `applyReceiptLedgerBatch` → `snapshot` `enqueue=0`，日志 `batchedCount`）：`pnpm run example:micropay`（`scripts/example-micropay-batch.mjs`；`MICRO_N` 默认 5、上限 20；**API 须已在 :13008**）。这是 lab N-receipt 演示，**不是** [IOT.md](./IOT.md) v0.5「100+ 模拟传感器」验收。
+小批量微收据实验室（N 笔 `payQuote` → 必要时 `applyReceiptLedgerBatch` → `snapshot` `enqueue=0`，日志 `batchedCount`）：`pnpm run example:micropay`（`scripts/example-micropay-batch.mjs`；`MICRO_N` 默认 5、上限 20；**API 须已在 :13008**；注册会话后软断言 `listSessions` 非空且含本实验室会话，**不**调用 `revokeSession`）。这是 lab N-receipt 演示，**不是** [IOT.md](./IOT.md) v0.5「100+ 模拟传感器」验收。
 
 会话列表（可选软撤销）：`pnpm run example:sessions`（`scripts/example-sessions.mjs`；`listSessions` 实验室无需 JWT。仅当 `EXAMPLE_SESSIONS_REVOKE=1` 且 `EXAMPLE_SESSION_ID` 已设才调用 `revokeSession`）。**不是** IOT 100+ 传感器验收，也不勾选 BRIDGE Escrow。
 
@@ -135,6 +138,9 @@ EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt
 - `list_pending_receipts(limit=None, ledger_applied=None)` → `GET /payments/receipts/pending`（`ledgerApplied=true|false`）
 - `list_receipts(status="pending", limit=None)` → `GET /payments/receipts?status=&limit=`
 - `get_receipt(receipt_id)` → `GET /payments/receipts/{id}`
+- `payer_receipt_stats(payer)` → `GET /payments/receipts/stats?payer=`
+- `credit_ledger(account, asset, amount, token=None)` → `POST /payments/ledger/credit`（PaymentServiceGuard；`token` 或构造 `token=`）
+- `credit_ledger_batch(items, token=None)` → `POST /payments/ledger/credit-batch`（body `{ entries }`）
 - `list_ledger_commits(status=None, limit=None)` → `GET /payments/ledger/commits`
 - `get_ledger_commit(epoch)` → `GET /payments/ledger/commits/{epoch}`
 - `create_ledger_snapshot(enqueue=False)` → `POST /payments/ledger/snapshot`（`enqueue=False` → `?enqueue=0`；`True` 省略 query，对齐 TS）；**PaymentServiceGuard** 需 service JWT（构造 `DoerFlowClient(..., token=...)`，`_request` 已发 `Authorization: Bearer`）
