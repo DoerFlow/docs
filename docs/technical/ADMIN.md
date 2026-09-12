@@ -110,7 +110,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 ### 实验室设备库存（只读，非链上 Registry）
 
-- 路由 `/devices`：只读列出 HTTP `GET /devices`（轮询 + 搜索 + 状态筛选 + `lastSeenAt`/`kind` 排序；筛选空结果走 `filterEmpty` 文案）；**不是**链上 `DeviceRegistry`
+- 路由 `/devices`：只读列出 HTTP `GET /devices`（轮询 + 搜索 + 状态筛选 + `lastSeenAt`/`kind`/`label` 排序；筛选空结果走 `filterEmpty` 文案）；**不是**链上 `DeviceRegistry`
 
 ## 3. 技术栈
 

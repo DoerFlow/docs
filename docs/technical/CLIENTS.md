@@ -95,16 +95,16 @@ flowchart TB
 
 | 路由 | 职责 |
 |------|------|
-| `/devices` | 列出 `GET /devices`（HTTP 实验室库存；状态 chips + 搜索；kind 缺失为 —；**不是**链上 DeviceRegistry） |
+| `/devices` | 列出 `GET /devices`（HTTP 实验室库存；状态 chips + 搜索；kind/label 缺失为 —；**不是**链上 DeviceRegistry） |
 
 ## 8. web 实验室
 
 | 页面 | 职责 |
 |------|------|
-| Payments（挂载 `LabDevicesCard`） | 列出 HTTP `GET /devices`（轮询 + 状态筛选 + 搜索；lastSeen/kind/payee 缺失为 —；**不是**链上 DeviceRegistry） |
+| Payments（挂载 `LabDevicesCard`） | 列出 HTTP `GET /devices`（轮询 + 状态筛选 + 搜索；lastSeen/kind/payee/status/label 缺失为 —；**不是**链上 DeviceRegistry） |
 
 ## 9. admin 实验室路由
 
 | 路由 | 职责 |
 |------|------|
-| `/devices` | 只读 `GET /devices` 库存（轮询 + 状态筛选 + 搜索 + `lastSeenAt` 排序；**不是**链上 DeviceRegistry） |
+| `/devices` | 只读 `GET /devices` 库存（轮询 + 状态筛选 + 搜索 + `lastSeenAt`/`kind`/`label` 排序；**不是**链上 DeviceRegistry） |
