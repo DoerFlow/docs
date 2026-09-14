@@ -98,3 +98,15 @@ pnpm run smoke:escrow          # 真发 Sepolia 交易（约锁定 0.008 ETH）
 技术规格：[WALLET](/technical/WALLET)
 
 [返回用户总览](/users/)
+
+
+## 安装包下载
+
+Android 侧载 APK（非 Play）托管在公开仓 [DoerFlow/downloads](https://github.com/DoerFlow/downloads/releases)：
+
+- 官网：[doerflow.dev/download](https://doerflow.dev/download/)
+- 文件：`DoerFlow-Wallet-{version}.apk`
+
+允许未知来源安装。Creator DApp 仍用浏览器 [app.doerflow.dev](https://app.doerflow.dev)。
+
+Meta-Repo：`pnpm pack:publish`（需 EAS 登录后先产出 APK）。

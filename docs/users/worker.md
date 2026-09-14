@@ -37,3 +37,15 @@ title: 综合端 App
 [WORKER](/technical/WORKER) · 仓库 `doerflow/worker`（私有）
 
 [返回用户总览](/users/)
+
+
+## 安装包下载
+
+Android 侧载 APK（非 Play）托管在公开仓 [DoerFlow/downloads](https://github.com/DoerFlow/downloads/releases)：
+
+- 官网：[doerflow.dev/download](https://doerflow.dev/download/)
+- 文件：`DoerFlow-Worker-{version}.apk`
+
+允许未知来源安装。Creator DApp 仍用浏览器 [app.doerflow.dev](https://app.doerflow.dev)。
+
+Meta-Repo：`pnpm pack:publish`（需 EAS 登录后先产出 APK）。
