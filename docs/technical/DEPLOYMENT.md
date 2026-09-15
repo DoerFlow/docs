@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 部署边界与档位（DEPLOYMENT）
 
-**版本**: v0.1-profiles · **最后更新**: 2026-09-09
+**版本**: v0.1-profiles · **最后更新**: 2026-09-15
 **关联**: [PRODUCTION.md](./PRODUCTION.md) · [PORTS.md](./PORTS.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [SMART_SITE.md](./SMART_SITE.md) · [CHANNELS.md](./CHANNELS.md)
 
 本文件定义 **DoerFlow 能独立部署到什么程度**，以及哪些能力必须依赖 LuminaryWorks 控制面。
@@ -148,6 +148,10 @@ AuthN（双轨）───┤
 | `enforce` | 调控制面并拦截 | 是 | `control-plane`+ |
 
 `offline_license` 必须同时提供 `ENTITLEMENT_LICENSE_FILE`、`ENTITLEMENT_DEPLOYMENT_ID`、`ENTITLEMENT_LICENSE_PUBLIC_KEYS`，否则**启动即失败**（不降级为放行）。
+
+### 4.1.1 本地排障：会员 commerce 503
+
+`standalone` 默认 `ENTITLEMENT_MODE=off` 时，平台 commerce BFF（`/api/v1/platform/commerce/*`）**不可用**，返回 **503**（`ENTITLEMENT_SERVICE_UNAVAILABLE` 一类）。本机会员页需要 `DEPLOYMENT_PROFILE=control-plane`、`ENTITLEMENT_MODE=enforce`，以及 Entitlement 控制面 `:3040`（档位见 §1 表，端口见 [PORTS.md](./PORTS.md)）。仅拉起 Entitlement 数据库不够。
 
 ### 4.2 `COMMERCE_AUTH_MODE`
 

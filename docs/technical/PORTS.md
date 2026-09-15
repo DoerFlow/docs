@@ -11,7 +11,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 | 服务 | 端口 | 环境变量 |
 |------|------|----------|
-| **API** | **13008** | `PORT` |
+| **API** | **13008** | `PORT` · compose: `${DOERFLOW_API_BIND:-127.0.0.1}:${DOERFLOW_API_PORT:-13008}` |
 | Site 官网 | 13010 | `next dev --port` |
 | Web DApp | 5174 (compose publishes `${DOERFLOW_WEB_BIND:-127.0.0.1}:${DOERFLOW_WEB_PORT:-5174}`) | `DOERFLOW_WEB_BIND` / `DOERFLOW_WEB_PORT` |
 | Admin 运营台 | 13011 | `DOERFLOW_ADMIN_BIND` / `DOERFLOW_ADMIN_PORT` |

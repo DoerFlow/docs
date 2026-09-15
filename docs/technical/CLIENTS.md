@@ -101,7 +101,7 @@ flowchart TB
 
 | 页面 | 职责 |
 |------|------|
-| Payments（挂载 `LabDevicesCard`） | 列出 HTTP `GET /devices`（轮询 + 状态筛选 + 搜索；计数徽章 `shown / total`；lastSeen/kind/payee/status/label 缺失为 —；**不是**链上 DeviceRegistry） |
+| Payments（挂载 `LabDevicesCard`） | 列出 HTTP `GET /devices`（轮询 + 状态筛选 + 搜索；计数徽章 `shown / total`；lastSeen/kind/payee/status/label 缺失为 —；**不是**链上 DeviceRegistry）。页面按 Tabs 分区（`destroyInactiveTabPane`，未激活 pane 卸载），实验室轮询仅在当前激活的实验室 Tab 运行：`payments.tab.vault`（Vault）、`payments.tab.buy`（买币）、`payments.tab.catalog`（代币与费率）、`payments.tab.ledger`（账本实验室）、`payments.tab.onrampLab`（入金实验室）、`payments.tab.sessions`（会话与收据，含 `LabDevicesCard`）。 |
 
 ## 9. admin 实验室路由
 
