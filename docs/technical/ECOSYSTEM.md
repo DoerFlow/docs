@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 平台生态与壮大策略
 
-**版本**: v0.1-draft · **最后更新**: 2024-10-10
+**版本**: v0.1-draft · **最后更新**: 2026-09-15
 
 ## 1. 核心目标
 
@@ -57,9 +57,17 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 |------|----------|
 | wallet | 发任务、发 IoT 服务单、质押 |
 | worker | 人类执行层 |
-| web | Creator / Agent 运营 |
+| web | Creator / Agent 运营；`/ecosystem` 只读 catalog（非合作方控制台） |
 | admin | 治理与风控（早期中心化运营） |
 | 未来 IoT SDK | 设备与 Agent 机器层 |
+
+### 5.1 工程实验室（web `/ecosystem` 与合作方商业）
+
+Creator DApp 的 **web `/ecosystem`** 是面向 Creator 的只读 catalog / jobs 目录（档位 Tag 来自 `/capabilities`），**不是**合作方生产控制台。未登录或无租户为空态。见 [CLIENTS.md](./CLIENTS.md)。
+
+VistaCast / SyncroBrain 伙伴商业是 **opt-in 工程实验室**：`DEPLOYMENT_PROFILE=agent-commerce`（或累进的 `smart-site`）才开，默认关。未接真实对端前 `/capabilities` 的 `readiness` 保持 `lab`，不得标成 production。本机验收：`pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`）。
+
+排期与档位边界：[ROADMAP.md](./ROADMAP.md) §9 生态商业实验室、§10 smart-site · [DEPLOYMENT.md](./DEPLOYMENT.md) · [SMART_SITE.md](./SMART_SITE.md)。
 
 ## 6. 治理里程碑
 

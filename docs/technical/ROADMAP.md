@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # DoerFlow 版本规划与里程碑
 
-**最后更新**: 2026-09-05  
+**最后更新**: 2026-09-15  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [CLIENTS.md](./CLIENTS.md) · [SPEC.md](./SPEC.md)
 
 ---
@@ -349,6 +349,8 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | 鉴权 | 生产 M2M+Entitlement+Casbin；`COMMERCE_AUTH_MODE=lab\|off`（生产禁用） |
 | 验收 | `pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`） |
 
+**Creator UI**：web `/ecosystem`（只读 catalog / jobs；实验室 readiness Tags）。见 [CLIENTS.md](./CLIENTS.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)。
+
 **现状诚实标注**：VistaCast / SyncroBrain 对接是**已实现的工程实验室**，`DEPLOYMENT_PROFILE` 未开时**默认关**；未接真实生产对端。
 
 ---
@@ -366,5 +368,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | 启动校验 | capability manifest fail-closed（生产禁 `COMMERCE_AUTH_MODE=lab\|off`） |
 | smart-site | 人工介入深链 + DataLuminary 导出关联；**不自动远控、不自动 resolve** |
 | 验收 | `pnpm run compose:config` · `pnpm run compose:preflight` · `pnpm run smoke:m5` |
+
+Creator UI 同 §9（web `/ecosystem`）。
 
 *主线规范入口：[ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [CHANNELS.md](./CHANNELS.md) · [CLIENTS.md](./CLIENTS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md)*
