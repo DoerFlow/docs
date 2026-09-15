@@ -153,6 +153,8 @@ AuthN（双轨）───┤
 
 `standalone` 默认 `ENTITLEMENT_MODE=off` 时，平台 commerce BFF（`/api/v1/platform/commerce/*`）**不可用**，返回 **503**（`ENTITLEMENT_SERVICE_UNAVAILABLE` 一类）。Web 可稳定键 JSON 体字段 `error.code`（值为 `ENTITLEMENT_SERVICE_UNAVAILABLE`）。Web Membership 在此 **503** / `error.code` 上展示 Alert（非空结算页）。本机会员页需要 `DEPLOYMENT_PROFILE=control-plane`、`ENTITLEMENT_MODE=enforce`，以及 Entitlement 控制面 `:3040`（档位见 §1 表，端口见 [PORTS.md](./PORTS.md)）。仅拉起 Entitlement 数据库不够。
 
+`ENTITLEMENT_BASE_URL`：Compose 内用服务名 `http://entitlement:3040`；宿主本机跑 API 时用 `http://127.0.0.1:3040`。**禁止** `host.docker.internal`（见 §3.1）。
+
 ### 4.2 `COMMERCE_AUTH_MODE`
 
 | 值 | 用途 |
