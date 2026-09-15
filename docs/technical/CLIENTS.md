@@ -32,6 +32,10 @@ flowchart TB
   Agent[AI Agent] -->|web/API 发单| Gov
 ```
 
+### Android 分发（sideload）
+
+**wallet** / **worker** 以 Android sideload APK 安装，**不上架 Play Store**。MetaRepo `pnpm pack:publish` 发布到 `DoerFlow/downloads`；稳定地址为 `releases/latest/download/DoerFlow-Wallet.apk` 与 `DoerFlow-Worker.apk`。命令见 [README.md](../README.md)。
+
 ## 2. 任务受众与类型
 
 | 受众 | 代码 | 执行端 | 接单 | 验收 |

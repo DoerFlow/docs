@@ -103,6 +103,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ## 5. 技术栈
 
 - React Native · Expo（**独立工程**，与 wallet 分仓库）  
+- Android 正式 APK 由 Meta `pnpm pack:publish` 发到 GitHub `DoerFlow/downloads`，稳定文件名为 `DoerFlow-Worker.apk`（`releases/latest/download`）；**不**上 Play Store。
 - 原生模块：`expo-camera`、`expo-location`  
 - Android：Accessibility Service（**原生 Kotlin 模块**，v0.4，社交步骤引导；**不是**读屏/字幕）  
 - **前期不做** 面向聋哑盲等特殊人群的残障无障碍适配

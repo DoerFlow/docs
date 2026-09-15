@@ -110,6 +110,8 @@ React Native · Expo · expo-router · viem · Biome · 依赖 `api` 任务治�
 
 平台门禁调用可附加安全存储中的 OIDC access token，并区分 `401` / `402` / `403`。普通转账、收款、链上签名与协议费路径不依赖平台套餐。DoerFlow 无 Trial，wallet 不显示试用 CTA 或倒计时。Agent Session Key 页（`/session`）文案走 en/zh locale。
 
+- Android 正式 APK 由 Meta `pnpm pack:publish` 发到 GitHub `DoerFlow/downloads`，稳定文件名为 `DoerFlow-Wallet.apk`（`releases/latest/download`）；**不**上 Play Store。
+
 ## 5. 里程碑
 
 | 版本 | 交付 |
