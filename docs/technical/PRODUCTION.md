@@ -99,7 +99,7 @@ Hardhat 网络 `base`（chainId **8453**）。部署顺序与 Sepolia 相同：A
 3. `pnpm run use:base`（缺 8453 则失败）  
 4. 复制 `deploy/production.env.example` → `deploy/env/api.env`：`COMMERCIAL_MODE=beta`、白名单、限额、`INDEXER_ROLE=http`、`DEPLOYMENT_PROFILE`、`COMMERCE_AUTH_MODE=production`；再按 `deploy/env/*.example` 填 `indexer.env` / `db.env`（口令只在 db.env）  
 5. `docker compose -f deploy/docker-compose.core.yml -f deploy/docker-compose.prod.yml up -d`（API + indexer + Postgres + Redis；DB **不**映射宿主端口）。托管 DB 用 `-f deploy/docker-compose.external-db.yml`；控制面档位再叠 `-f deploy/docker-compose.control-plane.yml`  
-6. `pnpm run compose:preflight` 绿灯（无 `container_name` / `host.docker.internal`、生产 DB 未暴露）  
+6. `pnpm run compose:preflight` 绿灯（无 `container_name` / `host.docker.internal`、生产 DB 未暴露、API/Web/Admin 默认绑 `127.0.0.1`；见 [DEPLOYMENT.md](./DEPLOYMENT.md) §3.1）  
 7. 白名单钱包小额 Vault 充值 / Escrow 锁定 → 再请受邀用户  
 
 `pnpm run smoke:vault` 须在 **Sepolia** 先绿灯（deposit → snapshot/`commitRoot` → `forceWithdraw`）。
@@ -151,7 +151,7 @@ Hardhat 网络 `base`（chainId **8453**）。部署顺序与 Sepolia 相同：A
 
 ```bash
 pnpm run compose:config     # 四种 overlay 组合的 docker compose config 语法校验
-pnpm run compose:preflight  # Compose 硬约束静态断言（不需要 Docker 守护进程）
+pnpm run compose:preflight  # Compose 硬约束静态断言（含 API/Web/Admin loopback bind；无需 Docker 守护进程）
 pnpm run smoke:m5
 pnpm run smoke:vault   # Sepolia；需测试 ETH / Mock USDC 与 operator 钥
 ```

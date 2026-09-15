@@ -105,7 +105,7 @@ docker compose -f deploy/docker-compose.core.yml -f deploy/docker-compose.prod.y
 | **生产不得映射 DB / Redis 宿主端口** | `prod` 与 `external-db` overlay 里 `postgres`/`redis` 不允许出现 `ports:` |
 | **Entitlement 走 `:3040` + DNS** | `ENTITLEMENT_BASE_URL` 必须是服务名或域名，端口 `3040`（见 [PORTS.md](./PORTS.md)） |
 | **每个长驻服务有 healthcheck** | `/live` 用于容器存活，`/ready` 用于流量准入；web `/health`、admin `/health` |
-| **API/Web/Admin 默认绑 loopback** | `DOERFLOW_API_BIND` / `DOERFLOW_WEB_BIND` / `DOERFLOW_ADMIN_BIND` 默认 `127.0.0.1`；对外反代再改 bind |
+| **API/Web/Admin 默认绑 loopback** | `DOERFLOW_API_BIND` / `DOERFLOW_WEB_BIND` / `DOERFLOW_ADMIN_BIND` 默认 `127.0.0.1`；对外反代再改 bind。`scripts/compose-preflight.mjs` / `pnpm run compose:preflight` 断言 `docker-compose.core.yml` 中这三项默认字符串 |
 
 ### 3.2 env 文件划分
 
@@ -255,4 +255,4 @@ pnpm run smoke:ecosystem-commerce
 - [x] 任何 compose 文件无 `container_name` / `host.docker.internal`
 - [x] `production` 模式下 `GET /trading/jobs` 与 `GET /integrations/events` 均需鉴权且需显式 `sourceTenantId`
 
-证据：`probe.controller.spec.ts`（degraded → 503）；`deployment-profile.spec.ts`（inbound 按档位、lab 启动失败、control-plane + `ENTITLEMENT_MODE=off` 启动失败、manifestHash）；`commerce-auth.guard.spec.ts`（production 下 GET `/trading/jobs` 与 `/integrations/events` 无 bearer → 401）；`tenant-scope.spec.ts`（`TENANT_SCOPE_REQUIRED`）；`scripts/compose-preflight.mjs` / `pnpm run smoke:m5`（无 `container_name` / `host.docker.internal`、prod 不映射 postgres/redis `ports:`；`/version` profile+manifestHash）。`/live` 恒 200 见 `probe.controller.ts` 与 `m5-production-gate.mjs`。
+证据：`probe.controller.spec.ts`（degraded → 503）；`deployment-profile.spec.ts`（inbound 按档位、lab 启动失败、control-plane + `ENTITLEMENT_MODE=off` 启动失败、manifestHash）；`commerce-auth.guard.spec.ts`（production 下 GET `/trading/jobs` 与 `/integrations/events` 无 bearer → 401）；`tenant-scope.spec.ts`（`TENANT_SCOPE_REQUIRED`）；`scripts/compose-preflight.mjs` / `pnpm run smoke:m5`（无 `container_name` / `host.docker.internal`、prod 不映射 postgres/redis `ports:`、`docker-compose.core.yml` 中 `DOERFLOW_API_BIND` / `DOERFLOW_WEB_BIND` / `DOERFLOW_ADMIN_BIND` 默认 `127.0.0.1`；`/version` profile+manifestHash）。`/live` 恒 200 见 `probe.controller.ts` 与 `m5-production-gate.mjs`。

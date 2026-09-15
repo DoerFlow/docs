@@ -44,7 +44,7 @@ title: 综合端 App
 Android 侧载 APK（非 Play）托管在公开仓 [DoerFlow/downloads](https://github.com/DoerFlow/downloads/releases)：
 
 - 官网：[doerflow.dev/download](https://doerflow.dev/download/)
-- 文件：`DoerFlow-Worker-{version}.apk`
+- 稳定直链：[DoerFlow-Worker.apk](https://github.com/DoerFlow/downloads/releases/latest/download/DoerFlow-Worker.apk)（GitHub `latest/download`，始终指向最新发布）
 
 允许未知来源安装。Creator DApp 仍用浏览器 [app.doerflow.dev](https://app.doerflow.dev)。
 
