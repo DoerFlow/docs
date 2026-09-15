@@ -145,7 +145,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-PRV-002 | 付款后才 invoke 对方 endpoint | api | execute 校验 Receipt；CloudEvents `job.invoke` | **v1.1-channels-lab** ✅ |
 | FR-PRV-003 | 每 Skill HMAC + SSRF 限制 | api, shared/sdk | `verifyDoerFlowWebhook`；loopback HTTP / 公网 HTTPS | **v1.1-channels-lab** ✅ |
 | FR-EP-001~003 | Endpoint 注册/心跳/白名单执行 | api | `/endpoints` · `ENDPOINT.md` | **v1.1-channels-lab** ✅ |
-| FR-IOT-007 | 实验室 Device HTTP（非链上 Registry） | api, shared/sdk, sdk/python | `/devices` 注册·心跳·telemetry；SDK `registerDevice` / `heartbeatDevice` / `postDeviceTelemetry` | **v1.1-channels-lab** ✅ |
+| FR-IOT-007 | 实验室 Device HTTP（非链上 Registry） | api, shared/sdk, sdk/python | 实验室 `GET /devices` / SDK `listDevices` / `list_devices`（空列表 OK）；注册·心跳·telemetry（`registerDevice` / `heartbeatDevice` / `postDeviceTelemetry`）；链上 `DeviceRegistry` 仍为 v1.2+ | **v1.1-channels-lab** ✅ |
 | FR-IOT-008 | TB 时间窗 digest → 账本入账 | spec, api, SyncroBrain Gateway | `POST /integrations/syncrobrain/telemetry-credits` · 可选 `data.payer` → `applyReceipt` · `PUT`/`GET …/payee-bindings` · Gateway UTC 窗闭合出站 · [SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md) | **实验室 REST + 出站 + asset↔payee 绑定 + 可选买方划转** |
 
 ## MVP v0.1 验收对照

@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 客户端与平台总览
 
-**版本**: v0.2-draft · **最后更新**: 2026-09-12
+**版本**: v0.2-draft · **最后更新**: 2026-09-15
 
 ## 1. 产品矩阵
 
@@ -95,16 +95,16 @@ flowchart TB
 
 | 路由 | 职责 |
 |------|------|
-| `/devices` | 列出 `GET /devices`（HTTP 实验室库存；状态 chips + 搜索；kind/label 缺失为 —；**不是**链上 DeviceRegistry） |
+| `/devices` | 列出 `GET /devices`（HTTP 实验室库存；状态 chips + 搜索；kind/label 缺失为 —；计数 `shown / total`（过滤后/全量）；**不是**链上 DeviceRegistry） |
 
 ## 8. web 实验室
 
 | 页面 | 职责 |
 |------|------|
-| Payments（挂载 `LabDevicesCard`） | 列出 HTTP `GET /devices`（轮询 + 状态筛选 + 搜索；lastSeen/kind/payee/status/label 缺失为 —；**不是**链上 DeviceRegistry） |
+| Payments（挂载 `LabDevicesCard`） | 列出 HTTP `GET /devices`（轮询 + 状态筛选 + 搜索；计数徽章 `shown / total`；lastSeen/kind/payee/status/label 缺失为 —；**不是**链上 DeviceRegistry） |
 
 ## 9. admin 实验室路由
 
 | 路由 | 职责 |
 |------|------|
-| `/devices` | 只读 `GET /devices` 库存（轮询 + 状态筛选 + 搜索 + `lastSeenAt`/`kind`/`label` 排序；**不是**链上 DeviceRegistry） |
+| `/devices` | 只读 `GET /devices` 库存（轮询 + 状态筛选 + 搜索 + `lastSeenAt`/`kind`/`label`/`id`/`payee` 排序；计数 `shown / total`；**不是**链上 DeviceRegistry） |

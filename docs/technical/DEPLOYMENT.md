@@ -105,7 +105,7 @@ docker compose -f deploy/docker-compose.core.yml -f deploy/docker-compose.prod.y
 | **生产不得映射 DB / Redis 宿主端口** | `prod` 与 `external-db` overlay 里 `postgres`/`redis` 不允许出现 `ports:` |
 | **Entitlement 走 `:3040` + DNS** | `ENTITLEMENT_BASE_URL` 必须是服务名或域名，端口 `3040`（见 [PORTS.md](./PORTS.md)） |
 | **每个长驻服务有 healthcheck** | `/live` 用于容器存活，`/ready` 用于流量准入；web `/health`、admin `/health` |
-| **Web/Admin 默认绑 loopback** | `DOERFLOW_WEB_BIND` / `DOERFLOW_ADMIN_BIND` 默认 `127.0.0.1`；对外反代再改 bind |
+| **API/Web/Admin 默认绑 loopback** | `DOERFLOW_API_BIND` / `DOERFLOW_WEB_BIND` / `DOERFLOW_ADMIN_BIND` 默认 `127.0.0.1`；对外反代再改 bind |
 
 ### 3.2 env 文件划分
 

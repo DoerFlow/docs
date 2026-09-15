@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 生产就绪（M5 工程闸门）
 
-**版本**: v1.0-rc · **最后更新**: 2026-09-09  
+**版本**: v1.0-rc · **最后更新**: 2026-09-12  
 **关联**: [ROADMAP.md](./ROADMAP.md) · [DEPLOYMENT.md](./DEPLOYMENT.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [COMMERCIAL.md](./COMMERCIAL.md) · [ONRAMP.md](./ONRAMP.md)
 
 本文件是 **AI 可自动验收** 的生产工程清单。  
@@ -156,7 +156,7 @@ pnpm run smoke:m5
 pnpm run smoke:vault   # Sepolia；需测试 ETH / Mock USDC 与 operator 钥
 ```
 
-`smoke:m5` 检查：生产文档与 env 模板（含 `COMMERCIAL_MODE`）、Hardhat `base`、探针与 disclosure（含 `/ready` 状态码与 `/version` 的 `profile`/`manifestHash`）、OpenAPI 源文件字符串（`/payments/sessions` 与 `/payments/sessions/{id}/revoke`、收据重试路径含 `apply-ledger-batch`、`GET /payments/receipts` 的 `pending|batched`、`GET /payments/receipts/stats`、`POST /payments/ledger/credit` / `credit-batch`、`GET /payments/ledger/balances`、`/payments/ledger/snapshot` + `batchedCount`、`/payments/ledger/snapshots/latest`、`/payments/ledger/commits`、`GET /payments/health`、`POST /payments/commercial/assert`、`GET /payments/ledger/nets`、`POST /payments/ledger/net-settle`、`POST /payments/ledger/bundle`、`/fees/tiers`、`GET /onramp/health` · `/onramp/disclosure` · `/onramp/providers`、`POST /onramp/session`、以及 `POST /devices/register` · `/devices/{id}/heartbeat` · `/devices/{id}/telemetry`）、静态 T0–T3 单测文件 `fees.service.spec.ts`、M4 SDK、compose 基座与 overlay、`use:base`。  
+`smoke:m5` 检查：生产文档与 env 模板（含 `COMMERCIAL_MODE`）、Hardhat `base`、探针与 disclosure（含 `/ready` 状态码与 `/version` 的 `profile`/`manifestHash`）、OpenAPI 源文件字符串（`/payments/sessions` 与 `/payments/sessions/{id}/revoke`、收据重试路径含 `apply-ledger-batch`、`GET /payments/receipts` 的 `pending|batched`、`GET /payments/receipts/stats`、`POST /payments/ledger/credit` / `credit-batch`、`GET /payments/ledger/balances`、`/payments/ledger/snapshot` + `batchedCount`、`/payments/ledger/snapshots/latest`、`/payments/ledger/commits`、`GET /payments/health`、`POST /payments/commercial/assert`、`GET /payments/ledger/nets`、`POST /payments/ledger/net-settle`、`POST /payments/ledger/bundle`、`/fees/tiers`、`GET /onramp/health` · `/onramp/disclosure` · `/onramp/providers`、`POST /onramp/session`、以及 `GET /devices`（lab inventory；空列表 OK；非 DeviceRegistry）、`POST /devices/register` · `/devices/{id}/heartbeat` · `/devices/{id}/telemetry`）、静态 T0–T3 单测文件 `fees.service.spec.ts`、M4 SDK、compose 基座与 overlay、`use:base`。  
 `smoke:vault` 检查：已部署 Sepolia Vault 上真实 `deposit` → `commitRoot` → `forceWithdraw`。
 
 ---
