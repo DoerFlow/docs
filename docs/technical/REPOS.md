@@ -9,7 +9,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 **品牌**：[DoerFlow](https://doerflow.dev) · **目标组织**：[github.com/doerflow](https://github.com/doerflow)（原 AgentSkillMesh）  
 **版本**: v0.1  
-**最后更新**: 2026-08-25  
+**最后更新**: 2026-09-15  
 **清单数据源**: `repos.manifest.json`
 
 > 组织迁移见 [LuminaryWorks/spec/github-org-migration.md](https://github.com/LuminaryWorks/LuminaryWorks/blob/main/spec/github-org-migration.md)。下文 **AgentSkillMesh** 为迁移前组织名。
@@ -163,7 +163,8 @@ flowchart TB
 
 | 项 | 内容 |
 |----|------|
-| 路径 | `repos/site` |
+| 路径 | `repos/site`（清单主路径 · `doerflow/site`） |
+| 备用 gitlink | Meta 若仍跟踪 `repos/website`，其为指向 `DoerFlow/website.git` 的遗留/备用克隆，不是第二套营销站；可与 `repos/site` 同 tip，不代表合并或淘汰计划 |
 | 技术栈 | Next.js 16 + Tailwind CSS 4 |
 | 域名 | **doerflow.dev**（根域） |
 | 与 docs 区分 | docs = 技术文档；site = 营销官网、产品介绍 |
@@ -266,6 +267,8 @@ flowchart TB
 | `admin` | `git@github.com:doerflow/admin.git` | main |
 
 克隆 MetaRepo 后执行：`pnpm run setup`（macOS / Linux / Windows 相同；实现为 `scripts/init-meta.mjs`）。
+
+`repos/website` 不在上表：非 `repos.manifest.json` 条目；见 §3.3。
 
 ---
 
