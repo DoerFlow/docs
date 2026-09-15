@@ -34,6 +34,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 `agent-commerce` / `smart-site` 是累进的 **opt-in 实验室**：用 `pnpm run smoke:ecosystem-commerce` 与既有 m5 门禁冒烟即可，**不要**宣称已具备生产级兄弟产品连通。
 
+Creator 面向 catalog/jobs 的 UI 是 web `/ecosystem`，读 `/capabilities` 获取 `profile` 与 commerce readiness；见 [ECOSYSTEM.md](./ECOSYSTEM.md) §5.1 · [CLIENTS.md](./CLIENTS.md)。
+
 ### 1.1 各档位能力
 
 | 能力 | standalone | control-plane | agent-commerce | smart-site |
