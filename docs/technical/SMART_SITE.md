@@ -7,10 +7,12 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # smart-site 场景最小契约（SMART_SITE）
 
-**版本**: v0.1-smart-site-lab · **最后更新**: 2026-09-09
-**关联**: [DEPLOYMENT.md](./DEPLOYMENT.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [CHANNELS.md](./CHANNELS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) · [DATALUMINARY.md](./DATALUMINARY.md)
+**版本**: v0.1-smart-site-lab · **最后更新**: 2026-09-15
+**关联**: [DEPLOYMENT.md](./DEPLOYMENT.md) · [CLIENTS.md](./CLIENTS.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [CHANNELS.md](./CHANNELS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) · [DATALUMINARY.md](./DATALUMINARY.md)
 
 `smart-site` 是 `agent-commerce` 之上的站点/工地场景档位（见 [DEPLOYMENT.md](./DEPLOYMENT.md) §1）。本文件只定义 **稳定的 env 与契约面**，实现是 **工程实验室**，`DEPLOYMENT_PROFILE` 未设为 `smart-site` 时**默认关**。
+
+**客户端**（[CLIENTS.md](./CLIENTS.md)）：DoerFlow 各端 **没有** 自动远控界面。深链只给人点（worker / admin 按钮 **待实现**）；API 不发起会话。档位默认关，见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 
 **状态诚实标注**：本档位未接过真实 VistaRemote / DataLuminary 生产对端。`/capabilities` 里 `commerce.readiness` 为 `lab`，文档不得写「已上线」。
 
@@ -78,7 +80,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | 触发条件 | 档位 `smart-site` **且** 事件带 `sourceRef` **且** 模板已配 |
 | `sourceRef` 编码 | 逐个占位符做 `encodeURIComponent`，防止拼接注入 |
 | 没有 `sourceRef` | 不返回 `remoteIntervention`，**不猜**、不用 `eventId` 或 `sourceId` 顶替。深链只认信封里源产品**主动声明**的 `data.sourceRef`；`sourceId` 是摄像头/设备 id，不是业务引用 |
-| 谁点 | **人**（worker / admin 客户端里的按钮）；API 不发起会话、不持有 VistaRemote 凭据 |
+| 谁点 | **人**（worker / admin 按钮 **待实现**）；API 不发起会话、不持有 VistaRemote 凭据 |
 | 回调 | 若事件带 `callbackUrl`，durable outbox 发签名 CloudEvents `com.doerflow.site.intervention.requested.v1`，载荷只含 `eventId` / `sourceProduct` / `sourceTenantId` / `sourceRef` / `deepLink` / `mode`；**不改源产品业务状态** |
 
 ---

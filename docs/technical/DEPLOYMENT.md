@@ -32,6 +32,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 档位是**累进**的：`smart-site` ⊃ `agent-commerce` ⊃ `control-plane` ⊃ `standalone` 的能力集合。`DEPLOYMENT_PROFILE` 未设置时按 `standalone` 处理。
 
+`agent-commerce` / `smart-site` 是累进的 **opt-in 实验室**：用 `pnpm run smoke:ecosystem-commerce` 与既有 m5 门禁冒烟即可，**不要**宣称已具备生产级兄弟产品连通。
+
 ### 1.1 各档位能力
 
 | 能力 | standalone | control-plane | agent-commerce | smart-site |
