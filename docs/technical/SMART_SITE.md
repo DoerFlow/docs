@@ -16,6 +16,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 **状态诚实标注**：本档位未接过真实 VistaRemote / DataLuminary 生产对端。`/capabilities` 里 `commerce.readiness` 为 `lab`，文档不得写「已上线」。
 
+**Creator UI**：Creator 面向 catalog/jobs 仍是 web `/ecosystem`（读 `/capabilities`）。本档位只追加人工介入深链 + DataLuminary 导出关联——**无**自动远控、**无** admin 合作方控制台。见 [ECOSYSTEM.md](./ECOSYSTEM.md) §5.1 · [CLIENTS.md](./CLIENTS.md) · [DEPLOYMENT.md](./DEPLOYMENT.md)。
+
 ---
 
 ## 0. 三条不可协商的边界

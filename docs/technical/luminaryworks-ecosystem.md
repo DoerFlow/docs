@@ -11,6 +11,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 > **组织**：[github.com/doerflow](https://github.com/doerflow) · **域名**：[doerflow.dev](https://doerflow.dev)  
 > 跨产品生态说明 · 协议内生态激励见 [ECOSYSTEM.md](./ECOSYSTEM.md)
 
+**最后更新**: 2026-09-15
+
 规划摘要：[LuminaryWorks/spec/products/doerflow.md](https://github.com/LuminaryWorks/LuminaryWorks/blob/main/spec/products/doerflow.md)
 
 ## 本产品是什么
@@ -76,6 +78,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | SyncroBrain 时间窗账本入账 | **实验室 REST + asset↔payee 绑定已实现**；Gateway 自动出站已接；真实买方扣款仍为后续步 |
 | VistaRemote 人工介入深链 / DataLuminary 导出 | **最小契约已实现**，`smart-site` 档位外 **默认关**；见 [SMART_SITE.md](./SMART_SITE.md) |
 | 真实生产对端 | **未接**。`/capabilities` 的 `commerce.readiness` 保持 `lab`，文档不得写「已上线」 |
+
+Creator 可在 web `/ecosystem` 查看 profile 与 commerce readiness；见 [ECOSYSTEM.md](./ECOSYSTEM.md) §5.1。
 
 ## 隐私、租户与兼容（FR-XPROD-002）
 
