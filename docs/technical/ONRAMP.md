@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 法币入口 · 合规第三方 Onramp
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-10  
+**版本**: v0.1-draft · **最后更新**: 2026-09-16  
 **关联**: [WALLET.md](./WALLET.md) · [BRIDGE.md](./BRIDGE.md) · [ROADMAP.md](./ROADMAP.md) § M3
 
 ## 1. 合规策略：不自建汇款

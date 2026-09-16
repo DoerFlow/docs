@@ -78,6 +78,7 @@ flowchart TB
 ## 5. 双身份、会员与客户端边界
 
 - **web**：平台 Logto 会话、钱包连接、SIWE 会话分别展示；显示钱包链接状态、会员快照、Pro / Ultra / Enterprise 与配额。公开市场和钱包直签保持可用。Creator DApp 用户可见文案走 en + zh-CN locale。
+- **web Home / market**：可展示 `/capabilities` 的 profile Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 commerce readiness Tag（`/capabilities.commerce.readiness`），用于本地 DX 的只读诊断。
 - **web `/login`**：`HeadlessLoginPanel` 可经 `@luminaryworks/auth-react` Experience API 暴露注册（`showRegister`）；仍为 Logto 平台账号，**不是**钱包注册。
 - **admin `/login`**：保持 `showRegister={false}`（无自助注册）。
 - **web `/account`**：可展示 `/capabilities` 的 profile Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 entitlement.mode Tag（`/capabilities.entitlement.mode`），诊断语义与 `/membership` 相同。

@@ -7,7 +7,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # Agent 链经济 · 现成 L2 优先 · 自建应用链延期
 
-**版本**: v0.2-draft · **最后更新**: 2025-01-08  
+**版本**: v0.2-draft · **最后更新**: 2026-09-16  
+**关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)  
 **路线图**: MasterChef / SDK 仍可走 v0.7；**自建 L2/L3 延后**（见 [ROADMAP.md](./ROADMAP.md)）
 
 ## 1. 背景与挑战
