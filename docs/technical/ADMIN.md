@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 管理平台规格
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-15  
+**版本**: v0.1-draft · **最后更新**: 2026-09-16  
 **仓库**: `repos/admin` → `AgentSkillMesh/admin`（私有）
 
 ---
@@ -28,6 +28,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 用户：**平台运营、风控、客服**（RBAC，非普通 C 端用户）。
 
 - **不托管** VistaCast / SyncroBrain 伙伴控制台，也**不做** smart-site 远控（深链 / 导出关联是 API + integrations 实验室面）；运营仍在 DoerFlow 任务/支付面板。生态 catalog / jobs UI 在 **web** `/ecosystem`（不在 admin）；运营用 smoke + API 实验室，不要期待 admin 商业控制台。见 [ECOSYSTEM.md](./ECOSYSTEM.md) · [SMART_SITE.md](./SMART_SITE.md)。
+- 平台会员 / commerce checkout UI 在 **web** `/membership`（不在 admin）。见 [CLIENTS.md](./CLIENTS.md)。
 
 ## 2. 功能需求
 
