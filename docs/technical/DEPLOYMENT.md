@@ -99,6 +99,8 @@ docker compose -f deploy/docker-compose.core.yml -f deploy/docker-compose.prod.y
   -f deploy/docker-compose.control-plane.yml up -d
 ```
 
+本机会员 Docker overlay 见 [ONBOARDING.md](../ONBOARDING.md)「本地会员 / commerce」。
+
 ### 3.1 Compose 硬约束（`pnpm run compose:preflight` 断言）
 
 | 约束 | 原因 |
