@@ -34,6 +34,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 ### FR-ADM-001 登录与权限
 - Logto OIDC 平台账号 + 2FA（v0.4）
+- `/login`：`HeadlessLoginPanel` 且 `showRegister={false}`（运营控制台；自助注册仅 web `/login`）。见 [CLIENTS.md](./CLIENTS.md)。
 - 本地：MetaRepo `pnpm id:up`（委托相邻 `LuminaryWorks`）→ OIDC `:3001`；运营登录 `admin.doerflow@luminaryworks.dev`（seed）
 - JWT 角色 `doerflow_admin` 仅用于引导 Casbin `agent_admin`；审批按钮仍只看资源 `permissions`
 - 资源响应附 `permissions`；审批、风控、治理控件只按该映射启用

@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 跨链互通 · 官方桥与 Omnichain
 
-**版本**: v0.3 · **最后更新**: 2026-09-10  
+**版本**: v0.3 · **最后更新**: 2026-09-16  
 **关联**: [AGENT_CHAIN.md](./AGENT_CHAIN.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [ROADMAP.md](./ROADMAP.md) · [ONRAMP.md](./ONRAMP.md)
 
 ## 1. 设计原则
@@ -220,4 +220,4 @@ NOTE：链下账本 `POST /payments/ledger/credit`（及 `credit-batch`）与非
 
 ---
 
-*法币入口见 [ONRAMP.md](./ONRAMP.md)；链经济见 [AGENT_CHAIN.md](./AGENT_CHAIN.md)。*
+*法币入口见 [ONRAMP.md](./ONRAMP.md)；链下微支付见 [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)；链经济见 [AGENT_CHAIN.md](./AGENT_CHAIN.md)。*
