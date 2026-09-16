@@ -7,7 +7,12 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 本地开发端口
 
+**最后更新**: 2026-09-16
+
 **默认 API 端口 `13008`**（避免与多项目默认 3000 冲突）。各仓通过环境变量覆盖。
+
+Entitlement `:3040` 本机会员见 [ONBOARDING.md](../ONBOARDING.md)「本地会员 / commerce」。
+Compose bind / `compose:preflight` 见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 
 | 服务 | 端口 | 环境变量 |
 |------|------|----------|

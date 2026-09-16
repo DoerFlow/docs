@@ -7,8 +7,10 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # Agent 异步支付 · 链下账本 + Merkle 批量结算
 
-**版本**: v0.2.8 · **最后更新**: 2026-09-11  
-**关联**: [SPEC.md](./SPEC.md) · [AGENT_CHAIN.md](./AGENT_CHAIN.md) · [FEE_TIERS_AA.md](./FEE_TIERS_AA.md) · [IOT.md](./IOT.md) · [BRIDGE.md](./BRIDGE.md)
+**版本**: v0.2.8 · **最后更新**: 2026-09-16  
+**关联**: [SPEC.md](./SPEC.md) · [AGENT_CHAIN.md](./AGENT_CHAIN.md) · [FEE_TIERS_AA.md](./FEE_TIERS_AA.md) · [IOT.md](./IOT.md) · [BRIDGE.md](./BRIDGE.md) · [CHANNELS.md](./CHANNELS.md)
+
+五通道实验室上手见 MetaRepo [ONBOARDING.md](../ONBOARDING.md)「五通道实验室」。本地验收：`pnpm run smoke:channels`。
 
 ## 0. 架构决策（已定）
 
