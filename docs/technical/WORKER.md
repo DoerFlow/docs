@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 综合端 App 规格（React Native）
 
-**版本**: v0.1-draft  
+**版本**: v0.1-draft · **最后更新**: 2026-09-16  
 **仓库**: `repos/worker` → `doerflow/worker`（私有）
 
 ---
@@ -20,7 +20,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 2. **社交平台任务**：在抖音、小红书、知乎等完成 **点赞、观看、收藏** 等（用户自愿、账号自有）  
 3. **收益**：Escrow 结算至绑定钱包地址  
 
-发单在 **wallet App**；本 App **仅接单与交付**。
+发单在 **wallet App**；本 App **仅接单与交付**。**不提供** Creator `/ecosystem` 合作方 catalog UI；Creator 走 web。见 [CLIENTS.md](./CLIENTS.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)。
 
 ## 2. 社交平台任务
 

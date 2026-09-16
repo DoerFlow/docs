@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 钱包 App 规格（纯粹钱包 · React Native）
 
-**版本**: v0.2-draft · **最后更新**: 2026-09-12  
+**版本**: v0.2-draft · **最后更新**: 2026-09-16  
 **仓库**: `repos/wallet` → `AgentSkillMesh/wallet`（私有）
 
 ---
@@ -22,7 +22,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | **查看收益** | Escrow 入账、任务支出、协议费明细 |
 | **发布任务** | 创建任务草稿 → 确认清单 → 提交审批 → 跟踪状态 |
 
-**不包含**：接单大厅、拍照交付、社交平台自动化 — 见 [WORKER.md](./WORKER.md)。
+**不包含**：接单大厅、拍照交付、社交平台自动化（见 [WORKER.md](./WORKER.md)）；也不提供 Creator `/ecosystem` 合作方 catalog UI（留在 web，见 [CLIENTS.md](./CLIENTS.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)）。
 
 ## 2. 与综合端分工
 
