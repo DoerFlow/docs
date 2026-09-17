@@ -14,6 +14,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 公开叙事页：[docs/developers/agent-trading-sdk](https://docs.doerflow.dev/developers/agent-trading-sdk)（`repos/docs`，非本文件自动同步）。
 
+产品内 Creator 控制台为 web `/developers`（Key、HTTP Skill 注册、作业/收据表）；无头 Agent 仍以 SDK 为主。见 [CLIENTS.md](./CLIENTS.md)。
+
 ---
 
 ## 1. 包

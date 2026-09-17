@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 客户端与平台总览
 
-**版本**: v0.2-draft · **最后更新**: 2026-09-16
+**版本**: v0.2-draft · **最后更新**: 2026-09-17
 
 ## 1. 产品矩阵
 
@@ -69,6 +69,7 @@ flowchart TB
 | [WALLET.md](./WALLET.md) | 纯粹钱包 App |
 | [WORKER.md](./WORKER.md) | 综合端 App（众包 + 社交） |
 | [ADMIN.md](./ADMIN.md) | 管理平台 |
+| [DEVELOPER.md](./DEVELOPER.md) | Agent Trading SDK · Creator `/developers` |
 | [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) | 审批分级、风控、状态机 |
 | [CHANNELS.md](./CHANNELS.md) | 五通道任务经济 |
 | [AGENT_RUNTIME.md](./AGENT_RUNTIME.md) | Agent 执行循环 |
@@ -85,6 +86,7 @@ flowchart TB
 - **web `/account`**：可展示 `/capabilities` 的 profile Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 entitlement.mode Tag（`/capabilities.entitlement.mode`），诊断语义与 `/membership` 相同。
 - **web `/membership`**：走 `/platform/commerce/*`；需 `DEPLOYMENT_PROFILE=control-plane`、`ENTITLEMENT_MODE=enforce`、Entitlement `:3040`。standalone 下 commerce **503**。页面可展示部署档位 Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 entitlement.mode Tag（`/capabilities.entitlement.mode`），用于说明 control-plane / entitlement 关闭时 commerce BFF **503**。catalog / offerings 失败（**503** / `ENTITLEMENT_SERVICE_UNAVAILABLE`）时 web 展示 `membership.commerceUnavailable` Alert，而非空结算页；全局 `AccessErrorBanner` 亦会展示拦截器 `resolveAccessError` 将其标为 `kind: error`（与会员页 Alert 并存）。见 [DEPLOYMENT.md](./DEPLOYMENT.md) §4.1.1、[ONBOARDING.md](../ONBOARDING.md)。
 - **web `/ecosystem`**：只读 catalog / jobs。catalog 加载失败与 jobs 加载 `error`（非 auth/tenant）均展示 Retry 操作（`ecosystem.retry`）。Profile Tag 来自 `/capabilities.profile`（与 `/version.profile` 相同）；commerce readiness Tag 来自 `/capabilities.commerce.readiness`（`lab`|`production`）；catalog 行 readiness Tag 来自 trading catalog。部署档位低于 `agent-commerce` 时展示 `ecosystem.labHint` Alert。未登录或无租户为空态。**不是**生产合作方控制台。见 [ECOSYSTEM.md](./ECOSYSTEM.md)。
+- **web `/developers`**：Creator / 开发者控制台。需平台登录。自助 API Key、HTTP Skill 注册、作业/收据只读表；可展示 `/capabilities` 的 profile Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 commerce readiness Tag（`/capabilities.commerce.readiness`），用于本地 DX 的只读诊断。**不是** admin。见 [DEVELOPER.md](./DEVELOPER.md)。
 - **web `/dex`**：加载失败展示 Retry 操作（`dex.retry`）。
 - **web `/payments`**：可展示 `/capabilities` 的 profile Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 commerce readiness Tag（`/capabilities.commerce.readiness`），用于本地 DX 的只读诊断。
 - **admin**：必须登录平台账号；按钮只消费 API 返回的 `permissions`，不得用 Logto claim、前端 mock role 或可切换角色授予权限；同时展示套餐与组织上下文。运营界面文案走 en + zh-CN locale。
