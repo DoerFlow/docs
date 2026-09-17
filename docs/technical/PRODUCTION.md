@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 生产就绪（M5 工程闸门）
 
-**版本**: v1.0-rc · **最后更新**: 2026-09-12  
+**版本**: v1.0-rc · **最后更新**: 2026-09-17  
 **关联**: [ROADMAP.md](./ROADMAP.md) · [DEPLOYMENT.md](./DEPLOYMENT.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [COMMERCIAL.md](./COMMERCIAL.md) · [ONRAMP.md](./ONRAMP.md)
 
 本文件是 **AI 可自动验收** 的生产工程清单。  
@@ -190,7 +190,7 @@ pnpm run smoke:vault   # Sepolia；需测试 ETH / Mock USDC 与 operator 钥
 - [x] `COMMERCE_AUTH_MODE=production`；`NODE_ENV=production` 下 `lab`/`off` 启动失败（已有闸门）
 - [x] 开发者 API Key 规范：`dfk_live_` 生产可用，`dfk_test_` 生产拒绝（FR-DEV-001）
 - [x] 工程限流档位 none/pro/ultra（FR-DEV-002）；**不是**法律 SLA 合同
-- [x] 控制台 `/developers` 自助发 Key / 轮换 webhook（FR-DEV-003）
+- [x] 控制台 `/developers` 自助发 Key / 轮换 webhook（FR-DEV-003）。控制台展示 capabilities Tags + query Retry 仅为本地 DX；生产鉴权仍是 Key / M2M / Entitlement
 - [x] Python `authorize_session` + `pay_quote`（FR-DEV-004）
 - [ ] npm `@doerflow/shared` / PyPI `doerflow` **真人持令牌发布**（CI 只 dry-run；AI 不代发）
 - [ ] Base 主网 `"8453"` Vault / Escrow **由部署脚本写入** `deployments.json`（禁止手填假地址）

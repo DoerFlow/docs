@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 商业收款：封闭 Beta（M5a）与公开 1.0（M5b）
 
-**最后更新**: 2026-09-05  
+**最后更新**: 2026-09-17  
 **关联**: [PRODUCTION.md](./PRODUCTION.md) · [ROADMAP.md](./ROADMAP.md) · FR-PAY-016 · FR-PAY-017
 
 **原则**：先上线、先运行；不把「打磨完成 / 能赔付」当作收款前置。  
@@ -24,6 +24,8 @@ M5a 工程可关。审计机构、有资金的 Bounty、商店账号 **AI 不伪
 | `public` | 公开 1.0（M5b） | 关闭 | 提高或取消 | 审计报告公开后 false |
 
 `CHAIN_ID=8453` 禁止 `off`。错误码：`COMMERCIAL_NOT_ALLOWLISTED`、`COMMERCIAL_CAP_EXCEEDED`、`PAYMENTS_PAUSED`。
+
+web `/developers` API Key 控制台与 `COMMERCIAL_MODE` 白名单 / 限额无关，见 [DEVELOPER.md](./DEVELOPER.md) · [CLIENTS.md](./CLIENTS.md)。
 
 Vault 主网资产：**Base USDC** `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`。Escrow 继续收 **ETH**。
 
