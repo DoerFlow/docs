@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 任务治理与发布审批
 
-**版本**: v0.2-draft · **最后更新**: 2026-09-16  
+**版本**: v0.2-draft · **最后更新**: 2026-09-17  
 **关联**: [CLIENTS.md](./CLIENTS.md) · [WORKER.md](./WORKER.md)
 
 ## 1. 任务状态机
@@ -31,7 +31,7 @@ draft → pending_review → published → assigned → submitted → verifying 
 | `completed` / `cancelled` | 已结算或已取消 | 相关方 |
 
 **交易约束**：`published` 时绑定平台 Escrow 预留（`escrowId` 形如 `P…`，status `Reserved`）。`P…` **不是**已锁 ETH；链上 `createEscrow` + `fundEscrow` 发生在 `assigned` 之后。接单后写入 `provider`。  
-**链上放款（M3）**：发单方（wallet）在 `assigned` 后 `createEscrow` + `fundEscrow`，并 `POST /tasks/:id/bind-onchain-escrow` 写入 `onChainEscrowId`；接单方（worker）交付时 `deliverEscrow`；发单方验收前 `confirmDelivery` 放款。有 `onChainEscrowId` 时不再走账本 stub 双付。结算费率见 [FEE_TIERS_AA.md](./FEE_TIERS_AA.md)。
+**链上放款（M3）**：发单方（wallet）在 `assigned` 后 `createEscrow` + `fundEscrow`，并 `POST /tasks/:id/bind-onchain-escrow` 写入 `onChainEscrowId`；接单方（worker）交付时 `deliverEscrow`；发单方验收前 `confirmDelivery` 放款。有 `onChainEscrowId` 时 API `settleLedgerPayout` 只标 `ledgerSettled`、不 `LEDGER.credit`（禁止双付）。**无 `onChainEscrowId` 时**，`POST /human-tasks/:id/verify`（通过）或免验收 `deliver` → `completed` 经同一函数走链下账本（`ledgerSettled` + `LEDGER.credit`）是**既定路径**，不是未完成 stub。结算费率见 [FEE_TIERS_AA.md](./FEE_TIERS_AA.md)。
 
 ## 2. 双受众（audience）
 
@@ -92,7 +92,7 @@ draft → pending_review → published → assigned → submitted → verifying 
 | 接口 | 说明 |
 |------|------|
 | `POST /tasks` | 创建并可选 submit（wallet SIWE Bearer；测试网可不绑 Logto） |
-| `POST /human-tasks/:id/accept` \| `verify` | 人类接单 / 发单方验收 |
+| `POST /human-tasks/:id/accept` \| `verify` | 人类接单 / 发单方验收；无 `onChainEscrowId` 时 verify 通过走 `settleLedgerPayout`（`ledgerSettled`，既定账本结算） |
 | `GET /human-tasks` \| `/agent-tasks` | 已发布列表 |
 | `POST /human-tasks/:id/proof` | 接单方上传交付照片，返回 `proofCid`（`local://…`） |
 | `POST /human-tasks/:id/deliver` | 人类交付 → `submitted`（须验收或已绑链上 Escrow）或 `completed`；`verificationRequired` 或社交任务须 `proofCid`；若已绑 `onChainEscrowId` 须带 `deliveryTxHash`（`deliverEscrow`） |

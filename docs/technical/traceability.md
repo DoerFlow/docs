@@ -9,7 +9,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 将 `SPEC.md` 中的需求 ID 映射到实现仓库与模块，用于 Spec 驱动开发与 Code Review。
 
-**最后更新**: 2026-09-10
+**最后更新**: 2026-09-17
 
 | 需求 ID | 简述 | 主仓库 | 模块/路径 | 版本 |
 |---------|------|--------|-----------|------|
@@ -24,7 +24,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-SK-004 | Skill 搜索 | api + web | `GET /skills?q=`、市场 Skill 列表 | v0.1 |
 | FR-ST-001 | Escrow 创建 | contracts + web | `Escrow.sol`；雇佣等上链后再轮询新 escrowId | v0.1 |
 | FR-ST-002 | 交付 | contracts + web + api | `EscrowDelivered` + 开放订单 `getEscrow` 刷新；任务中心摘要 | v0.1 |
-| FR-ST-003 | 争议仲裁 | contracts, api, admin, wallet, worker | M3 平台工单 + `refundTimedOut`；DAO 分账 v0.4+ | **M3** 🟡 |
+| FR-ST-003 | 争议仲裁 | contracts, api, admin, wallet, worker | M3 平台工单 + `refundTimedOut`；DAO 分账 v0.4+ | **M3 ✅** · DAO 分账 v0.4+ |
 | FR-ST-004 | 分账 | contracts + web | 协议费 + 任务卡/工作台实收拆分 | v0.1+ |
 | FR-IPFS-001 | 元数据 / 任务 CID pin | api + web | `storage` 默认 local；`STORAGE_BACKEND=pinata` 才走 Pinata | v0.1 ✅ |
 | FR-P2P-001~004 | P2P | p2p | Beacon 等 | v0.2 |
@@ -33,12 +33,12 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-WRK-* | 综合端 RN | worker | 众包 + 社交 | v0.3+ |
 | FR-ADM-* | 管理平台 | admin | 审批、告警 | v0.3+ |
 | FR-GOV-* | 任务治理 | api | `tasks` 模块 | MVP+ |
-| FR-GOV-SUBMIT | 人类交付进入 `submitted` 再验收 | api, wallet, worker | `deliver` → `submitted`；`verify` 接受 `submitted\|verifying`；wallet 收益页验收按钮 | **v0.3 / M3** 🟡 |
+| FR-GOV-SUBMIT | 人类交付进入 `submitted` 再验收 | api, wallet, worker | `deliver` → `submitted`；`verify` 接受 `submitted\|verifying`；wallet 收益页验收按钮 | **v0.3 / M3 ✅** |
 | FR-UI-* | DApp 页面 | web | `pages/*` | v0.1 |
-| FR-UI-001 | 公开市场（无需平台登录） | web | `pages/Home` 默认可雇佣 Agent + Skill 列表搜索、`/agents/:id` · en+zh | **v0.3 / M3** 🟡 |
+| FR-UI-001 | 公开市场（无需平台登录） | web | `pages/Home` 默认可雇佣 Agent + Skill 列表搜索、`/agents/:id` · en+zh | **v0.3 / M3 ✅** |
 | FR-UI-002 | Agent 详情雇佣进度 + 未绑定引导 | web | `pages/AgentDetail`、托管历史、自雇提示、`MintFlowPanel` kind=hire | v0.1 |
-| FR-UI-004 | 任务中心待办队列 + 超时退款 | web | `pages/Tasks`、上链回执 + 状态对齐；人类任务只读列表 + wallet/worker CTA · locale | **v0.3 / M3** 🟡 |
-| FR-UI-003 | Creator 工作台网络/gas 引导；托管收入 | web + MetaRepo | `NetworkGasAlert`、Studio `waitMined`、收入卡、`scripts/use-chain.mjs` · locale | **v0.3 / M3** 🟡 |
+| FR-UI-004 | 任务中心待办队列 + 超时退款 | web | `pages/Tasks`、上链回执 + 状态对齐；人类任务只读列表 + wallet/worker CTA · locale | **v0.3 / M3 ✅** |
+| FR-UI-003 | Creator 工作台网络/gas 引导；托管收入 | web + MetaRepo | `NetworkGasAlert`、Studio `waitMined`、收入卡、`scripts/use-chain.mjs` · locale | **v0.3 / M3 ✅** |
 | FR-IDX-001 | 索引分片与游标 + RPC 健康 | api, web | `indexer/` 历史追块可走 RPC_URL、链头可选 thirdweb；`catchupPercent` | **v0.3 / M3** 🟡 |
 | FR-IDX-002 | Indexer worker + Redis 选主 + PG 游标与索引行 | api | `INDEXER_ROLE` · `indexer.main.ts` · leader 锁 · `indexer_cursors` · `agents`/`skills`/`escrows` 在账本 Postgres | **v1.0-rc / HA** |
 | FR-IOT-001 | 设备注册认证 | contracts + api | 链上 `DeviceRegistry` 仍为 v1.2+；实验室 HTTP `/devices` 见 FR-IOT-007 | v1.2+ |
@@ -95,7 +95,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-DEV-004 | Python SDK 独立 EIP-712 支付闭环 | sdk/python | `authorize_session` + `pay_quote` · 域与 TS 一致 | **客户接入** |
 | FR-DEV-005 | npm / PyPI 可发布（CI dry-run，不代发） | shared, sdk/python, .github | `publishConfig` · workflow_dispatch | **客户接入** |
 | FR-DEV-006 | 生产接入清单；主网地址禁止伪造 | spec, deploy | PRODUCTION + production.env.example | **客户接入** |
-| FR-GEO-001 | 权益与支付轨解耦；权益表不含支付标识 | LW entitlement | `subscriptions`/`grants` 列守卫测试 | **现状成立**，待守卫测试 |
+| FR-GEO-001 | 权益与支付轨解耦；权益表不含支付标识 | LW entitlement | `subscriptions`/`grants` 列守卫测试 | **现状成立**，守卫测试已加 |
 | FR-GEO-002 | Ed25519 权益断言签发/验签/续签/撤销 | LW entitlement | 复用 `license/ed25519.ts` + `canonical-json.ts` | **P4** · GEO_PORTABILITY |
 | FR-GEO-003 | 断言 schema 严格模式，拒绝支付类字段 | LW entitlement | 拒绝 `txHash`/`orderId`/`providerId` | **P4** |
 | FR-GEO-004 | 大陆站通道集与续费辖区切换文案 | LW entitlement, 产品 web | CN 阻断加密通道 · en+zh 文案 | **P4** |
@@ -130,14 +130,14 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-PAY-013 | Merkle 强制提现 | contracts, shared | Hardhat 任意账户 `forceWithdraw`；Sepolia 已部署未重部 | **v0.2 / M2** ✅ |
 | FR-WLT-001 | wallet 账户与首页 | wallet | 首页平台会话/快速体验 · 链名 en+zh | **v0.3 / M3** 🟡 |
 | FR-WLT-002 | wallet ETH 转账（去演示化） | wallet | `/transfer` gas 估算 + 回执 + explorer · en+zh | **v0.3 / M3** 🟡 |
-| FR-WLT-003 | wallet 收益：Escrow 锁定/放款/争议 | wallet | `earnings` 文案 en+zh；Escrow 错误 locale；争议输入框；fund/confirm/refund；**`submitted` 验收** · **进度只读 + 待办置顶** | **v0.3 / M3** 🟡 |
-| FR-WLT-004 | wallet 发任务 + 驳回原因回显 | wallet, api | `earnings` 展示 `alertReason`；发布即时 Alert · **说明 / 线下地点** · **社交须声明平台与步骤** · **published 接单进度** · locale | **v0.3 / M3** 🟡 |
+| FR-WLT-003 | wallet 收益：Escrow 锁定/放款/争议 | wallet | `earnings` 文案 en+zh；Escrow 错误 locale；争议输入框；fund/confirm/refund；**`submitted` 验收** · **进度只读 + 待办置顶** | **v0.3 / M3 ✅** |
+| FR-WLT-004 | wallet 发任务 + 驳回原因回显 | wallet, api | `earnings` 展示 `alertReason`；发布即时 Alert · **说明 / 线下地点** · **社交须声明平台与步骤** · **published 接单进度** · locale | **v0.3 / M3 ✅** |
 | FR-WLT-005 | 审批状态应用内通知 | wallet | `notifyStore` 轮询 mine（**assigned** + 交付 `submitted`）；系统 Push → v0.4 | **v0.3 / M3** 🟡 |
 | FR-WLT-006 / FR-ONRAMP-003 | wallet 买币 Onramp | wallet, api | `/onramp` + `POST /onramp/session` · en+zh | **v0.3 / M3** 🟡 |
-| FR-ST-001/002 | 链上 Escrow fund/release（平台任务） | wallet, worker, api, contracts | bind-onchain-escrow · create/fund · deliver · confirm · **`pnpm run smoke:escrow:local`**（Hardhat 31337）· **`pnpm run smoke:escrow`**（Sepolia 可选；拒绝 Hardhat 公开钥 / EIP-7702） | **v0.3 / M3** 🟡 |
+| FR-ST-001/002 | 链上 Escrow fund/release（平台任务） | wallet, worker, api, contracts | bind-onchain-escrow · create/fund · deliver · confirm · **`pnpm run smoke:escrow:local`**（Hardhat 31337）· **`pnpm run smoke:escrow`**（Sepolia 可选；拒绝 Hardhat 公开钥 / EIP-7702） | **v0.3 / M3 ✅** |
 | FR-WLT-008 | wallet Vault 充提 | wallet | `app/vault.tsx` + 入金 Tab · disclosure · en+zh | **v0.3 / M3** 🟡 |
-| FR-ADM-001 | admin Logto 登录 | admin, api | 本地 `pnpm id:up`；`doerflow_admin` → Casbin；禁止 SIWE 冒充运营 | **v0.3 / M3** 🟡 |
-| FR-ADM-003 | admin 审批工作台 | admin, api | approve 绑 Escrow 预留；request-revision → needs_revision · **社交展示 App/步骤** · locale | **v0.3 / M3** 🟡 |
+| FR-ADM-001 | admin Logto 登录 | admin, api | 本地 `pnpm id:up`；`doerflow_admin` → Casbin；禁止 SIWE 冒充运营 | **v0.3 / M3 ✅** |
+| FR-ADM-003 | admin 审批工作台 | admin, api | approve 绑 Escrow 预留；request-revision → needs_revision · **社交展示 App/步骤** · locale | **v0.3 / M3 ✅** |
 | FR-ADM-004 | admin 自动审批监控 | admin, api | `/auto-approval` ← auto-decisions / escalate / mark-reviewed · locale | **v0.3 / M3** 🟡 |
 | FR-ADM-009 | admin 治理参数 | admin, api | `/governance` ← GET/PUT governance/config；驱动 scoreTask · locale | **v0.3 / M3** 🟡 |
 | FR-ADM-010 | admin 发单方观察/黑名单 | admin, api | `/publishers` ← aggregate + flag；黑名单禁发 · locale | **v0.3 / M3** 🟡 |
@@ -149,11 +149,11 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-ADM-013 | admin 界面文案 locale | admin | `en` + `zh-CN`；禁止页面硬编码 fallback | **v0.3 / M3** 🟡 |
 | FR-ADM-007 | admin 支付 Commits 运维 | admin | `/payments/commits` | **v0.3 / M3** 🟡 |
 | FR-ADM-008 | admin 费率等级只读 | admin, api | `/payments/fees` ← `GET /fees/tiers` | **v0.3 / M3** 🟡 |
-| FR-WRK-002/003/005 | worker published 大厅 + 相机/GPS/问卷交付 + Vault/账本 | worker, api | Expo 大厅 · proof · GPS · 社交清单 · accept **仅未接单** · 详情状态/待验收 · deliver → **submitted** · deliverEscrow · earnings **原生 ETH + 链上放款标记** · **en+zh** | **v0.3 / M3** 🟡 |
-| FR-WRK-004 | worker 社交任务（清单+截图） | worker, wallet | `social/[id]` · 打开目标首页 · wallet 声明平台与步骤 · 人工审后上架 | **v0.3 / M3 要做** 🟡 |
+| FR-WRK-002/003/005 | worker published 大厅 + 相机/GPS/问卷交付 + Vault/账本 | worker, api | Expo 大厅 · proof · GPS · 社交清单 · accept **仅未接单** · 详情状态/待验收 · deliver → **submitted** · deliverEscrow · earnings **原生 ETH + 链上放款标记** · **en+zh** | **v0.3 / M3 ✅** |
+| FR-WRK-004 | worker 社交任务（清单+截图） | worker, wallet | `social/[id]` · 打开目标首页 · wallet 声明平台与步骤 · 人工审后上架 | **v0.3 / M3 ✅** |
 | FR-WRK-010/011/012 | 社交步骤引导 Accessibility Service | worker | v0.4；**不是** 残障无障碍 | **v0.4** ⚪ |
 | FR-A11Y | 聋哑盲等残障无障碍（读屏/字幕/WCAG） | 全客户端 | **前期不做**（至商业 1.0 前；单独立项后再议） | **不做** |
-| FR-PAY-SETTLE | 任务完成链下放款 stub | api | `ledgerSettled` + LEDGER.credit(WETH wei) | **v0.3 / M3** 🟡 |
+| FR-PAY-SETTLE | 无 `onChainEscrowId` 时任务完成走链下账本（既定路径，非 stub） | api | `settleLedgerPayout` → `ledgerSettled` + LEDGER.credit(WETH wei)；有链上 Escrow 则跳过 credit | **v0.3 / M3** 🟡 |
 | FR-ST-005/006 | 账本清算主路径 + 场景矩阵 | spec, api, contracts | ASYNC_PAYMENTS · CHANNELS | **v0.2 / M2** · **v1.1-channels-lab** |
 | FR-ST-007 | 跨产品 Job 与 CloudEvents 变现 | spec, api, shared, web | luminaryworks-ecosystem · authorize/capture · `/integrations/events` | **v1.2-ecosystem-commerce** |
 | FR-CH-001~004 | 五通道、结算分流、统一 ID、交付凭证 | spec, api | `CHANNELS.md` · `GET /channels` · OpenAPI | **v1.1-channels-lab** ✅ |
@@ -171,7 +171,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 | SPEC §11 条目 | 仓库 | 状态 |
 |---------------|------|------|
-| Agent 铸造与市场展示 | contracts, api, web | 进行中 |
+| Agent 铸造与市场展示 | contracts, api, web | **v0.1 ✅** `smoke:mint` |
 | Skill 注册与绑定 | contracts, web | **v0.1** 代码就绪 / 需本机链 |
 | Escrow 全流程 | contracts, api, web | **v0.1 ✅** `smoke:escrow:local` · `smoke:m3` |
 | 任务治理双通道 | api, wallet, worker, admin | MVP+ |

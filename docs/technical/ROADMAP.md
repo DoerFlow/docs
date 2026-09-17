@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # DoerFlow 版本规划与里程碑
 
-**最后更新**: 2026-09-15  
+**最后更新**: 2026-09-17  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [CLIENTS.md](./CLIENTS.md) · [SPEC.md](./SPEC.md)
 
 ---
@@ -74,7 +74,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 ---
 
-### M1 — v0.1 MVP「身份与交易」🟡
+### M1 — v0.1 MVP「身份与交易」✅
 
 **主题**: Agent 铸造 → Skill 注册 → Escrow 结算最小闭环（已基本达成）
 
@@ -94,7 +94,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 | Escrow | `0x1bB2364fFeA1D747aC41e8A92A2fC78BfE423f50` |
 | SessionKeyRegistry | `0xF35E657DD8a57256694666331b5875D7A1B4FF0A` |
 
-**验收**: 双钱包完成铸造 → Escrow → 交付 → 结算。
+**验收**: 双钱包完成铸造 → Escrow → 交付 → 结算。`contracts` `smoke:mint` · `smoke:escrow:local` · `smoke:m3`（任务治理）。`contracts` `smoke:mint` · `smoke:escrow:local` · `smoke:m3`（任务治理）。
 
 ---
 
@@ -322,7 +322,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | 里程碑 | 版本 | 状态 |
 |--------|------|------|
 | M0 项目启动 | — | ✅ |
-| M1 身份与交易 | v0.1 | 🟡 |
+| M1 身份与交易 | v0.1 | ✅ `smoke:mint` · `smoke:escrow:local` · `smoke:m3` |
 | **M2 链下账本 + Merkle** | **v0.2** | **✅ 实验室验收（10 万笔 → 1 Root · Hardhat 强制提现）** |
 | M3 客户端完善 | v0.3 | ✅ **AI：`pnpm run smoke:m3`** |
 | M4 赚钱场景落地 | v0.4 | ✅ **AI：`pnpm run smoke:m4`** |

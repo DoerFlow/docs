@@ -174,6 +174,9 @@ print(client.quote("0", 1)["amount"])
 - `credit_ledger_batch(items, token=None)` → `POST /payments/ledger/credit-batch`（body `{ entries }`）
 - `list_ledger_commits(status=None, limit=None)` → `GET /payments/ledger/commits`
 - `get_ledger_commit(epoch)` → `GET /payments/ledger/commits/{epoch}`
+- `list_ledger_nets()` → `GET /payments/ledger/nets`
+- `settle_ledger_net(token=None)` → `POST /payments/ledger/net-settle`（PaymentServiceGuard；`token` 或构造 `token=`）
+- `create_ledger_bundle(include_commit=False, token=None)` → `POST /payments/ledger/bundle`（`include_commit=True` → `?includeCommit=1`；PaymentServiceGuard）
 - `create_ledger_snapshot(enqueue=False)` → `POST /payments/ledger/snapshot`（`enqueue=False` → `?enqueue=0`；`True` 省略 query，对齐 TS）；**PaymentServiceGuard** 需 service JWT（构造 `DoerFlowClient(..., token=...)`，`_request` 已发 `Authorization: Bearer`）
 - `latest_ledger_snapshot()` → `GET /payments/ledger/snapshots/latest`
 - `payments_health()` → `GET /payments/health`（与 `health()` 的 `/health` 不同）
