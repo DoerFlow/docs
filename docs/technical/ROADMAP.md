@@ -251,15 +251,39 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 | v0.15.1 api | `/dex/*` 读链 | 可并行 |
 | v0.15.2 web | Swap / LP / Vote | 可并行 |
 
-### 4.2 v1.0 之后展望
+### 4.2 LuminaryWorks 会员与支付融合（P0–P4 · 支线，与 M5a 并行）
+
+规范：[PAYMENT_ARCHITECTURE.md](./PAYMENT_ARCHITECTURE.md) · [GEO_PORTABILITY.md](./GEO_PORTABILITY.md)
+
+个人（无公司主体）先上线试运营，收款能力做全以便日后 SaaS 交付；私有化交付可整体摘除支付。DoerFlow 在此既是**产品**（可被购买会员），也是一条**支付轨**（可给其他产品付款）。
+
+| 阶段 | 内容 | 验收 | 状态 |
+|------|------|------|------|
+| **P0** | PayPal 活体（零新代码）+ `manual` 对公 + 付款方类型 `individual\|business`（FR-PAY-022/025） | 真实产生一笔 `order.fulfilled`，产品侧 plan 生效 | 🟡 |
+| **P1** | MoR 通道（代扣代缴 VAT，个人可开户）（FR-PAY-024） | 沙箱含税结算 + MoR 侧发起的退款级联撤销 | 🟡 |
+| **P2** | USDT 多资产 Vault + `doerflow_credit` 支付轨（FR-PAY-020/021） | 链上余额买通一个产品会员；重放 `idempotencyKey` 不二次扣款 | 🟡 |
+| **P3** | `PAYMENTS_ENABLED` 硬开关 + VistaCast 接入 + 企业开票（FR-PAY-023） | 关开关后 webhook 路由 404 且产品仍可跑 | 🟡 |
+| **P4** | 大陆分站权益断言（FR-GEO-002~005） | 仅 spec + 契约与守卫测试，同步服务不落代码 | ⚪ |
+
+**铁律**：会员真相源只有 LuminaryWorks Entitlement；DoerFlow 不自建会员表。协议费 / Job 单价 / Escrow / Gas 不进 Entitlement。不做法币提现。
+
+### 4.3 v1.0 之后展望
 
 | 版本 | 主题 |
 |------|------|
 | v1.1 | 完整 P2P Beacon、争议仲裁增强、信誉 |
 | v1.2 | IoT 设备收款 / 数据微市场规模化（复用 M2 账本） |
 | v1.3 | 能源与冷链 SLA 契约 |
-| v1.4 | Omnichain（CCTP / LayerZero）；状态通道 1:1 拓展 |
+| v1.4 | Omnichain（CCTP / LayerZero）；状态通道 1:1 拓展（FR-PAY-010，A2A 真高频） |
+| v0.7+ | `$DOER` **非结算**效用代币：费率折扣 / 质押 / ve gauge（FR-TOK-001） |
 | v1.x+ | MasterChef / DAO 治理扩大；自建 L2 **仅规模证明后评估** |
+
+#### 代币铁律（FR-TOK-001 / FR-TOK-002）
+
+- A2A 小额高频的**结算与计价单位永远是稳定币**。自有币若兼任计价货币，其波动会直接破坏 Agent 定价 —— 设计红线。
+- `$DOER` 只做效用与治理，**不作结算货币**。
+- **不发行** 1:1 锚定美元、可赎回的平台内记账币（属储值 / 预付工具，与 [ONRAMP.md](./ONRAMP.md) 的"不托管"立场冲突）。
+- 发币前置门槛（缺一不可）：主网真实成交量 · 已注册经营主体 · 法律意见书 · 明确「非证券、无收益承诺」定位。
 
 ---
 
@@ -370,5 +394,22 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | 验收 | `pnpm run compose:config` · `pnpm run compose:preflight` · `pnpm run smoke:m5` |
 
 Creator UI 同 §9（web `/ecosystem`）。
+
+---
+
+## 11. 客户正式接入（FR-DEV-001~006）
+
+规范：[DEVELOPER.md](./DEVELOPER.md) §5。目标是云 / Agent 客户能自助接生产，而不是只靠仓内路径 + 实验室模式。
+
+| 项 | 落点 |
+|----|------|
+| 开发者 API Key | `dfk_live_` / `dfk_test_`；生产拒 test；绑定 Logto `sub`；不绕过 Entitlement/Casbin |
+| 工程 SLA | 按套餐 30/300/1200 rpm；429 + `X-RateLimit-*` |
+| 控制台 | web `/developers`：发 Key、注册 Skill、轮换 webhook、看流水 |
+| Python 闭环 | `authorize_session` + `pay_quote` 与 TS EIP-712 字节一致 |
+| 发布面 | `@vibe-agent/shared` / `doerflow` 可 dry-run pack；**不代发 npm/PyPI** |
+| 主网 | 地址只由部署脚本写入；AI 禁止填 `"8453"` |
+
+生产默认仍是 M2M + Entitlement + Casbin；`NODE_ENV=production` 下 `COMMERCE_AUTH_MODE=lab\|off` 启动即失败。API Key 是第三条生产路径，不是实验室后门。
 
 *主线规范入口：[ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [CHANNELS.md](./CHANNELS.md) · [CLIENTS.md](./CLIENTS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md)*

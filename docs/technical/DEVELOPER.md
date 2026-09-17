@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 开发者接入（Agent Trading SDK · M4）
 
-**版本**: v0.4 · **最后更新**: 2026-09-12  
+**版本**: v0.4 · **最后更新**: 2026-09-17  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [ROADMAP.md](./ROADMAP.md) · [SPEC.md](./SPEC.md) §8.1
 
 第三方 **无 App** 即可：发现 Skill → 报价 → Session Key 授权 → `signReceipt` → 链下记账 → 参与 Merkle 清算。
@@ -81,6 +81,14 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | GET | `/onramp/disclosure` | 合规披露（非托管、无 PII）；TS `onrampDisclosure` / Python `onramp_disclosure` |
 | GET | `/onramp/providers?country=` | 按地区伙伴列表；TS `listOnrampProviders` / Python `list_onramp_providers` |
 | POST | `/onramp/session` | 签发 Widget session（`CreateOnrampSessionDto`，非 live charge）；TS `createOnrampSession` / Python `create_onramp_session` |
+| GET | `/developers/me` | 当前套餐 + 限流档位（平台登录；FR-DEV-001/002） |
+| GET | `/developers/keys` | 列出自己的 API Key（无明文） |
+| POST | `/developers/keys` | 创建 Key；响应含**一次性** `token`（`dfk_live_` / `dfk_test_`） |
+| POST | `/developers/keys/:id/rotate` | 轮换；明文一次性 |
+| DELETE | `/developers/keys/:id` | 撤销 |
+| GET | `/developers/skills` | 自己的 Provider Skill（不含 `webhookSecret`） |
+| GET | `/developers/jobs` | 自己的最近作业 |
+| GET | `/developers/receipts` | 最近收据只读 |
 
 企业回调：创建 job 时带 `callbackUrl`；结算后 POST **CloudEvents 1.0** JSON，头 `X-DoerFlow-Signature: sha256=<hmac>`（`TRADING_WEBHOOK_SECRET`）。信封含 `id` / `source` / `type` / `data`。
 
@@ -144,7 +152,7 @@ print(client.quote("0", 1)["amount"])
 # then verify_webhook(raw_body, signature, webhook_secret)
 ```
 
-EIP-712 签名优先用 TS SDK；Python `eth-account` extra 提供 `sign_receipt`。`submit_receipt` 返回 API `data`（含 `ledgerApplied` / `ledgerError`）；HTTP 200 时 `ledgerApplied` 仍可能为 false。此时勿重放同一签名体（Vault `DUPLICATE`）；补余额后 `POST /payments/receipts/:receiptId/apply-ledger`。
+`pip install 'doerflow[sign]'` 后 Python 独立走完：`catalog → quote → create_job → authorize_session → pay_quote`（必要时 `apply_receipt_ledger`）。EIP-712 域与 TS 一致：收据 `VibeAgent`/`1`，会话 `VibeAgent Session`/`1`，`verifyingContract=0x000…0`。另有 `sign_receipt` / `sign_session_authorization`。`submit_receipt` 返回 API `data`（含 `ledgerApplied` / `ledgerError`）；HTTP 200 时 `ledgerApplied` 仍可能为 false。此时勿重放同一签名体（Vault `DUPLICATE`）；补余额后 `POST /payments/receipts/:receiptId/apply-ledger`。
 
 - `list_canonical_tokens(chain_id=None)` → `GET /tokens/canonical`（实验室只读目录，非 CCTP / LayerZero）
 - `list_fee_tiers()` → `GET /fees/tiers`（静态 AA 协议费等级表；非链上 FeeTierRegistry）
@@ -235,7 +243,72 @@ tel = client.post_device_telemetry(device["id"], "22.5", unit="C")
 
 ---
 
-## 5. AI 验收（M4）
+## 5. 客户正式接入（FR-DEV-001~006）
+
+实验室 SDK（§3–4）已经能跑通一笔链下微支付。本节补的是**客户能自己接、能在生产跑、密钥可轮换、限流可计量**。不降低生产鉴权：`NODE_ENV=production` 下 `COMMERCE_AUTH_MODE=lab|off` 仍直接拒绝启动。
+
+### 5.1 生产鉴权三条路径（FR-DEV-001）
+
+| 路径 | 凭证 | 用途 |
+|------|------|------|
+| Logto M2M JWT | `aud=https://api.doerflow.local` + `integration.*` scope | 企业 / 已有 IdP |
+| 平台人类 Bearer | Logto 用户 token + SIWE 钱包绑定 | 控制台操作、卖家注册 |
+| **开发者 API Key** | `Authorization: Bearer dfk_live_…` 或 `X-DoerFlow-Key` | 云服务 / Agent 运行时，不必自建 Logto 应用 |
+
+API Key 规则：
+
+- 明文只在创建 / 轮换时返回一次；库里只存 SHA-256。
+- 前缀 `dfk_test_`（非生产）/ `dfk_live_`（生产）。`NODE_ENV=production` 拒绝 `dfk_test_`。
+- 主体绑定创建者的 Logto `sub`。后续 Entitlement / Casbin 仍按该 `sub` 判定，**Key 不能绕过套餐**。
+- 卖家注册 Skill 仍要求 `integration.provider.register`（种子里 Enterprise）。Pro 用户可以调目录 / 报价 / 收据 / 作业，不能开卖。
+
+### 5.2 限流与 SLA 档位（FR-DEV-002）
+
+这是工程 SLA（配额 + 响应头），不是法律服务合同。
+
+| 档位 | 来源 | 每分钟请求 | 并发作业 |
+|------|------|------------|----------|
+| `none` | 无有效套餐 | 30 | 2 |
+| `pro` | Entitlement `effectivePlan=pro` | 300 | 20 |
+| `ultra` / `enterprise` | 同上 | 1200 | 100 |
+
+超限返回 **429** `RATE_LIMITED`，头：`X-RateLimit-Limit` / `Remaining` / `Reset`。实现优先 Redis（与账本同套），无 Redis 则进程内令牌桶（单实例实验室）。
+
+### 5.3 开发者控制台（FR-DEV-003）
+
+Creator DApp 路由 `/developers`（需登录）：
+
+- 创建 / 列出 / 撤销 API Key（明文一次性展示）
+- 注册 / 列出自己的 Provider Skill；轮换 `webhookSecret`（明文一次性）
+- 最近作业与收据只读表
+- 当前套餐与限流档位只读
+
+运营 admin **不**替代此页。Admin 继续只做平台治理。
+
+### 5.4 Python 独立支付闭环（FR-DEV-004）
+
+`pip install 'doerflow[sign]'` 后必须能独立完成，不再依赖 TS：
+
+`catalog → quote → create_job → authorize_session → pay_quote →（必要时 apply_receipt_ledger）`
+
+EIP-712 域必须与 `@vibe-agent/shared/payments` 字节一致：收据域 `VibeAgent` / `1`，会话域 `VibeAgent Session` / `1`，`verifyingContract=0x000…0`。
+
+### 5.5 发布面（FR-DEV-005）
+
+| 包 | 坐标 | 说明 |
+|----|------|------|
+| TypeScript | `@vibe-agent/shared`（export `./sdk`） | 仓内已 `private: false`；补 `publishConfig` + workflow_dispatch |
+| Python | `doerflow` | `sdk/python`；补 PyPI 元数据 + workflow_dispatch |
+
+**本轮不替你执行 `npm publish` / `twine upload`。** 没有登记令牌就假装已上架是假交付。CI 只做到 build + dry-run pack。
+
+### 5.6 生产与主网（FR-DEV-006）
+
+- 生产清单见 [PRODUCTION.md](./PRODUCTION.md) 与 `deploy/production.env.example`。
+- **禁止 AI 填写 Base 主网合约地址。** 主网 Vault / Escrow 地址只能由部署脚本写入 `deployments.json`。
+- 客户接入生产：`COMMERCE_AUTH_MODE` 不设或 `production` + Entitlement `enforce` + 开发者 Key 或 M2M。
+
+## 6. AI 验收（M4）
 
 > ① SDK 在无 App 情况下完成至少一笔链下微支付记账并出现在 Merkle 快照 / proof 中；另覆盖 apply-ledger 重试（submit `ledgerApplied: false` → Vault `DUPLICATE` → 补余额后 `applyReceiptLedger` 幂等 true）；  
 > ② 人类发单→审批→接单→结算由 `pnpm run smoke:m3` 覆盖；  

@@ -7,7 +7,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 等级费率 · ERC-4337 账户抽象
 
-**版本**: v0.1-draft · **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)（Session Keys）
+**版本**: v0.1-draft · **最后更新**: 2026-09-16  
+**关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)（Session Keys）
 
 ## 1. 目标
 

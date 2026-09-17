@@ -101,6 +101,17 @@ Creator 可在 web `/ecosystem` 查看 profile 与 commerce readiness；见 [ECO
 - 支付状态机见 [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) FR-PAY-018
 - 通道与 CloudEvents 见 [CHANNELS.md](./CHANNELS.md)
 
+## DoerFlow 的双重身份：产品 + 支付轨
+
+DoerFlow 在生态里既是**被购买方**，也是**付款通道**：
+
+| 方向 | 机制 | 规范 |
+|------|------|------|
+| DoerFlow 会员被购买 | `productCode=doerflow`，走 LuminaryWorks Entitlement 目录（`trialPolicy=disabled`） | [PAYMENT_ARCHITECTURE.md](./PAYMENT_ARCHITECTURE.md) §1 |
+| 用 DoerFlow 余额买别的产品 | `doerflow_credit` 通道：Entitlement 服务端定价 → `POST /payments/merchant/charges` 扣链上稳定币 → HMAC 回调履约 | [PAYMENT_ARCHITECTURE.md](./PAYMENT_ARCHITECTURE.md) §3 · FR-PAY-020 |
+
+**边界**：DoerFlow 的协议费、Job 单价、Escrow、Gas 一律不进 Entitlement；Entitlement 的 plan / quota 一律不进 JWT。会员真相源只有 Entitlement，DoerFlow 不自建会员表。
+
 ## 延伸阅读
 
 - [LuminaryWorks 宣传站](https://luminaryworks.dev)

@@ -46,21 +46,39 @@ await api.payQuote({ session, quote, resourceId: job.resourceId });
 
 底层收据仍可用 `@vibe-agent/shared/payments` 的 `signReceipt`。
 
+生产鉴权（`COMMERCE_AUTH_MODE=production`）：Logto M2M、平台 Bearer，或开发者控制台签发的 `dfk_live_…`（`apiKey` / `X-DoerFlow-Key`）。`NODE_ENV=production` 下实验室模式 `lab|off` 会拒绝启动；`dfk_test_` 也会被拒。自助发 Key、轮换 webhook、看流水：Creator DApp `/developers`。
+
 ## Python
 
 ```bash
-pip install -e sdk/python
+pip install 'doerflow[sign]'
+# 尚未上 PyPI 时：pip install -e "sdk/python[sign]"
 ```
 
 ```python
+import os
 from doerflow import DoerFlowClient
 
-client = DoerFlowClient('http://localhost:13008/api/v1')
-print(client.catalog()['skills'][0]['skillId'])
-print(client.quote('0', 1)['amount'])
+client = DoerFlowClient('http://localhost:13008/api/v1', chain_id=84532)
+quote = client.quote('0', 1)
+job = client.create_job(quote['skillId'], 1)
+client.authorize_session(
+    owner_key=os.environ['OWNER_KEY'],
+    session_key=os.environ['SESSION_KEY'],
+    allowed_payees=[quote['payee']],
+    max_amount_per_call=quote['amount'],
+    session_budget=quote['amount'],
+)
+paid = client.pay_quote(
+    session_key=os.environ['SESSION_KEY'],
+    quote=quote,
+    resource_id=job['resourceId'],
+)
+if paid['submitted'].get('ledgerApplied') is False:
+    client.apply_receipt_ledger(paid['submitted']['receiptId'])
 ```
 
-EIP-712 签名：`pip install -e "sdk/python[sign]"` 后使用 `sign_receipt`，或直接用 TypeScript SDK。卖家验签：`verify_webhook(raw_body, signature, webhook_secret)`。
+卖家验签：`verify_webhook(raw_body, signature, webhook_secret)`。包坐标 `doerflow`，维护者持 token 后才 `twine upload`。
 
 ## Provider SDK（第三方 App / SaaS 当卖家）
 
@@ -93,6 +111,8 @@ const skill = await api.registerProviderSkill({
 | GET | `/api/v1/trading/events?jobId=`（SSE） |
 | WS | `/api/v1/trading/ws` |
 | POST | `/api/v1/payments/receipts` |
+| GET/POST | `/api/v1/developers/keys`（控制台；明文只返回一次） |
+| GET | `/api/v1/developers/me` · `/skills` · `/jobs` · `/receipts` |
 
 企业回调：创建 job 时传 `callbackUrl`；结算后 POST JSON，头 `X-DoerFlow-Signature: sha256=<hmac>`。
 

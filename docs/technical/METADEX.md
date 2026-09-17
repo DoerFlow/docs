@@ -7,7 +7,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # MetaDEX · 轻量 ve 模型 DEX
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-10  
+**版本**: v0.1-draft · **最后更新**: 2026-09-16  
+**关联**: [CLIENTS.md](./CLIENTS.md)  
 **路线图**: v0.15（**合约优先**，见 [ROADMAP.md](./ROADMAP.md) § M1b）  
 **合约计划**: [METADEX_CONTRACTS.md](./METADEX_CONTRACTS.md) ← **当前实施入口**  
 **链下架构**: [METADEX_ARCHITECTURE.md](./METADEX_ARCHITECTURE.md)  

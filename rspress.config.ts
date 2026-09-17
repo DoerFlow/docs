@@ -140,6 +140,8 @@ export default defineConfig({
             { text: '跨链 BRIDGE', link: '/technical/BRIDGE' },
             { text: '法币 ONRAMP', link: '/technical/ONRAMP' },
             { text: '链下账本 ASYNC_PAYMENTS', link: '/technical/ASYNC_PAYMENTS' },
+            { text: '支付与会员架构 PAYMENT_ARCHITECTURE', link: '/technical/PAYMENT_ARCHITECTURE' },
+            { text: '跨区权益可携带性 GEO_PORTABILITY', link: '/technical/GEO_PORTABILITY' },
             { text: '开发者 SDK DEVELOPER', link: '/technical/DEVELOPER' },
             { text: '五通道 CHANNELS', link: '/technical/CHANNELS' },
             { text: 'Agent Runtime', link: '/technical/AGENT_RUNTIME' },

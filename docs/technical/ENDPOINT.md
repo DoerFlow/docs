@@ -7,10 +7,12 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # Endpoint Agent（电脑 / 手机执行面）
 
-**版本**: v1.1-channels-lab · **最后更新**: 2026-08-29  
+**版本**: v1.1-channels-lab · **最后更新**: 2026-09-16  
 **关联**: [CHANNELS.md](./CHANNELS.md) · [WORKER.md](./WORKER.md) · [IOT.md](./IOT.md)
 
 `channel=agent-endpoint`。本机 OS 作为 Agent 执行器，**不是** 人类 worker，也不是 IoT 设备，也不是算力出租 Device Node。
+
+实验室本机验收：`pnpm run smoke:channels`（上手见 MetaRepo [ONBOARDING.md](../ONBOARDING.md)「五通道实验室」）。
 
 ---
 

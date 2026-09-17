@@ -7,8 +7,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 物联网交易与设备经济
 
-**版本**: v0.3-lab · **最后更新**: 2026-09-12  
-**路线图**: 实验室 P4 = v1.1-channels-lab HTTP 设备；TB 时间窗入账 = **FR-IOT-008**；规模化车桩/能源/冷链 = **v1.2+**（见 [ROADMAP.md](./ROADMAP.md) · [CHANNELS.md](./CHANNELS.md)）
+**版本**: v0.3-lab · **最后更新**: 2026-09-16  
+**路线图**: 实验室 P4 = v1.1-channels-lab HTTP 设备；TB 时间窗入账 = **FR-IOT-008**；规模化车桩/能源/冷链 = **v1.2+**（见 [ROADMAP.md](./ROADMAP.md) · [CHANNELS.md](./CHANNELS.md) 五通道实验室）
 
 ## 1. 愿景
 

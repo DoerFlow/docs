@@ -7,7 +7,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 任务治理与发布审批
 
-**版本**: v0.2-draft · **最后更新**: 2026-09-10
+**版本**: v0.2-draft · **最后更新**: 2026-09-16  
+**关联**: [CLIENTS.md](./CLIENTS.md) · [WORKER.md](./WORKER.md)
 
 ## 1. 任务状态机
 

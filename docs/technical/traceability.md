@@ -83,6 +83,25 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-PAY-017 | 前期不予赔付 | docs, web, wallet, worker | 文档 `legal/terms` · 注册/登录勾选；disclosure 字段保留、资金页不横幅 | **M5a** |
 | FR-PAY-018 | Job 授权收据 authorize/capture/void | api, shared | `/trading/jobs/:id/authorize|capture|void` · `payment_authorizations` · 5xx 不入账 | **生态商业** |
 | FR-PAY-019 | Durable outbox 回调 | api | `outbox_callbacks` 替换 trading fire-and-forget | **生态商业** |
+| FR-PAY-020 | DoerFlow 作为 LuminaryWorks 支付轨 | api, LW entitlement | `POST /payments/merchant/charges` · `doerflow_credit` adapter · 双向幂等 | **P2** · PAYMENT_ARCHITECTURE |
+| FR-PAY-021 | USDT 多资产 Vault 与账本打通 | contracts, api, shared, wallet, worker | 第二个 `PaymentVault` 实例 · `deployments.json` `vault.usdt` | **P2** |
+| FR-PAY-022 | 付款方类型（个人/企业）与税号档案 | LW entitlement | `billing_profiles.payerType` · `taxId` · 地址 | **P0** |
+| FR-PAY-023 | `PAYMENTS_ENABLED` 硬开关，私有交付摘除支付面 | LW entitlement, deploy | 模块不注册 · webhook 路由 404 · profile `commerce` | **P3** |
+| FR-PAY-024 | MoR 通道（代扣代缴 VAT，个人可开户） | LW entitlement | `creem` adapter · gross/tax/net · MoR 侧退款 | **P1** |
+| FR-PAY-025 | PayPal 活体启用（零新代码，运营配置 + 验收） | LW entitlement, deploy | GLOBAL 路由 · Control Console 凭证 | **P0** |
+| FR-DEV-001 | 开发者 API Key（生产可替代自建 Logto M2M） | api | `developer_api_keys` · `dfk_live_`/`dfk_test_` · 接入 CommerceAuthGuard | **客户接入** |
+| FR-DEV-002 | 按套餐限流 + 429 头（工程 SLA） | api | Redis 令牌桶；档位 none/pro/ultra | **客户接入** |
+| FR-DEV-003 | 开发者控制台：Key / Skill / 轮换密钥 / 流水 | web | `/developers` · en+zh · 禁 defaultValue | **客户接入** |
+| FR-DEV-004 | Python SDK 独立 EIP-712 支付闭环 | sdk/python | `authorize_session` + `pay_quote` · 域与 TS 一致 | **客户接入** |
+| FR-DEV-005 | npm / PyPI 可发布（CI dry-run，不代发） | shared, sdk/python, .github | `publishConfig` · workflow_dispatch | **客户接入** |
+| FR-DEV-006 | 生产接入清单；主网地址禁止伪造 | spec, deploy | PRODUCTION + production.env.example | **客户接入** |
+| FR-GEO-001 | 权益与支付轨解耦；权益表不含支付标识 | LW entitlement | `subscriptions`/`grants` 列守卫测试 | **现状成立**，待守卫测试 |
+| FR-GEO-002 | Ed25519 权益断言签发/验签/续签/撤销 | LW entitlement | 复用 `license/ed25519.ts` + `canonical-json.ts` | **P4** · GEO_PORTABILITY |
+| FR-GEO-003 | 断言 schema 严格模式，拒绝支付类字段 | LW entitlement | 拒绝 `txHash`/`orderId`/`providerId` | **P4** |
+| FR-GEO-004 | 大陆站通道集与续费辖区切换文案 | LW entitlement, 产品 web | CN 阻断加密通道 · en+zh 文案 | **P4** |
+| FR-GEO-005 | 大陆独立 Entitlement 库与 Logto 联邦 | deploy | 数据驻留 · 单向断言同步 | **P4** |
+| FR-TOK-001 | `$DOER` 定位为**非结算**效用代币（费率折扣/质押/治理） | spec, contracts | 结算单位始终稳定币；见 PAYMENT_ARCHITECTURE §9 | **v0.7+** |
+| FR-TOK-002 | **不发行**可赎回美元锚定记账币（储值/预付工具风险） | spec | 与 ONRAMP `custodial: false` 一致 | **已定** |
 | FR-XPROD-001 | 双向价值流 VistaCast/SyncroBrain | spec, api | sell invoke + buy inbox CloudEvents | **生态商业** |
 | FR-XPROD-002 | 租户隔离 / 无 PII / 旧 API 兼容 | spec, api | `sourceTenantId` · `CROSS_TENANT` · receipts 旧路径 | **生态商业** |
 | FR-INT-001 | CloudEvents inbox | api | `POST /integrations/events` | **生态商业** |
