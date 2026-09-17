@@ -212,7 +212,7 @@ flowchart TB
 | 项 | 内容 |
 |----|------|
 | 路径 | `repos/shared` |
-| 包名 | `@vibe-agent/shared` |
+| 包名 | `@doerflow/shared`（对外 npm；仓内路径别名可仍见 `@vibe-agent/shared`） |
 | 职责 | 跨仓类型、链 ID、合约地址常量、ABI 重导出 |
 
 ### 3.9 wallet（纯粹钱包 · React Native）

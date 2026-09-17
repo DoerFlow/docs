@@ -20,7 +20,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 | 语言 | 包 | 入口 |
 |------|-----|------|
-| TypeScript | `@vibe-agent/shared/sdk` | `repos/shared/src/sdk` |
+| TypeScript | `@doerflow/shared/sdk` | `repos/shared/src/sdk` |
 | Python | `doerflow` | MetaRepo `sdk/python` |
 
 底层收据类型仍从 `@vibe-agent/shared/payments` 导出（`signReceipt` / Merkle）。
@@ -101,7 +101,7 @@ Provider SDK（第三方 App/SaaS **当卖家**）：`POST /trading/providers/sk
 ## 3. TypeScript 最短路径
 
 ```ts
-import { DoerFlowClient } from "@vibe-agent/shared/sdk";
+import { DoerFlowClient } from "@doerflow/shared/sdk";
 import { privateKeyToAccount } from "viem/accounts";
 
 const api = new DoerFlowClient({ baseUrl: "http://localhost:13008/api/v1" });
@@ -185,7 +185,7 @@ print(client.quote("0", 1)["amount"])
 第三方把自家 HTTP API 挂上 DoerFlow 出售（实验室，不写链上 SkillRegistry）：
 
 ```ts
-import { DoerFlowClient, verifyDoerFlowWebhook } from "@vibe-agent/shared/sdk";
+import { DoerFlowClient, verifyDoerFlowWebhook } from "@doerflow/shared/sdk";
 
 const api = new DoerFlowClient({ baseUrl: "http://localhost:13008/api/v1" });
 const skill = await api.registerProviderSkill({
@@ -218,7 +218,7 @@ if (!verifyDoerFlowWebhook(rawBody, req.headers["x-doerflow-signature"], skill.w
 实验室 HTTP 设备，**不是**链上 `DeviceRegistry` / 车桩收款。活路径证明：`pnpm run smoke:channels`（P4）。示例设备：`pnpm run example:device`（MetaRepo `scripts/example-device-runner.mjs`；实验室 REST，非 v1.2 稳定币充电）。
 
 ```ts
-import { DoerFlowClient } from "@vibe-agent/shared/sdk";
+import { DoerFlowClient } from "@doerflow/shared/sdk";
 
 const api = new DoerFlowClient({ baseUrl: "http://localhost:13008/api/v1" });
 const device = await api.registerDevice({
@@ -297,10 +297,17 @@ EIP-712 域必须与 `@vibe-agent/shared/payments` 字节一致：收据域 `Vib
 
 | 包 | 坐标 | 说明 |
 |----|------|------|
-| TypeScript | `@vibe-agent/shared`（export `./sdk`） | 仓内已 `private: false`；补 `publishConfig` + workflow_dispatch |
+| TypeScript | `@doerflow/shared`（export `./sdk`） | npm 组织 `doerflow`；`publishConfig.access=public` |
 | Python | `doerflow` | `sdk/python`；补 PyPI 元数据 + workflow_dispatch |
 
-**本轮不替你执行 `npm publish` / `twine upload`。** 没有登记令牌就假装已上架是假交付。CI 只做到 build + dry-run pack。
+自动发布（GitHub Actions）：
+
+| 包 | 仓库 | Workflow | 触发 | Secret |
+|----|------|----------|------|--------|
+| `@doerflow/shared` | `doerflow/shared` | `.github/workflows/publish.yml` | tag `v*` 或手动 Run | `NPM_TOKEN`（或 npm Trusted Publisher） |
+| `doerflow` | MetaRepo | `.github/workflows/publish-python.yml` | tag `py-v*` 或手动 Run | `PYPI_API_TOKEN`（或 PyPI Trusted Publisher） |
+
+PR 仍只跑 dry-run（`.github/workflows/publish-packages.yml`），不会上架。
 
 ### 5.6 生产与主网（FR-DEV-006）
 

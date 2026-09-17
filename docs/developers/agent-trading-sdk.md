@@ -19,10 +19,10 @@ title: Agent 交易 SDK
 
 ## TypeScript
 
-包：`@vibe-agent/shared/sdk`
+包：`@doerflow/shared/sdk`
 
 ```ts
-import { DoerFlowClient } from '@vibe-agent/shared/sdk';
+import { DoerFlowClient } from '@doerflow/shared/sdk';
 import { privateKeyToAccount } from 'viem/accounts';
 
 const api = new DoerFlowClient({
@@ -44,7 +44,7 @@ await api.authorizeSession({
 await api.payQuote({ session, quote, resourceId: job.resourceId });
 ```
 
-底层收据仍可用 `@vibe-agent/shared/payments` 的 `signReceipt`。
+底层收据仍可用 `@doerflow/shared/payments` 的 `signReceipt`。
 
 生产鉴权（`COMMERCE_AUTH_MODE=production`）：Logto M2M、平台 Bearer，或开发者控制台签发的 `dfk_live_…`（`apiKey` / `X-DoerFlow-Key`）。`NODE_ENV=production` 下实验室模式 `lab|off` 会拒绝启动；`dfk_test_` 也会被拒。自助发 Key、轮换 webhook、看流水：Creator DApp `/developers`。
 
@@ -85,7 +85,7 @@ if paid['submitted'].get('ledgerApplied') is False:
 把自家 HTTP API 挂成可计费 Skill（实验室，不写链上 SkillRegistry）：
 
 ```ts
-import { DoerFlowClient, verifyDoerFlowWebhook } from '@vibe-agent/shared/sdk';
+import { DoerFlowClient, verifyDoerFlowWebhook } from '@doerflow/shared/sdk';
 
 const skill = await api.registerProviderSkill({
   name: 'Acme Summarize',

@@ -192,7 +192,7 @@ pnpm run smoke:vault   # Sepolia；需测试 ETH / Mock USDC 与 operator 钥
 - [x] 工程限流档位 none/pro/ultra（FR-DEV-002）；**不是**法律 SLA 合同
 - [x] 控制台 `/developers` 自助发 Key / 轮换 webhook（FR-DEV-003）
 - [x] Python `authorize_session` + `pay_quote`（FR-DEV-004）
-- [ ] npm `@vibe-agent/shared` / PyPI `doerflow` **真人持令牌发布**（CI 只 dry-run；AI 不代发）
+- [ ] npm `@doerflow/shared` / PyPI `doerflow` **真人持令牌发布**（CI 只 dry-run；AI 不代发）
 - [ ] Base 主网 `"8453"` Vault / Escrow **由部署脚本写入** `deployments.json`（禁止手填假地址）
 - [ ] 生产 Entitlement `enforce` + Logto M2M 或开发者 Key（真人配置 :3040 与 IdP）
 - [ ] `PAYMENT_VAULT_ADDRESS` / `DOERFLOW_MERCHANT_ACCOUNT` 填真实托管账户（勿把实验室地址当主网）
