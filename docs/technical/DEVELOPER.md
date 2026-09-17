@@ -278,7 +278,7 @@ API Key 规则：
 
 ### 5.3 开发者控制台（FR-DEV-003）
 
-Creator DApp 路由 `/developers`（需登录）：
+Creator DApp 路由 `/developers`（需登录；查询加载失败展示 Retry）：
 
 - 创建 / 列出 / 撤销 API Key（明文一次性展示）
 - 注册 / 列出自己的 Provider Skill；轮换 `webhookSecret`（明文一次性）

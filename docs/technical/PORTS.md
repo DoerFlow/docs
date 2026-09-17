@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 本地开发端口
 
-**最后更新**: 2026-09-16
+**最后更新**: 2026-09-17
 
 **默认 API 端口 `13008`**（避免与多项目默认 3000 冲突）。各仓通过环境变量覆盖。
 
@@ -26,6 +26,8 @@ Compose bind / `compose:preflight` 见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 | **Entitlement 控制面** | **3040** | `ENTITLEMENT_BASE_URL`（仅 `control-plane` 及以上档位；必须是服务名或域名，**禁止** `host.docker.internal`） |
 | Logto Identity | 3001 | `IDP_ISSUER`（`pnpm id:up`；仅 `control-plane` 及以上） |
 | Expo Metro | 8081+ | — |
+
+Web `:5174` Creator 路由含 `/membership`、`/ecosystem`、`/developers`（见 [CLIENTS.md](./CLIENTS.md)）。
 
 部署档位与哪些端口属于「最小后端」见 [DEPLOYMENT.md](./DEPLOYMENT.md)。`standalone` 档位不需要 3040 / 3001。
 

@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 部署边界与档位（DEPLOYMENT）
 
-**版本**: v0.1-profiles · **最后更新**: 2026-09-16
+**版本**: v0.1-profiles · **最后更新**: 2026-09-17
 **关联**: [PRODUCTION.md](./PRODUCTION.md) · [PORTS.md](./PORTS.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [SMART_SITE.md](./SMART_SITE.md) · [CHANNELS.md](./CHANNELS.md)
 
 本文件定义 **DoerFlow 能独立部署到什么程度**，以及哪些能力必须依赖 LuminaryWorks 控制面。
@@ -158,6 +158,8 @@ AuthN（双轨）───┤
 ### 4.1.1 本地排障：会员 commerce 503
 
 `standalone` 默认 `ENTITLEMENT_MODE=off` 时，平台 commerce BFF（`/api/v1/platform/commerce/*`）**不可用**，返回 **503**（`ENTITLEMENT_SERVICE_UNAVAILABLE` 一类）。Web 可稳定键 JSON 体字段 `error.code`（值为 `ENTITLEMENT_SERVICE_UNAVAILABLE`）。Web Membership 在此 **503** / `error.code` 上展示 Alert（非空结算页）。Web `/membership`（及 `/account`）可展示 `/capabilities.profile` 与 `/capabilities.entitlement.mode` Tags，用于诊断 commerce 503（见 [CLIENTS.md](./CLIENTS.md)）。本机会员页需要 `DEPLOYMENT_PROFILE=control-plane`、`ENTITLEMENT_MODE=enforce`，以及 Entitlement 控制面 `:3040`（档位见 §1 表，端口见 [PORTS.md](./PORTS.md)）。仅拉起 Entitlement 数据库不够。
+
+Creator 开发者控制台 web `/developers` 需平台登录；API Key CRUD 打 API `/developers/*`，与 `/platform/commerce/*` 会员无关。见 [CLIENTS.md](./CLIENTS.md) · [DEVELOPER.md](./DEVELOPER.md)。
 
 `ENTITLEMENT_BASE_URL`：Compose 内用服务名 `http://entitlement:3040`；宿主本机跑 API 时用 `http://127.0.0.1:3040`。**禁止** `host.docker.internal`（见 §3.1）。
 
