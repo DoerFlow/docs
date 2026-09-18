@@ -12,7 +12,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 **版本**: v0.4.1  
 **状态**: Draft  
-**最后更新**: 2026-09-10
+**最后更新**: 2026-09-18
 
 > 历史名称 **VibeAgent** 在本文档中仍可能出现，含义同 **DoerFlow**。品牌决策见 [LuminaryWorks/spec/products/doerflow.md](https://github.com/LuminaryWorks/LuminaryWorks/blob/main/spec/products/doerflow.md)。
 
@@ -159,7 +159,7 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 
 #### FR-SK-002 Skill 验证
 - v0.1：Creator 自声明 + 链上 hash 存证
-- v0.2：第三方 Validator 链上 attestation（EAS 或自定义）
+- v0.2：第三方 Validator 链上 attestation（EAS 或自定义）— **延期**（2026-09-18 未决策开工；非当前 v0.4）
 - v0.3：零知识证明验证（模型/能力证明）
 
 #### FR-SK-003 Skill 绑定

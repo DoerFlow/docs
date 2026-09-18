@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 跨产品支付与会员架构（Payment Architecture）
 
-> **状态**：Accepted · **决策日**：2026-09-16 · **范围**：LuminaryWorks 六产品会员收款 + DoerFlow 作为支付轨
+> **状态**：Accepted · **决策日**：2026-09-16 · **修订**：2026-09-18（D-PA-09：MoR 仅 Entitlement，DoerFlow 不自建 Creem/Polar/Paddle） · **范围**：LuminaryWorks 六产品会员收款 + DoerFlow 作为支付轨
 > **关联**：[LuminaryWorks payment-platform.md](https://github.com/LuminaryWorks/LuminaryWorks/blob/main/spec/payment-platform.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [ONRAMP.md](./ONRAMP.md) · [GEO_PORTABILITY.md](./GEO_PORTABILITY.md) · [COMMERCIAL.md](./COMMERCIAL.md)
 
 本文是 **DoerFlow 与 LuminaryWorks 会员/支付融合** 的唯一权威。它不重新定义支付编排（那是 LuminaryWorks `payment-platform.md` 的职责），只定义三件事：
@@ -22,12 +22,13 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 |---|------|
 | D-PA-01 | 会员真相源**只有** LuminaryWorks Entitlement（`:3040`）。DoerFlow 不自建会员表，只作支付轨与消费方 |
 | D-PA-02 | 新增通道一律实现已有 `PaymentAdapter` 接口 + 一行 `payment_provider_configs`，**不新增支付子系统** |
-| D-PA-03 | 个人阶段三条通道并行：`paypal`（已实现）、MoR（新增）、`doerflow_credit`（新增）。需 KYB 的 `coinbase_commerce` / `bitpay` / `wechat_pay_v3` / `unionpay_quickpass` 保持 disabled |
+| D-PA-03 | 个人阶段三条通道并行：`paypal`（已实现）、MoR（**仅 LuminaryWorks Entitlement**）、`doerflow_credit`（新增）。需 KYB 的 `coinbase_commerce` / `bitpay` / `wechat_pay_v3` / `unionpay_quickpass` 保持 disabled |
 | D-PA-04 | `doerflow_credit` 的金额**只由 Entitlement 服务端定价**；DoerFlow 永不信任调用方金额 |
 | D-PA-05 | 链上余额**按币种分账**（`ledger_balances` 主键 `(account, asset)`）。不混池、不承诺跨币种赎回、不发行可赎回美元债权 |
 | D-PA-06 | 不做法币提现。出金 = 提到用户自托管钱包；平台不持有法币、不做货币转移 |
 | D-PA-07 | `PAYMENTS_ENABLED=false` 时 `PaymentsModule` 整体不注册、公开 webhook 路由不挂载。私有交付包不含 PSP 面 |
 | D-PA-08 | 付款方区分 `individual` / `business`；企业走 `manual`（对公转账）+ `contract`（合同 PO） |
+| D-PA-09 | **2026-09-18**：会员 MoR **只经 LuminaryWorks Entitlement**（统一）。DoerFlow **不**自建 Creem / Polar / Paddle 适配器或 checkout |
 
 ## 1. 权威边界
 
@@ -84,7 +85,7 @@ flowchart TB
 
 MoR 供应商作为**记录商户**（seller of record）：它对终端买家开票、代扣代缴 VAT / 销售税，再按周期把净额打到个人银行 / Wise / Payoneer。这是无公司主体合法销售 SaaS 的标准解法，也是后续交付给客户时"客户有更多选择"的基础。
 
-候选：Creem · Polar · Paddle · Lemon Squeezy。**开户资质必须实际验证**——不同供应商对自然人开户的接受度不同，不得假定。
+候选：Creem · Polar · Paddle · Lemon Squeezy（**开户与适配器在 LuminaryWorks Entitlement，不在 DoerFlow**）。**开户资质必须实际验证**——不同供应商对自然人开户的接受度不同，不得假定。
 
 适配器按**单 vendor** 实现（webhook 签名校验必须 vendor-specific，不可抽象成通用 MoR 适配器），其余供应商留 `ProviderId` 槽位。
 

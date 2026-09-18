@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 物联网交易与设备经济
 
-**版本**: v0.3-lab · **最后更新**: 2026-09-16  
+**版本**: v0.3-lab · **最后更新**: 2026-09-18  
 **路线图**: 实验室 P4 = v1.1-channels-lab HTTP 设备；TB 时间窗入账 = **FR-IOT-008**；规模化车桩/能源/冷链 = **v1.2+**（见 [ROADMAP.md](./ROADMAP.md) · [CHANNELS.md](./CHANNELS.md) 五通道实验室）
 
 ## 1. 愿景
@@ -129,7 +129,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - [x] `POST /devices/register` + heartbeat + telemetry hash → 账本入账（`pnpm run smoke:channels`）
 - [x] SDK wrap：`registerDevice` / `heartbeatDevice` / `postDeviceTelemetry`（TS + Python；见 [DEVELOPER.md](./DEVELOPER.md) §4.2）
 - [x] 实验室 `GET /devices` / SDK `listDevices` / `list_devices`（空列表可接受；`pnpm run example:devices` 默认仅列出，注册须 `EXAMPLE_DEVICES_REGISTER=1`）
-- HTTP 库存浏览（非 DeviceRegistry）：[CLIENTS.md](./CLIENTS.md) lab UI — wallet `/devices`、web Payments `LabDevicesCard`、admin `/devices`
+- HTTP 库存浏览（非 DeviceRegistry）：[CLIENTS.md](./CLIENTS.md) — wallet `/devices`、web **独立** `/devices`（注册/收益；不局限于 Payments `LabDevicesCard`）、admin `/devices`
 - [ ] 链上 `DeviceRegistry` / 稳定币充电（仍为 v1.2+）
 
 实验室 REST 示例：`pnpm run example:device`（`scripts/example-device-runner.mjs`）。这是 v1.1 HTTP 设备回路，**不是** v1.2「稳定币充电」样例。`pnpm run smoke:m5` 只确认该包装脚本与 `package.json` 的 `example:device` 存在，不运行示例，也不表示 v1.2 稳定币充电已验收。

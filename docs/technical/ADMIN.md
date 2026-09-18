@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 管理平台规格
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-17  
+**版本**: v0.1-draft · **最后更新**: 2026-09-18  
 **仓库**: `repos/admin` → `AgentSkillMesh/admin`（私有）
 
 ---
@@ -27,14 +27,14 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 用户：**平台运营、风控、客服**（RBAC，非普通 C 端用户）。
 
-- **不托管** VistaCast / SyncroBrain 伙伴控制台，也**不做** smart-site 远控（深链 / 导出关联是 API + integrations 实验室面）；运营仍在 DoerFlow 任务/支付面板。生态 catalog / jobs UI 在 **web** `/ecosystem`（不在 admin）；运营用 smoke + API 实验室，不要期待 admin 商业控制台。见 [ECOSYSTEM.md](./ECOSYSTEM.md) · [SMART_SITE.md](./SMART_SITE.md)。
+- **不托管** VistaCast / SyncroBrain 伙伴控制台，也**不自动** smart-site 远控（不持有 VistaRemote 凭据、不发起会话）。v0.4：smart-site `remoteIntervention.deepLink` **主 UI** = **web** `/ecosystem` **Events** 卡（人工打开，不自动远控）。生态 catalog / jobs 仍在 `/ecosystem`，但介入是同页 Events，不是 catalog 语义。admin **不做**远控控制台、**可不做**深链按钮。见 [ECOSYSTEM.md](./ECOSYSTEM.md) · [SMART_SITE.md](./SMART_SITE.md)。
 - 平台会员 / commerce checkout UI 在 **web** `/membership`（不在 admin）。见 [CLIENTS.md](./CLIENTS.md)。
 - 开发者 API Key / Skill 自助 UI 在 **web** `/developers`（不在 admin）。见 [CLIENTS.md](./CLIENTS.md) · [DEVELOPER.md](./DEVELOPER.md)。
 
 ## 2. 功能需求
 
 ### FR-ADM-001 登录与权限
-- Logto OIDC 平台账号 + 2FA（v0.4）
+- Logto OIDC 平台账号 + MFA（v0.4 **立即接线**，2026-09-18 已定；走 Logto MFA，不另造一套）
 - `/login`：`HeadlessLoginPanel` 且 `showRegister={false}`（运营控制台；自助注册仅 web `/login`）。见 [CLIENTS.md](./CLIENTS.md)。
 - 本地：MetaRepo `pnpm id:up`（委托相邻 `LuminaryWorks`）→ OIDC `:3001`；运营登录 `admin.doerflow@luminaryworks.dev`（seed）
 - JWT 角色 `doerflow_admin` 仅用于引导 Casbin `agent_admin`；审批按钮仍只看资源 `permissions`
@@ -61,17 +61,18 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
   - 升级人工 → `POST .../escalate-auto`（`published` 且未接单 → `pending_review`）  
 
 ### FR-ADM-005 危险任务告警
-- 实时列表（WebSocket 或轮询）  
+- 实时列表：**保留** 轮询（现实现 `/risk-alerts` ← `GET /admin/tasks/alerts`）  
 - 级别：高 / 中  
 - 操作：拦截、升级人工、加入黑名单  
-- **实现（M3）**：`/risk-alerts` ← `GET /admin/tasks/alerts`；拦截 → `POST .../reject`（待审或未接单的 `published`）；升级人工 → `POST .../escalate`；加入黑名单/观察 → `POST /admin/publishers/flag`；标记已处理 → `POST .../clear-alert`  
+- **实现（M3）**：拦截 → `POST .../reject`（待审或未接单的 `published`）；升级人工 → `POST .../escalate`；加入黑名单/观察 → `POST /admin/publishers/flag`；标记已处理 → `POST .../clear-alert`  
+- **v0.4（2026-09-18 已定，两者都要）**：在保留上述轮询的同时，增加 Slack / email **出站 webhook** 告警（不替代 `/risk-alerts` 页面）  
 
 ### FR-ADM-006 仪表盘
 - 今日发布/完成/**GMV（已完成任务 `rewardEth` 合计，单位 ETH）**、待审数量、告警数  
 - 首页须可干活：待审队列预览（点进 `/review?id=`）、开放争议数、Indexer 健康（`GET /health` 的 `indexer.rpcOk` / `catchupPercent` / `leader`）、最近审计  
 - 不得展示占位假金额（如固定 `$128,400 USDC`）  
 - **实现（M3）**：KPI 条接 `GET /admin/stats/overview`（含 `gmvSettledTodayEth`、`needsRevision`、`openDisputes`）  
-- **图表**：不做自建图表；后续嵌入 [DataLuminary](./DATALUMINARY.md) Dashboard（iframe / 外链）  
+- **图表（v0.4，2026-09-18 已定立即开工）**：不做自建图表；**立即 iframe** 嵌入 [DataLuminary](./DATALUMINARY.md) Dashboard。若 DataLuminary 尚无 embed 能力，则 **跨产品迭代 DataLuminary**，不在 admin 自建图表  
 
 ### FR-ADM-007 支付清算运维（M3）
 - 只读面板：`GET /payments/ledger/commits`  
@@ -82,7 +83,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ### FR-ADM-008 费率等级只读（M3）
 - 面板：`GET /fees/tiers`（ERC-4337 等级协议费 bps）  
 - 路由：`/payments/fees`  
-- 与 FEE_TIERS_AA 文档一致；配置写入链上 FeeTierRegistry 见后续版本  
+- 与 FEE_TIERS_AA 文档一致；费率路径 **已定** 须走链上 `FeeTierRegistry`（非 1.0 静态表可选项）  
 
 ### FR-ADM-009 治理参数（M3）
 - 路由：`/governance`  
@@ -107,6 +108,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
   - `release_worker` → 任务 `completed` + 账本结算（链上已锁定则要求已有 `releaseTxHash` 或仅结案标注）  
   - `split` → 按 `splitBps` 账本部分打款后 `completed`  
 - 裁决写入审计 `DISPUTE_RESOLVED`  
+- **v0.4**：smart-site 深链主 UI 在 **web** `/ecosystem` Events（人工打开）。admin 任务/争议 **可不**挂深链按钮（不做远控控制台）  
 
 ### FR-ADM-013 界面文案（M3）
 - 运营控制台用户可见文案走 locale：`lib/i18n/messages/en.json`（类型源）+ `zh-CN.json`（简体中文必填）
@@ -143,7 +145,7 @@ admin → shared（类型）
 | 版本 | 交付 |
 |------|------|
 | v0.3 | 登录、待审列表、单条/批量审批、告警列表、**支付 Commits 运维**、**治理参数**、**任务总览**、**发单方治理**、**审计日志**、**争议工单**；仪表盘 KPI + 待审队列预览 + 真实 GMV（图表 → DataLuminary）；**界面 en + zh-CN** |
-| v0.4 | Webhook 告警、链上争议结算、DataLuminary 仪表盘嵌入 |
+| v0.4 | **进行中**：Logto MFA 接线；保留 `/risk-alerts` 轮询 **并** Slack/email webhook；**立即 iframe** DataLuminary；smart-site `deepLink` **人工**按钮主 UI = web `/ecosystem` Events（不自动远控）；链上争议结算 |
 | v1.0 | 完整 RBAC + 审计留存策略 |
 
 ## 6. 验收

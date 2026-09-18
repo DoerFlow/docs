@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 等级费率 · ERC-4337 账户抽象
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-16  
+**版本**: v0.1-draft · **最后更新**: 2026-09-18  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)（Session Keys）
 
 ## 1. 目标
@@ -27,7 +27,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | T2 | 质押 ≥ X ETH 或 DAO 徽章 | 150 | 贡献者 |
 | T3 | 验证 Skill Creator | 100 | 生态伙伴 |
 
-MVP：API 返回静态表；**v1.0** 实验室 `SettlementPaymaster` 已部署（FR-PAY-008）；链上 `FeeTierRegistry` 仍见 v0.2+ 验收。
+MVP：API 返回静态表（实验室）。**已定方向（2026-09-18）**：费率路径 **必须** 走 Sepolia Smart Account + 链上 `FeeTierRegistry`，**不是** 1.0 可选的「仅静态表」方案。实验室 `SettlementPaymaster` 已部署（FR-PAY-008）。下方验收勾选保持未勾，直至链上跑通。
 
 ## 3. ERC-4337 集成要点
 
@@ -60,9 +60,9 @@ Smart Account 持有主密钥；Agent 运行时仅加载 **Session Key**，泄�
 
 `GET /api/v1/fees/tiers` → `{ tiers: [{ id, name, protocolFeeBps, requirements }] }`
 
-## 5. 验收（v0.2+）
+## 5. 验收（v0.2+ · 已定方向，勾选仍开）
 
 - [ ] Sepolia 上 Smart Account 完成一笔带等级费率的 Escrow 结算  
 - [ ] 链下索引与 `GET /fees/tiers` 一致  
 
-MVP 的 `GET /api/v1/fees/tiers` 仍返回本文件第 2 节静态 T0–T3 表（`FeesService`），尚无链上 `FeeTierRegistry` 索引。实验室单元测试 `fees.service.spec.ts` 校验静态表 `protocolFeeBps` 250/200/150/100；`pnpm run smoke:m4` 覆盖 SDK `listFeeTiers` 静态表（4 档 / T0=250）；`smoke:m5` 廉价断言 OpenAPI 源含 `/fees/tiers` 且该单测文件存在；**不**覆盖 Sepolia / 链上索引（上表勾选框保持未勾）。
+MVP 的 `GET /api/v1/fees/tiers` 仍返回本文件第 2 节静态 T0–T3 表（`FeesService`），尚无链上 `FeeTierRegistry` 索引。实验室单元测试 `fees.service.spec.ts` 校验静态表 `protocolFeeBps` 250/200/150/100；`pnpm run smoke:m4` 覆盖 SDK `listFeeTiers` 静态表（4 档 / T0=250）；`smoke:m5` 廉价断言 OpenAPI 源含 `/fees/tiers` 且该单测文件存在；**不**覆盖 Sepolia / 链上索引（上表勾选框保持未勾）。**1.0 不得以静态表作为费率路径的最终方案。**

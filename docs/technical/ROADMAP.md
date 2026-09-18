@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # DoerFlow 版本规划与里程碑
 
-**最后更新**: 2026-09-17  
+**最后更新**: 2026-09-18  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [CLIENTS.md](./CLIENTS.md) · [SPEC.md](./SPEC.md)
 
 ---
@@ -94,7 +94,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 | Escrow | `0x1bB2364fFeA1D747aC41e8A92A2fC78BfE423f50` |
 | SessionKeyRegistry | `0xF35E657DD8a57256694666331b5875D7A1B4FF0A` |
 
-**验收**: 双钱包完成铸造 → Escrow → 交付 → 结算。`contracts` `smoke:mint` · `smoke:escrow:local` · `smoke:m3`（任务治理）。`contracts` `smoke:mint` · `smoke:escrow:local` · `smoke:m3`（任务治理）。
+**验收**: 双钱包完成铸造 → Escrow → 交付 → 结算。`contracts` `smoke:mint` · `smoke:escrow:local` · `smoke:m3`（任务治理）。
 
 ---
 
@@ -158,7 +158,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 发单方仅用 wallet、接单方仅用 worker、运营仅用 admin，可在测试网完成「发布 → 审批 → 接单 → 交付 → 放款」全流程，无需运维手工改库。
 
-**前期不做**：面向听障、视障、言语障碍等特殊人群的残障无障碍（读屏 / 字幕 / WCAG）。**社交任务本身是 M3 交付**（清单+截图）。Android Accessibility Service 打开目标 App 为 v0.4 可选项，与残障无障碍不是同一件事。
+**前期不做**：面向听障、视障、言语障碍等特殊人群的残障无障碍（读屏 / 字幕 / WCAG）。**社交任务本身是 M3 交付**（清单+截图）。Android Accessibility Service 打开目标 App 为 **v0.4 进行中**（2026-09-18 已定立即开工），与残障无障碍不是同一件事。
 
 **预计工期**: 8–10 周  
 **依赖**: M2 Vault/账本可用（充提与余额展示）  
@@ -265,7 +265,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 | **P3** | `PAYMENTS_ENABLED` 硬开关 + VistaCast 接入 + 企业开票（FR-PAY-023） | 关开关后 webhook 路由 404 且产品仍可跑 | 🟡 |
 | **P4** | 大陆分站权益断言（FR-GEO-002~005） | 仅 spec + 契约与守卫测试，同步服务不落代码 | ⚪ |
 
-**铁律**：会员真相源只有 LuminaryWorks Entitlement；DoerFlow 不自建会员表。协议费 / Job 单价 / Escrow / Gas 不进 Entitlement。不做法币提现。
+**铁律**：会员真相源只有 LuminaryWorks Entitlement；DoerFlow 不自建会员表。**会员 MoR 只经 Entitlement**（DoerFlow 不自建 Creem / Polar / Paddle）。协议费 / Job 单价 / Escrow / Gas 不进 Entitlement。不做法币提现。
 
 ### 4.3 v1.0 之后展望
 
@@ -319,6 +319,21 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `smoke:m4` AI 验收（2026-08-29）。顺序仍是 **清算底座 → 客户端 → 场景 → 生产闸门**；继续留在 Base Sepolia 打磨，**不伪造主网地址**。
 
+**v0.4 产品补齐（进行中 · 2026-09-18）**：M4 `smoke:m4` 已关。下列为同版本产品决策，立即开工，不重开 SDK 验收：
+
+| 项 | 决策 |
+|----|------|
+| FR-WRK-010 | Accessibility Service **立即开工**（非残障无障碍） |
+| admin MFA | Logto MFA **立即接线** |
+| admin 图表 | **立即 iframe** DataLuminary；缺 embed 则跨产品改 DataLuminary |
+| ops 告警 | 保留轮询 `/risk-alerts` **并**加 Slack/email webhook |
+| FeeTier | Sepolia Smart Account + `FeeTierRegistry` 为费率路径 **已定方向**（验收勾选仍开；非 1.0 静态表可选项） |
+| Creator 设备 | web **独立** `/devices` 注册/收益页（不局限于 Payments `LabDevicesCard`） |
+| smart-site 深链 | 主 UI = **web** `/ecosystem` Events；admin 不做远控控制台 |
+| 会员 MoR | **仅** LuminaryWorks Entitlement；DoerFlow 不自建 Creem/Polar/Paddle |
+| commerce.readiness | 保持 `lab` 直至真实 VistaCast/SyncroBrain 对端 |
+| FR-SK-002 EAS | **延期**（未决策开工） |
+
 | 里程碑 | 版本 | 状态 |
 |--------|------|------|
 | M0 项目启动 | — | ✅ |
@@ -352,7 +367,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | **P1** | Agent ↔ Cloud：发现→报价→执行适配器→Receipt | `trading` 持久化 job、`execute`、MCP、CloudEvents |
 | **P2** | Agent ↔ Agent：Card → claim → deliver | `/a2a/*` + `POST /agent-tasks/:id/deliver` |
 | **P3** | 电脑/手机 Endpoint 白名单执行 | `/endpoints` |
-| **P4** | 单设备 IoT 注册/心跳/遥测入账 | `/devices`（无 DeviceRegistry 合约） |
+| **P4** | 单设备 IoT 注册/心跳/遥测入账 | `/devices`（无 DeviceRegistry 合约）；Creator web **独立** `/devices` 页（不局限于 Payments `LabDevicesCard`） |
 
 验收：`pnpm run smoke:channels`。示例 Runtime：`scripts/example-agent-runner.mjs`。
 
@@ -373,9 +388,9 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | 鉴权 | 生产 M2M+Entitlement+Casbin；`COMMERCE_AUTH_MODE=lab\|off`（生产禁用） |
 | 验收 | `pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`） |
 
-**Creator UI**：web `/ecosystem`（只读 catalog / jobs；实验室 readiness Tags）。见 [CLIENTS.md](./CLIENTS.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)。
+**Creator UI**：web `/ecosystem`（catalog / jobs + Events 深链 Intervene；实验室 readiness Tags）。见 [CLIENTS.md](./CLIENTS.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)。
 
-**现状诚实标注**：VistaCast / SyncroBrain 对接是**已实现的工程实验室**，`DEPLOYMENT_PROFILE` 未开时**默认关**；未接真实生产对端。
+**现状诚实标注**：VistaCast / SyncroBrain 对接是**已实现的工程实验室**，`DEPLOYMENT_PROFILE` 未开时**默认关**；未接真实生产对端。**已定（2026-09-18）**：`/capabilities.commerce.readiness` **保持 `lab`** 直至真实 VistaCast / SyncroBrain 对端。
 
 ---
 
@@ -390,10 +405,10 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | Compose | `core` 基座 + `dev`/`prod`/`external-db`/`control-plane`/`smoke` overlay |
 | 探针 | `/ready` 降级 **503**；新增 `/version` 与 `/capabilities` |
 | 启动校验 | capability manifest fail-closed（生产禁 `COMMERCE_AUTH_MODE=lab\|off`） |
-| smart-site | 人工介入深链 + DataLuminary 导出关联；**不自动远控、不自动 resolve** |
+| smart-site | 人工介入深链 + DataLuminary 导出关联；**不自动远控、不自动 resolve**；深链主 UI = **web** `/ecosystem` Events |
 | 验收 | `pnpm run compose:config` · `pnpm run compose:preflight` · `pnpm run smoke:m5` |
 
-Creator UI 同 §9（web `/ecosystem`）。
+Creator UI 同 §9（web `/ecosystem` catalog）。Creator 设备注册/收益走 web **独立** `/devices`（不局限于 Payments `LabDevicesCard`）。
 
 ---
 

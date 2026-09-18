@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 部署边界与档位（DEPLOYMENT）
 
-**版本**: v0.1-profiles · **最后更新**: 2026-09-17
+**版本**: v0.1-profiles · **最后更新**: 2026-09-18
 **关联**: [PRODUCTION.md](./PRODUCTION.md) · [PORTS.md](./PORTS.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [SMART_SITE.md](./SMART_SITE.md) · [CHANNELS.md](./CHANNELS.md)
 
 本文件定义 **DoerFlow 能独立部署到什么程度**，以及哪些能力必须依赖 LuminaryWorks 控制面。
@@ -17,7 +17,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 1. **可独立**：`standalone` 档位不需要 Logto / Entitlement / 兄弟产品即可跑通任务、账本、Merkle、链上 Escrow。
 2. **不静默匿名**：任何档位、任何 `ENTITLEMENT_MODE`，写路径都必须有已验证主体（SIWE / 平台 JWT / M2M）。「关掉 Entitlement」**不等于**「关掉 AuthN」。
 3. **生产平台档位**：面向多租户公开收款的托管平台必须开 **AuthN（Logto/M2M）+ Entitlement + Casbin**，钱包证明单独走 **SIWE**（双轨，见 §4）。
-4. **诚实标注**：`agent-commerce` / `smart-site` 的兄弟产品对接目前是 **已实现的工程实验室**，默认 **关**；未接真实对端前不得在文档或 `/capabilities` 里标成 `production`。
+4. **诚实标注**：`agent-commerce` / `smart-site` 的兄弟产品对接目前是 **已实现的工程实验室**，默认 **关**；未接真实 VistaCast / SyncroBrain 对端前不得在文档或 `/capabilities` 里把 `commerce.readiness` 标成 `production`（**已定保持 `lab`**，2026-09-18）。
+5. **会员 / MoR**：只经 **LuminaryWorks Entitlement**（统一）。DoerFlow **不**自建 Creem / Polar / Paddle 适配器或 checkout。
 
 ---
 
@@ -157,7 +158,7 @@ AuthN（双轨）───┤
 
 ### 4.1.1 本地排障：会员 commerce 503
 
-`standalone` 默认 `ENTITLEMENT_MODE=off` 时，平台 commerce BFF（`/api/v1/platform/commerce/*`）**不可用**，返回 **503**（`ENTITLEMENT_SERVICE_UNAVAILABLE` 一类）。Web 可稳定键 JSON 体字段 `error.code`（值为 `ENTITLEMENT_SERVICE_UNAVAILABLE`）。Web Membership 在此 **503** / `error.code` 上展示 Alert（非空结算页）。Web `/membership`（及 `/account`）可展示 `/capabilities.profile` 与 `/capabilities.entitlement.mode` Tags，用于诊断 commerce 503（见 [CLIENTS.md](./CLIENTS.md)）。本机会员页需要 `DEPLOYMENT_PROFILE=control-plane`、`ENTITLEMENT_MODE=enforce`，以及 Entitlement 控制面 `:3040`（档位见 §1 表，端口见 [PORTS.md](./PORTS.md)）。仅拉起 Entitlement 数据库不够。
+`standalone` 默认 `ENTITLEMENT_MODE=off` 时，平台 commerce BFF（`/api/v1/platform/commerce/*`）**不可用**，返回 **503**（`ENTITLEMENT_SERVICE_UNAVAILABLE` 一类）。Web 可稳定键 JSON 体字段 `error.code`（值为 `ENTITLEMENT_SERVICE_UNAVAILABLE`）。Web Membership 在此 **503** / `error.code` 上展示 Alert（非空结算页）。Web `/membership`（及 `/account`）可展示 `/capabilities.profile` 与 `/capabilities.entitlement.mode` Tags，用于诊断 commerce 503（见 [CLIENTS.md](./CLIENTS.md)）。本机会员页需要 `DEPLOYMENT_PROFILE=control-plane`、`ENTITLEMENT_MODE=enforce`，以及 Entitlement 控制面 `:3040`（档位见 §1 表，端口见 [PORTS.md](./PORTS.md)）。仅拉起 Entitlement 数据库不够。**会员 / MoR 只经 Entitlement**；DoerFlow 不自建 Creem / Polar / Paddle。
 
 Creator 开发者控制台 web `/developers` 需平台登录；API Key CRUD 打 API `/developers/*`，与 `/platform/commerce/*` 会员无关。见 [CLIENTS.md](./CLIENTS.md) · [DEVELOPER.md](./DEVELOPER.md)。
 

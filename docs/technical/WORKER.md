@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 综合端 App 规格（React Native）
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-16  
+**版本**: v0.1-draft · **最后更新**: 2026-09-18  
 **仓库**: `repos/worker` → `doerflow/worker`（私有）
 
 ---
@@ -28,7 +28,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 > **残障无障碍（已定，前期不做）**：不针对听障、视障、言语障碍等特殊人群做读屏、字幕、WCAG、TalkBack/VoiceOver 专项。见 [CLIENTS.md](./CLIENTS.md)。这 **不是**「不做社交任务」。
 
-### FR-WRK-010 能力说明（v0.4 可选增强，非社交任务本体）
+### FR-WRK-010 能力说明（v0.4 进行中：2026-09-18 已定立即开工，非社交任务本体）
 
 社交任务本体不依赖此条。此条仅指 Android **无障碍服务（Accessibility Service）** 自动打开目标 App 的步骤引导（及 iOS 调研），**不是** 残障无障碍，也 **不是** M3 社交任务的验收条件。
 
@@ -73,7 +73,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - **相机**：`expo-camera` 拍摄现场/结果照片 → `POST /human-tasks/:id/proof` 得到 `proofCid`  
 - **GPS**：`expo-location`；`remote=false` 的线下任务交付前必须附加坐标（写入交付说明 `gps:lat,lng`）  
 - **问卷**：交付说明必填（完成步骤 / 问卷答案）  
-- **社交（M3，要做）**：详情走 `app/social/[id]`；展示发单方声明的 App 与步骤；**可打开目标 App 首页**（系统浏览器 / 已安装 App，不代操作）；须勾选清单后上传截图。Accessibility Service 自动打开 App 为 v0.4 可选项  
+- **社交（M3，要做）**：详情走 `app/social/[id]`；展示发单方声明的 App 与步骤；**可打开目标 App 首页**（系统浏览器 / 已安装 App，不代操作）；须勾选清单后上传截图。Accessibility Service 自动打开 App 为 **v0.4 进行中**（已定立即开工）  
 - **API**：`verificationRequired` 或 `taskType=social` 的交付必须带 `proofCid`，否则 `PROOF_REQUIRED`  
 - 大厅 / 交付 / 收益 / Vault 用户文案走 en/zh locale  
 - 首次连接钱包须勾选用户协议（含前期不予赔付；全文在文档站 `legal/terms`）  
@@ -92,7 +92,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-WRK-002 | 任务大厅（human + social 分 Tab）；**仅 `published`/`open`** |
 | FR-WRK-003 | 众包交付（相机/GPS/问卷 + `proofCid`）→ `submitted`；详情展示状态；仅未接单可接；待验收 / 未 fund 提示 |
 | FR-WRK-004 | **社交任务（M3 要做）**：大厅 + 打开目标首页 + 清单 + 截图交付 |
-| FR-WRK-010 | Android Accessibility Service 社交步骤引导（v0.4；非残障无障碍） |
+| FR-WRK-010 | Android Accessibility Service 社交步骤引导（**v0.4 进行中**，已定立即开工；非残障无障碍） |
 | FR-WRK-011 | 社交步骤引导合规与授权（v0.4） |
 | FR-WRK-012 | 社交交付截图 / 可选事件 hash（v0.4） |
 | FR-WRK-005 | 收益与历史；Vault 提现；**原生 ETH（Escrow 放款）** + 任务完成账本余额（`GET /payments/ledger/balances`）；链上已放款任务须标明 |
@@ -105,7 +105,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - React Native · Expo（**独立工程**，与 wallet 分仓库）  
 - Android 正式 APK 由 Meta `pnpm pack:publish` 发到 GitHub `DoerFlow/downloads`，稳定文件名为 `DoerFlow-Worker.apk`（`releases/latest/download`）；**不**上 Play Store。
 - 原生模块：`expo-camera`、`expo-location`  
-- Android：Accessibility Service（**原生 Kotlin 模块**，v0.4，社交步骤引导；**不是**读屏/字幕）  
+- Android：Accessibility Service（**原生 Kotlin 模块**，v0.4 进行中，社交步骤引导；**不是**读屏/字幕）  
 - **前期不做** 面向聋哑盲等特殊人群的残障无障碍适配
 - `api`：`GET /tasks?status=published&type=social|human`  
 - 本机私钥/签名永不传给 Logto 或平台；公开任务浏览和链上收款地址保持钱包语义
@@ -116,7 +116,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | 版本 | 交付 |
 |------|------|
 | v0.3 | 众包 + **社交任务**（抖音/小红书/知乎：发单声明平台与步骤、人工审、接单、清单+截图、验收）；相机/GPS/问卷；收益 Vault + 账本；链上 `deliverEscrow` |
-| v0.4 | 可选：Accessibility Service 打开目标 App；**不含**残障无障碍 |
+| v0.4 | **进行中**：Accessibility Service 打开目标 App（已定立即开工）；**不含**残障无障碍 |
 | v0.5 | 更多社交平台扩展 |
 
 ---

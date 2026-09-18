@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # DataLuminary 外接分析
 
-**版本**: v0.1-draft · **外项目**: [DataLuminary-Platform](https://github.com/DataLuminary/DataLuminary-Platform)
+**版本**: v0.1-draft · **最后更新**: 2026-09-18 · **外项目**: [DataLuminary-Platform](https://github.com/DataLuminary/DataLuminary-Platform)
 
 ## 1. 边界原则
 
@@ -50,7 +50,7 @@ GET /api/v1/dex/analytics/overview
 ### 2.2 前端嵌入
 
 - web `/dex/analytics`：iframe 或新窗口打开 DataLuminary 预置 Dashboard  
-- **admin `/dashboard`**：运营 KPI 外的趋势/GMV 等图表 **不自建**，嵌入或跳转 DataLuminary 预置运营 Dashboard（`DATALUMINARY_DASHBOARD_URL`）  
+- **admin `/dashboard`（2026-09-18 已定立即开工）**：运营 KPI 外的趋势/GMV 等图表 **不自建**，**立即 iframe** 嵌入 DataLuminary 预置运营 Dashboard（`DATALUMINARY_DASHBOARD_URL`）。若 DataLuminary 尚不具备 embed，则 **跨产品迭代 DataLuminary** 补 embed，DoerFlow admin 不改自建图表  
 - 链 ID、Pool 地址通过 URL 参数传递（契约由两项目文档对齐）
 
 ### 2.3 数据回写（可选）
