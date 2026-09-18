@@ -37,6 +37,17 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - 生成交付凭证：截图时间戳 + 步骤完成标记（**不上传** 聊天记录、密码）  
 - **不是** 面向聋哑盲的残障无障碍产品
 
+#### 第一刀（stub，worker Android，2026-09-18）
+
+已落地，且 **禁止** 自动操作：
+
+- 声明 `SocialGuidanceAccessibilityService`：`onAccessibilityEvent` / `onInterrupt` 为空；`canRetrieveWindowContent=false`；不点击、不抓取、不代完成
+- RN 模块 `SocialGuidance`：`isServiceEnabled`、`openAccessibilitySettings`、`openTargetApp(packageName)`
+- 社交任务详情：风险提示 + 去系统设置开启 + 打开目标 App（失败则 `Linking.openURL` 首页）
+- 原生源在 `repos/worker/plugins/social-guidance/native/`；`android/` 被 gitignore，由 `plugins/with-social-guidance.js` 在 Expo prebuild 写入
+
+本刀不做：手势/节点点击、窗口内容读取、步骤完成判定、事件 hash、自动勾选清单、自动交付、iOS 引导。
+
 ### FR-WRK-011 合规与安全
 
 - 首次启用需阅读风险提示 + 系统无障碍授权  

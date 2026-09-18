@@ -324,7 +324,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | 项 | 决策 |
 |----|------|
 | FR-WRK-010 | Accessibility Service **立即开工**（非残障无障碍） |
-| admin MFA | Logto MFA **立即接线** |
+| admin MFA | Hosted `signInRedirect` 可配；Headless MFA **阻塞于** auth-react MFA challenge + tenant force-MFA |
 | admin 图表 | **立即 iframe** DataLuminary；缺 embed 则跨产品改 DataLuminary |
 | ops 告警 | 保留轮询 `/risk-alerts` **并**加 Slack/email webhook |
 | FeeTier | Sepolia Smart Account + `FeeTierRegistry` 为费率路径 **已定方向**（验收勾选仍开；非 1.0 静态表可选项） |

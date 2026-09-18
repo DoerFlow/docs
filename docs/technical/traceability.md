@@ -136,8 +136,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-WLT-006 / FR-ONRAMP-003 | wallet 买币 Onramp | wallet, api | `/onramp` + `POST /onramp/session` · en+zh | **v0.3 / M3** 🟡 |
 | FR-ST-001/002 | 链上 Escrow fund/release（平台任务） | wallet, worker, api, contracts | bind-onchain-escrow · create/fund · deliver · confirm · **`pnpm run smoke:escrow:local`**（Hardhat 31337）· **`pnpm run smoke:escrow`**（Sepolia 可选；拒绝 Hardhat 公开钥 / EIP-7702） | **v0.3 / M3 ✅** |
 | FR-WLT-008 | wallet Vault 充提 | wallet | `app/vault.tsx` + 入金 Tab · disclosure · en+zh | **v0.3 / M3** 🟡 |
-| FR-ADM-001 | admin Logto 登录 | admin, api | 本地 `pnpm id:up`；`doerflow_admin` → Casbin；禁止 SIWE 冒充运营；**v0.4 Logto MFA 立即接线** | **v0.3 / M3 ✅** · MFA **v0.4 🟡** |
-| FR-ADM-005 | admin 风控告警 | admin, api | `/risk-alerts` 轮询保留 **并** v0.4 Slack/email webhook | **v0.3 / M3** 🟡 · webhook **v0.4 🟡** |
+| FR-ADM-001 | admin Logto 登录 | admin, api, LW shared/identity | 本地 `pnpm id:up`；`doerflow_admin` → Casbin；禁止 SIWE 冒充运营；默认 Headless；`NEXT_PUBLIC_ADMIN_LOGIN_MODE=hosted` 走 Logto Hosted MFA；Headless MFA **阻塞于** MFA-capable `@luminaryworks/auth-react` + 人工开启 tenant force-MFA | **v0.3 / M3 ✅** · Hosted MFA 路径 **v0.4 ✅** · Headless MFA **blocked** |
+| FR-ADM-005 | admin 风控告警 | admin, api | `/risk-alerts` 轮询保留 **并** `GET /admin/notifications/status` + `POST /admin/notifications/test`；env Slack/email webhook（不回传 URL） | **v0.3 / M3** 🟡 · webhook **v0.4 🟡** |
 | FR-ADM-006 | admin 仪表盘 KPI | admin, api | `/dashboard` 真实 GMV ETH + 待审队列 + Indexer + 争议；图表 **立即 iframe** DataLuminary · locale | **v0.3 / M3** 🟡 · iframe **v0.4 🟡** |
 | FR-ADM-003 | admin 审批工作台 | admin, api | approve 绑 Escrow 预留；request-revision → needs_revision · **社交展示 App/步骤** · locale | **v0.3 / M3 ✅** |
 | FR-ADM-004 | admin 自动审批监控 | admin, api | `/auto-approval` ← auto-decisions / escalate / mark-reviewed · locale | **v0.3 / M3** 🟡 |
@@ -151,7 +151,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-ADM-008 | admin 费率等级只读 | admin, api | `/payments/fees` ← `GET /fees/tiers`；1.0 费率路径 **已定** 须链上 `FeeTierRegistry` | **v0.3 / M3** 🟡 |
 | FR-WRK-002/003/005 | worker published 大厅 + 相机/GPS/问卷交付 + Vault/账本 | worker, api | Expo 大厅 · proof · GPS · 社交清单 · accept **仅未接单** · 详情状态/待验收 · deliver → **submitted** · deliverEscrow · earnings **原生 ETH + 链上放款标记** · **en+zh** | **v0.3 / M3 ✅** |
 | FR-WRK-004 | worker 社交任务（清单+截图） | worker, wallet | `social/[id]` · 打开目标首页 · wallet 声明平台与步骤 · 人工审后上架 | **v0.3 / M3 ✅** |
-| FR-WRK-010/011/012 | 社交步骤引导 Accessibility Service | worker | **v0.4 进行中**（2026-09-18 已定立即开工）；**不是** 残障无障碍 | **v0.4** 🟡 |
+| FR-WRK-010/011/012 | 社交步骤引导 Accessibility Service | worker | **v0.4 进行中**（2026-09-18 第一刀 stub：声明服务 + 开设置/开 App，**无**自动点击/抓取/完成）；**不是** 残障无障碍 | **v0.4** 🟡 |
 | FR-A11Y | 聋哑盲等残障无障碍（读屏/字幕/WCAG） | 全客户端 | **前期不做**（至商业 1.0 前；单独立项后再议） | **不做** |
 | FR-PAY-SETTLE | 无 `onChainEscrowId` 时任务完成走链下账本（既定路径，非 stub） | api | `settleLedgerPayout` → `ledgerSettled` + LEDGER.credit(WETH wei)；有链上 Escrow 则跳过 credit | **v0.3 / M3 ✅** |
 | FR-ST-005/006 | 账本清算主路径 + 场景矩阵 | spec, api, contracts | ASYNC_PAYMENTS · CHANNELS | **v0.2 / M2** · **v1.1-channels-lab** |

@@ -34,8 +34,13 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 ## 2. 功能需求
 
 ### FR-ADM-001 登录与权限
-- Logto OIDC 平台账号 + MFA（v0.4 **立即接线**，2026-09-18 已定；走 Logto MFA，不另造一套）
-- `/login`：`HeadlessLoginPanel` 且 `showRegister={false}`（运营控制台；自助注册仅 web `/login`）。见 [CLIENTS.md](./CLIENTS.md)。
+- Logto OIDC 平台账号 + MFA（走 Logto MFA，不另造一套）。完整 Headless MFA **阻塞于**
+  `@luminaryworks/auth-react` 提供真实 MFA challenge API，且需人工在 Logto tenant 开启
+  force-MFA；在 Admin 升级到明确标注 MFA-capable 的包版本前，Headless 无法完成 MFA。
+- `/login` 默认 `NEXT_PUBLIC_ADMIN_LOGIN_MODE=headless`：`HeadlessLoginPanel` 且
+  `showRegister={false}`（运营控制台；自助注册仅 web `/login`）。tenant 强制 MFA 时部署须设
+  `NEXT_PUBLIC_ADMIN_LOGIN_MODE=hosted`，登录页走 `signInRedirect` 到 Logto Hosted UI 完成 MFA。
+  **禁止**在 Admin 自造 TOTP / WebAuthn / 短信 MFA 表单。见 [CLIENTS.md](./CLIENTS.md)。
 - 本地：MetaRepo `pnpm id:up`（委托相邻 `LuminaryWorks`）→ OIDC `:3001`；运营登录 `admin.doerflow@luminaryworks.dev`（seed）
 - JWT 角色 `doerflow_admin` 仅用于引导 Casbin `agent_admin`；审批按钮仍只看资源 `permissions`
 - 资源响应附 `permissions`；审批、风控、治理控件只按该映射启用
@@ -66,6 +71,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - 操作：拦截、升级人工、加入黑名单  
 - **实现（M3）**：拦截 → `POST .../reject`（待审或未接单的 `published`）；升级人工 → `POST .../escalate`；加入黑名单/观察 → `POST /admin/publishers/flag`；标记已处理 → `POST .../clear-alert`  
 - **v0.4（2026-09-18 已定，两者都要）**：在保留上述轮询的同时，增加 Slack / email **出站 webhook** 告警（不替代 `/risk-alerts` 页面）  
+- **出站 webhook（first slice）**：`alertFlag` false→true 入队；`GET /admin/notifications/status`、`POST /admin/notifications/test`；env `RISK_ALERT_SLACK_WEBHOOK_URL` / `RISK_ALERT_EMAIL_WEBHOOK_URL`（缺省即关闭，接口不回传 URL）  
 
 ### FR-ADM-006 仪表盘
 - 今日发布/完成/**GMV（已完成任务 `rewardEth` 合计，单位 ETH）**、待审数量、告警数  
@@ -145,7 +151,7 @@ admin → shared（类型）
 | 版本 | 交付 |
 |------|------|
 | v0.3 | 登录、待审列表、单条/批量审批、告警列表、**支付 Commits 运维**、**治理参数**、**任务总览**、**发单方治理**、**审计日志**、**争议工单**；仪表盘 KPI + 待审队列预览 + 真实 GMV（图表 → DataLuminary）；**界面 en + zh-CN** |
-| v0.4 | **进行中**：Logto MFA 接线；保留 `/risk-alerts` 轮询 **并** Slack/email webhook；**立即 iframe** DataLuminary；smart-site `deepLink` **人工**按钮主 UI = web `/ecosystem` Events（不自动远控）；链上争议结算 |
+| v0.4 | **进行中**：Logto Hosted MFA 路径可配置；Headless MFA 阻塞于 MFA-capable `@luminaryworks/auth-react` + tenant force-MFA；保留 `/risk-alerts` 轮询 **并** Slack/email webhook；**立即 iframe** DataLuminary；smart-site `deepLink` **人工**按钮主 UI = web `/ecosystem` Events（不自动远控）；链上争议结算 |
 | v1.0 | 完整 RBAC + 审计留存策略 |
 
 ## 6. 验收
@@ -156,6 +162,7 @@ admin → shared（类型）
 - [x] 运营界面用户文案走 en + zh-CN locale（审批 / 任务 / 仪表盘 / 治理 / 发单方 / 审计 / 告警 / 登录）  
 - [x] 无 API `permissions.review|manage` 时写控件不可用，即使 JWT 带同名角色
 - [x] `401` 返回登录，`402` 显示套餐/配额上下文，`403` 显示资源无权且不展示升级误导
+- [x] `NEXT_PUBLIC_ADMIN_LOGIN_MODE=hosted|headless`（默认 headless）；hosted 走 Logto Hosted `signInRedirect`；Headless 无自造 MFA UI，阻塞于 auth-react MFA challenge + tenant force-MFA
 
 ---
 

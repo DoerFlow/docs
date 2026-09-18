@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 工具链规范
 
-**最后更新**: 2026-09-16
+**最后更新**: 2026-09-18
 
 | 仓库 | 构建 | 测试 | 代码规范 |
 |------|------|------|----------|
@@ -21,7 +21,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | **worker** | Expo / Metro（React Native） | Jest | Biome |
 | **admin** | Rsbuild + React + Ant Design | Rstest | Biome |
 
-**web** / **admin** 登录 UI：`@luminaryworks/auth-react` 的 `HeadlessLoginPanel`（web 可 `showRegister`；admin 为 `false`；详见 [CLIENTS.md](./CLIENTS.md) · [ADMIN.md](./ADMIN.md)）。
+**web** / **admin** 登录 UI：默认 `@luminaryworks/auth-react` 的 `HeadlessLoginPanel`（web 可 `showRegister`；admin 为 `false`）。admin 另支持 `NEXT_PUBLIC_ADMIN_LOGIN_MODE=hosted` 走 Logto Hosted `signInRedirect`（MFA）；Headless MFA 阻塞于该包的 MFA challenge API。详见 [CLIENTS.md](./CLIENTS.md) · [ADMIN.md](./ADMIN.md)。
 
 ## 原则
 
