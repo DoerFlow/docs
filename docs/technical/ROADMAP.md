@@ -332,7 +332,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | smart-site 深链 | **主 UI** = web `/ecosystem` Events；**admin + worker 亦**展示人工 `deepLink` Intervene（不自动远控） |
 | 会员 MoR | **仅** LuminaryWorks Entitlement（Polar+Creem 优先，Paddle 槽位）；DoerFlow **不**自建；`doerflow_credit` = C 轨 |
 | commerce.readiness | **保持 `lab`** 直至真实 VistaCast/SyncroBrain 对端 |
-| FR-SK-002 EAS | **取消「延期」** → 排入 **v0.4+ Wave 45**（本波不实现） |
+| FR-SK-002 EAS | **取消「延期」** → **Wave 45 B5**：lab `SkillAttestationRegistry` first slice ✅（非生产 EAS） |
 
 #### Wave 44 B 决策日志（2026-09-22）
 
@@ -342,12 +342,19 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | B2B | MFA：Hosted/e2e 完成；Headless 阻塞 auth-react（笔记） |
 | B3B | DataLuminary iframe：`NEXT_PUBLIC_DATALUMINARY_DASHBOARD_URL` |
 | B4AB | 保留 `/risk-alerts` + Slack/email webhook；ONBOARDING 记 env + Settings 测试 |
-| B5B | FR-SK-002 取消延期 → Wave 45 排期（不实现） |
+| B5B | FR-SK-002 取消延期 → Wave 45 排期（Wave 44 不实现） |
 | B6 | 费率混合：静态浏览 + 链上 Smart Account / `FeeTierRegistry` 收费升档 |
 | B7B | `/devices` 页已存在（CLIENTS 已述） |
 | B8 | admin + worker **亦**人工 Intervene；主 UI 仍可为 web `/ecosystem` |
 | B9′ | MoR 仅 Entitlement；DoerFlow 不自建 Creem/Polar/Paddle；重申 D-PA-09 |
 | B10A | `commerce.readiness` 保持 `lab` 直至伙伴接通 |
+
+#### Wave 45 B5 · FR-SK-002 first slice（2026-09-22）
+
+| ID | 结论 |
+|----|------|
+| B5 | **lab attest registry**：`SkillAttestationRegistry` 存 `schemaId` + `attester` + `skillId` + `uid`；Hardhat 单测；**无** EAS npm SDK；**不**声称生产 EAS / DAO Validator 产品 |
+| B5 后续 | 官方 EAS 合约对接、Indexer、主网、Validator UI → 另开切片 |
 
 | 里程碑 | 版本 | 状态 |
 |--------|------|------|

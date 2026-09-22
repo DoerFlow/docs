@@ -159,8 +159,23 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 
 #### FR-SK-002 Skill 验证
 - v0.1：Creator 自声明 + 链上 hash 存证
-- v0.2：第三方 Validator 链上 attestation（EAS 或自定义）— **排入 v0.4+ Wave 45**（2026-09-22 取消「延期」标签；本波不实现）
+- v0.2：第三方 Validator 链上 attestation（EAS 或自定义）— **v0.4+ Wave 45**
 - v0.3：零知识证明验证（模型/能力证明）
+
+##### FR-SK-002 · Wave 45 B5 first slice（实验室 · 2026-09-22）
+
+**本切片不是生产 EAS，也不是完整 DAO Validator 产品。** 完整 Ethereum Attestation Service（主网 / Base 官方 EAS 合约 / SDK 索引）排入后续波次。
+
+| 项 | 验收 |
+|----|------|
+| 记录接口 | 链上 Skill attestation 记录至少含：`schemaId`（bytes32）、`attester`（address）、`skillId`（bytes32）、`uid`（bytes32） |
+| 实现 | `repos/contracts`：`ISkillAttestationRegistry` + 薄合约 `SkillAttestationRegistry`（EAS 形状兼容字段；**无** `@ethereum-attestation-service/*` npm 依赖） |
+| 写入 | 任意地址可 `attest(schemaId, skillId, data)`；`uid = keccak256(schemaId, attester, skillId, data, nonce)`；发出 `Attested` |
+| 读取 | `getAttestation(uid)` 返回上述字段 + `data` + `time`；无效 `uid` revert |
+| 单测 | Hardhat：写入后可读四字段；同参多次 attest 得不同 `uid`；未知 `uid` revert |
+| 明确不做 | 生产 EAS 部署地址、EAS Indexer、主网 attest、DAO Validator UI、撤销/过期治理、SkillRegistry 自动联写 |
+
+*实验室标签：本切片 = **lab attest registry**；对外叙事与文档不得声称「已接 EAS 主网 / 生产 attestation」。*
 
 #### FR-SK-003 Skill 绑定
 - Agent 可绑定多个 Skill

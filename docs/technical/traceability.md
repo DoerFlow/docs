@@ -19,7 +19,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-ID-003b | SIWE 登录 | api + web | `auth` 模块、`/account` | v0.1 🟡 |
 | FR-ID-004 | 双身份 + 无 Trial 会员权益 | api, web, admin, wallet, worker | `platform/membership`、wallet-links、客户端 401/402/403 | v0.3 🟡 |
 | FR-SK-001 | Skill 注册 | contracts + web | `SkillRegistry.sol`；Studio `MintFlowPanel` kind=skill（201 pin 后钱包确认） | v0.1 |
-| FR-SK-002 | Skill 验证 | contracts | v0.2 EAS | **v0.4+ Wave 45**（2026-09-22 取消延期；本波不实现） |
+| FR-SK-002 | Skill 验证（lab attest registry） | contracts | `ISkillAttestationRegistry` · `SkillAttestationRegistry.sol`（schemaId/attester/skillId/uid）；Hardhat `test/registry/SkillAttestationRegistry.t.ts` | **Wave 45 B5 first slice ✅** · 非生产 EAS |
 | FR-SK-003 | Skill 绑定 | contracts + web | Studio `MintFlowPanel` kind=bind（钱包→上链→Agent 可见） | v0.1 |
 | FR-SK-004 | Skill 搜索 | api + web | `GET /skills?q=`、市场 Skill 列表 | v0.1 |
 | FR-ST-001 | Escrow 创建 | contracts + web | `Escrow.sol`；雇佣等上链后再轮询新 escrowId | v0.1 |
