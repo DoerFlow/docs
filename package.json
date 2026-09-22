@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "rspress dev",
-    "build": "rspress build",
+    "build": "rspress build && node scripts/publish-ai-reservation.mjs",
     "preview": "rspress preview"
   },
   "dependencies": {
@@ -18,7 +18,8 @@
     "typescript": "^5.7.0"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=24.0.0",
+    "pnpm": ">=11"
   },
   "repository": {
     "type": "git",

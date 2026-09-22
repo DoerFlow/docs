@@ -2,6 +2,11 @@ import path from 'node:path';
 import { defineConfig } from 'rspress/config';
 
 export default defineConfig({
+  head: [
+    ['meta', { name: 'robots', content: 'noai, noimageai, noarchive' }],
+    ['meta', { name: 'tdm-reservation', content: '1' }],
+    ['meta', { name: 'tdm-policy', content: 'https://docs.doerflow.dev/legal/ai-use' }],
+  ],
   root: 'docs',
   base: '/',
   globalStyles: path.join(__dirname, 'styles/index.css'),
@@ -172,7 +177,7 @@ export default defineConfig({
       },
     ],
     footer: {
-      message: 'DoerFlow · doerflow.dev · MIT',
+      message: 'DoerFlow · doerflow.dev · Polyform Noncommercial · 禁止用于 AI 训练或生成同类产品（/legal/ai-use）',
     },
   },
 });

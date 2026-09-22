@@ -1,4 +1,9 @@
-﻿# docs · DoerFlow 官方文档
+# docs · DoerFlow 官方文档
+
+## 使用边界
+
+这些文档公开供人阅读，也允许搜索引擎索引。**不允许**用于训练 AI，也不允许把文档交给 AI 去生成一套同类产品。详见 [AI-USE.md](./AI-USE.md)。
+
 
 [doerflow](https://github.com/doerflow) 组织下的公开文档仓库，基于 [Rspress](https://rspress.rs/)。
 
