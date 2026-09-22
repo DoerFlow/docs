@@ -39,7 +39,7 @@ MVP：API 返回静态表（实验室）。**已定方向（2026-09-18；Wave 44
 | 部署地址 | **仅** `script/deploy-fee-tier-registry.ts` 真实 `waitForDeployment()` 后写入 `deployments/fee-tier-registry-baseSepolia.json`。**未跑部署则无地址，禁止手填/伪造。** Escrow 本切片**不**部署、**不**写 8453 |
 | 冒烟 | `script/smoke-fee-tier-registry.ts` 读链上表；缺部署文件则失败（不编造地址） |
 | Escrow AA settle | **Wave 46 lab ✅**：Hardhat `UserOp → LabEntryPoint → LabSmartAccount → settleWithFee`（T3=100bps + Paymaster 白名单）；**Base Sepolia / 官方 EntryPoint / 真 Bundler 仍开** |
-| API | 仍为第 2 节静态表（`FeesService`）；尚未索引链上 Registry |
+| API | **Wave 47**：`GET /fees/tiers` 支持 `source: static|registry`；有 `FEE_TIER_REGISTRY_ADDRESS` 时读链上 `tierBps`，否则静态表 |
 
 ## 2.2 Wave 46 lab AA settle（Hardhat · 2026-09-22）
 
@@ -84,7 +84,8 @@ Smart Account 持有主密钥；Agent 运行时仅加载 **Session Key**，泄�
 - [x] **Registry first slice（contracts）**：Hardhat 单测覆盖 T0–T3 默认表、`accountTier` / `protocolFeeBps`、owner 写入与 max bps；部署/冒烟脚本仅 **Base Sepolia 84532**（**未跑部署则无链上地址**）
 - [x] **Escrow.settleWithFee first slice（contracts）**：Hardhat 覆盖 registry 已设时读 `protocolFeeBps(consumer)`、未设时回退静态 `protocolFeeBps`、owner `setFeeTierRegistry`（**未部署 Escrow、无 8453 地址**）
 - [x] **Lab AA UserOp settle（Hardhat · Wave 46）**：`LabSmartAccount` + `LabEntryPoint.handleOps` → `settleWithFee`；Registry T3=100bps；Paymaster 赞助/拒
+- [x] **链下索引镜像（API · Wave 47）**：`GET /fees/tiers` 在 `FEE_TIER_REGISTRY_ADDRESS`（或部署文件）可用时读 `tierBps` 并标 `source: registry`；否则 `source: static` 回退 MVP 表
 - [ ] **Base Sepolia** 上 Smart Account 完成一笔带等级费率的 Escrow 结算（官方 EntryPoint / 真 Bundler 仍开）
-- [ ] 链下索引与 `GET /fees/tiers` 一致（仍为静态表，尚未接 Registry）
+- [ ] 部署后与链上表长期一致（需真人 Sepolia 部署；未部署禁止手填地址）
 
-MVP 的 `GET /api/v1/fees/tiers` 仍返回本文件第 2 节静态 T0–T3 表（`FeesService`），尚无链上 `FeeTierRegistry` 索引。实验室单元测试 `fees.service.spec.ts` 校验静态表 `protocolFeeBps` 250/200/150/100；`pnpm run smoke:m4` 覆盖 SDK `listFeeTiers` 静态表（4 档 / T0=250）；`smoke:m5` 廉价断言 OpenAPI 源含 `/fees/tiers` 且该单测文件存在；**不**覆盖 Base Sepolia / 链上索引（全路径勾选框保持未勾）。**Lab AA UserOp ≠ Base Sepolia 验收。1.0 不得以静态表作为费率路径的最终方案。勿为 8453 填写部署地址。**
+MVP 的 `GET /api/v1/fees/tiers` 默认返回本文件第 2 节静态 T0–T3 表（`FeesService`，`source: static`）。配置 Registry 地址后可镜像链上 `tierBps`（`source: registry`）。实验室单元测试覆盖静态路径；`pnpm run smoke:m4` 覆盖 SDK `listFeeTiers` 静态表（4 档 / T0=250）；`smoke:m5` 廉价断言 OpenAPI 源含 `/fees/tiers`；**不**覆盖 Base Sepolia 全 AA。**Lab AA UserOp ≠ Base Sepolia 验收。勿为 8453 填写部署地址。**

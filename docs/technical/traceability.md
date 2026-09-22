@@ -19,7 +19,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-ID-003b | SIWE 登录 | api + web | `auth` 模块、`/account` | v0.1 🟡 |
 | FR-ID-004 | 双身份 + 无 Trial 会员权益 | api, web, admin, wallet, worker | `platform/membership`、wallet-links、客户端 401/402/403 | v0.3 🟡 |
 | FR-SK-001 | Skill 注册 | contracts + web | `SkillRegistry.sol`；Studio `MintFlowPanel` kind=skill（201 pin 后钱包确认） | v0.1 |
-| FR-SK-002 | Skill 验证（lab attest registry） | contracts | `ISkillAttestationRegistry` · `SkillAttestationRegistry.sol`（schemaId/attester/skillId/uid）；Hardhat `test/registry/SkillAttestationRegistry.t.ts` | **Wave 45 B5 first slice ✅** · 非生产 EAS |
+| FR-SK-002 | Skill 验证（lab attest registry） | contracts + api | `SkillAttestationRegistry.sol`；`GET /attestations/:uid`（lab read）；Hardhat + ABI export | **Wave 45/47 ✅** · 非生产 EAS |
 | FR-SK-003 | Skill 绑定 | contracts + web | Studio `MintFlowPanel` kind=bind（钱包→上链→Agent 可见） | v0.1 |
 | FR-SK-004 | Skill 搜索 | api + web | `GET /skills?q=`、市场 Skill 列表 | v0.1 |
 | FR-ST-001 | Escrow 创建 | contracts + web | `Escrow.sol`；雇佣等上链后再轮询新 escrowId | v0.1 |
@@ -148,7 +148,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-ADM-002 | admin 任务列表 | admin, api | `/tasks` ← GET /admin/tasks + 行内审批 · locale | **v0.3 / M3** 🟡 |
 | FR-ADM-013 | admin 界面文案 locale | admin | `en` + `zh-CN`；禁止页面硬编码 fallback | **v0.3 / M3** 🟡 |
 | FR-ADM-007 | admin 支付 Commits 运维 | admin | `/payments/commits` | **v0.3 / M3** 🟡 |
-| FR-ADM-008 | admin 费率等级只读 | admin, api | `/payments/fees` ← `GET /fees/tiers`；1.0 费率路径 **已定** 须链上 `FeeTierRegistry` | **v0.3 / M3** 🟡 |
+| FR-ADM-008 | admin 费率等级只读 | admin, api | `/payments/fees` ← `GET /fees/tiers`（`source: static|registry`）；1.0 结算路径须链上 `FeeTierRegistry` + `settleWithFee` | **v0.3 / M3** 🟡 · Wave 47 镜像 ✅ |
 | FR-WRK-002/003/005 | worker published 大厅 + 相机/GPS/问卷交付 + Vault/账本 | worker, api | Expo 大厅 · proof · GPS · 社交清单 · accept **仅未接单** · 详情状态/待验收 · deliver → **submitted** · deliverEscrow · earnings **原生 ETH + 链上放款标记** · **en+zh** | **v0.3 / M3 ✅** |
 | FR-WRK-004 | worker 社交任务（清单+截图） | worker, wallet | `social/[id]` · 打开目标首页 · wallet 声明平台与步骤 · 人工审后上架 | **v0.3 / M3 ✅** |
 | FR-WRK-010/011/012 | 社交步骤引导 Accessibility Service | worker | **v0.4**：**UI 已接**（Wave 44 B1C）；仍 **无** auto-click / 抓取 / 代完成；**不是** 残障无障碍 | **v0.4** 🟡 |

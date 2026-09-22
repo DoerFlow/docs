@@ -365,6 +365,16 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | B9′ Paddle | LuminaryWorks Entitlement：`paddle` 适配器（checkout + `Paddle-Signature` + refund）；与 Polar/Creem 并列；DoerFlow 仍不自建 |
 | 仍开 | Base Sepolia 全路径 AA、生产 EAS、对端接通后 `commerce.readiness=production` |
 
+#### Wave 47 · ABI 诚实 + fees 镜像 + lab attestation 读（2026-09-23）
+
+| ID | 结论 |
+|----|------|
+| ABI | `export-abi` 含 `settleWithFee` / `FeeTierRegistry` / `SkillAttestationRegistry` → api+web |
+| Fees | `GET /fees/tiers` 可选链上镜像（`source: registry`）；缺地址回退 static |
+| Attest | `GET /attestations/:uid` lab 读面（非生产 EAS） |
+| Web | `useConfirmEscrow` 改调 `settleWithFee` |
+| 仍开 | Base Sepolia 全 AA、生产 EAS、partners、`8453`、Headless MFA |
+
 | 里程碑 | 版本 | 状态 |
 |--------|------|------|
 | M0 项目启动 | — | ✅ |
