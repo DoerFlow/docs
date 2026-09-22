@@ -330,9 +330,10 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | FeeTier | **混合**：浏览静态 `GET /fees/tiers`；收费/升档走 Base Sepolia Smart Account + `FeeTierRegistry` |
 | Creator 设备 | web **独立** `/devices` **已存在**（见 CLIENTS；不局限于 Payments `LabDevicesCard`） |
 | smart-site 深链 | **主 UI** = web `/ecosystem` Events；**admin + worker 亦**展示人工 `deepLink` Intervene（不自动远控） |
-| 会员 MoR | **仅** LuminaryWorks Entitlement（Polar+Creem 优先，Paddle 槽位）；DoerFlow **不**自建；`doerflow_credit` = C 轨 |
+| 会员 MoR | **仅** LuminaryWorks Entitlement（Polar+Creem+Paddle 适配器均已落地）；DoerFlow **不**自建；`doerflow_credit` = C 轨 |
 | commerce.readiness | **保持 `lab`** 直至真实 VistaCast/SyncroBrain 对端 |
-| FR-SK-002 EAS | **取消「延期」** → **Wave 45 B5**：lab `SkillAttestationRegistry` first slice ✅（非生产 EAS） |
+| FR-SK-002 EAS | **Wave 45 B5**：lab `SkillAttestationRegistry` ✅（非生产 EAS） |
+| FeeTier AA | **Wave 46 lab**：UserOp → `LabSmartAccount` → `settleWithFee` ✅；Base Sepolia 全路径仍开 |
 
 #### Wave 44 B 决策日志（2026-09-22）
 
@@ -355,6 +356,14 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 |----|------|
 | B5 | **lab attest registry**：`SkillAttestationRegistry` 存 `schemaId` + `attester` + `skillId` + `uid`；Hardhat 单测；**无** EAS npm SDK；**不**声称生产 EAS / DAO Validator 产品 |
 | B5 后续 | 官方 EAS 合约对接、Indexer、主网、Validator UI → 另开切片 |
+
+#### Wave 46 · lab AA settle + Paddle MoR（2026-09-22）
+
+| ID | 结论 |
+|----|------|
+| B6 lab AA | Hardhat：`LabSmartAccount` + `LabEntryPoint` + Paymaster → `Escrow.settleWithFee` 读 Registry T3；**非** Base Sepolia / 官方 EntryPoint |
+| B9′ Paddle | LuminaryWorks Entitlement：`paddle` 适配器（checkout + `Paddle-Signature` + refund）；与 Polar/Creem 并列；DoerFlow 仍不自建 |
+| 仍开 | Base Sepolia 全路径 AA、生产 EAS、对端接通后 `commerce.readiness=production` |
 
 | 里程碑 | 版本 | 状态 |
 |--------|------|------|
