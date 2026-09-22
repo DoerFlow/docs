@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 等级费率 · ERC-4337 账户抽象
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-18  
+**版本**: v0.1-draft · **最后更新**: 2026-09-22  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)（Session Keys）
 
 ## 1. 目标
@@ -27,7 +27,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | T2 | 质押 ≥ X ETH 或 DAO 徽章 | 150 | 贡献者 |
 | T3 | 验证 Skill Creator | 100 | 生态伙伴 |
 
-MVP：API 返回静态表（实验室）。**已定方向（2026-09-18）**：费率路径 **必须** 走 **Base Sepolia（84532）** Smart Account + 链上 `FeeTierRegistry`，**不是** 1.0 可选的「仅静态表」方案，**也不是** Ethereum Sepolia，**也不填 Base 主网 8453**。实验室 `SettlementPaymaster` 已部署（FR-PAY-008）。下方全路径验收勾选保持未勾，直至 Smart Account + Escrow 带档结算跑通。
+MVP：API 返回静态表（实验室）。**已定方向（2026-09-18；Wave 44 B6 混合 2026-09-22）**：浏览继续用静态 `GET /fees/tiers`；**收费 / 升档**须走 **Base Sepolia（84532）** Smart Account + 链上 `FeeTierRegistry`——**不是** 1.0「仅静态表」终局，**也不是** Ethereum Sepolia，**也不填 Base 主网 8453**。实验室 `SettlementPaymaster` 已部署（FR-PAY-008）。下方全路径验收勾选保持未勾，直至 Smart Account + Escrow 带档结算跑通。
 
 ## 2.1 First slice（contracts · Registry only · 2026-09-18）
 

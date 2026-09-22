@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 管理平台规格
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-18  
+**版本**: v0.1-draft · **最后更新**: 2026-09-22  
 **仓库**: `repos/admin` → `AgentSkillMesh/admin`（私有）
 
 ---
@@ -27,7 +27,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 用户：**平台运营、风控、客服**（RBAC，非普通 C 端用户）。
 
-- **不托管** VistaCast / SyncroBrain 伙伴控制台，也**不自动** smart-site 远控（不持有 VistaRemote 凭据、不发起会话）。v0.4：smart-site `remoteIntervention.deepLink` **主 UI** = **web** `/ecosystem` **Events** 卡（人工打开，不自动远控）。生态 catalog / jobs 仍在 `/ecosystem`，但介入是同页 Events，不是 catalog 语义。admin **不做**远控控制台、**可不做**深链按钮。见 [ECOSYSTEM.md](./ECOSYSTEM.md) · [SMART_SITE.md](./SMART_SITE.md)。
+- **不托管** VistaCast / SyncroBrain 伙伴控制台，也**不自动** smart-site 远控（不持有 VistaRemote 凭据、不发起会话）。v0.4（Wave 44 B8）：smart-site `remoteIntervention.deepLink` **主 UI** 可为 **web** `/ecosystem` **Events**；**admin 亦**展示人工 Intervene（打开深链，不自动远控）。生态 catalog / jobs 仍在 web `/ecosystem`。admin **不做**远控控制台。见 [ECOSYSTEM.md](./ECOSYSTEM.md) · [SMART_SITE.md](./SMART_SITE.md)。
 - 平台会员 / commerce checkout UI 在 **web** `/membership`（不在 admin）。见 [CLIENTS.md](./CLIENTS.md)。
 - 开发者 API Key / Skill 自助 UI 在 **web** `/developers`（不在 admin）。见 [CLIENTS.md](./CLIENTS.md) · [DEVELOPER.md](./DEVELOPER.md)。
 
@@ -35,12 +35,19 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 ### FR-ADM-001 登录与权限
 - Logto OIDC 平台账号 + MFA（走 Logto MFA，不另造一套）。完整 Headless MFA **阻塞于**
-  `@luminaryworks/auth-react` 提供真实 MFA challenge API，且需人工在 Logto tenant 开启
-  force-MFA；在 Admin 升级到明确标注 MFA-capable 的包版本前，Headless 无法完成 MFA。
+  `@luminaryworks/auth-react` 提供真实 MFA challenge API；在 Admin 升级到明确标注
+  MFA-capable 的包版本前，Headless 无法完成 MFA。
+- **MFA 环境策略**（与 LuminaryWorks Identity 一致）：
+  - **本地开发**：不强制 MFA（`pnpm id:up` → `ensure-force-mfa --off`）；Admin 默认
+    `NEXT_PUBLIC_ADMIN_LOGIN_MODE=headless`。
+  - **测试覆盖**：`pnpm e2e:admin:mfa` 临时开启 Mandatory + 绑 TOTP，结束后恢复本地无 MFA。
+  - **生产（全生态）**：tenant **Mandatory MFA**（`IDENTITY_ACCOUNTS_PROFILE=product` 或
+    `LOGTO_FORCE_MFA=1`）；Admin 部署须 `NEXT_PUBLIC_ADMIN_LOGIN_MODE=hosted`。
+  - 脚本：`pnpm id:force-mfa -- --off|on|restore`（`LuminaryWorks/identity/scripts/ensure-force-mfa.mjs`）。
 - `/login` 默认 `NEXT_PUBLIC_ADMIN_LOGIN_MODE=headless`：`HeadlessLoginPanel` 且
-  `showRegister={false}`（运营控制台；自助注册仅 web `/login`）。tenant 强制 MFA 时部署须设
-  `NEXT_PUBLIC_ADMIN_LOGIN_MODE=hosted`，登录页走 `signInRedirect` 到 Logto Hosted UI 完成 MFA。
-  **禁止**在 Admin 自造 TOTP / WebAuthn / 短信 MFA 表单。见 [CLIENTS.md](./CLIENTS.md)。
+  `showRegister={false}`（运营控制台；自助注册仅 web `/login`）。生产强制 MFA 时走
+  `signInRedirect` → Logto Hosted UI。**禁止**在 Admin 自造 TOTP / WebAuthn / 短信 MFA 表单。
+  见 [CLIENTS.md](./CLIENTS.md)。
 - 本地：MetaRepo `pnpm id:up`（委托相邻 `LuminaryWorks`）→ OIDC `:3001`；运营登录 `admin.doerflow@luminaryworks.dev`（seed）
 - JWT 角色 `doerflow_admin` 仅用于引导 Casbin `agent_admin`；审批按钮仍只看资源 `permissions`
 - 资源响应附 `permissions`；审批、风控、治理控件只按该映射启用
@@ -70,15 +77,16 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - 级别：高 / 中  
 - 操作：拦截、升级人工、加入黑名单  
 - **实现（M3）**：拦截 → `POST .../reject`（待审或未接单的 `published`）；升级人工 → `POST .../escalate`；加入黑名单/观察 → `POST /admin/publishers/flag`；标记已处理 → `POST .../clear-alert`  
-- **v0.4（2026-09-18 已定，两者都要）**：在保留上述轮询的同时，增加 Slack / email **出站 webhook** 告警（不替代 `/risk-alerts` 页面）  
+- **v0.4（2026-09-18 已定；Wave 44 B4AB 2026-09-22 重申）**：在保留上述轮询的同时，增加 Slack / email **出站 webhook** 告警（不替代 `/risk-alerts` 页面）  
 - **出站 webhook（first slice）**：`alertFlag` false→true 入队；`GET /admin/notifications/status`、`POST /admin/notifications/test`；env `RISK_ALERT_SLACK_WEBHOOK_URL` / `RISK_ALERT_EMAIL_WEBHOOK_URL`（缺省即关闭，接口不回传 URL）  
+- **admin Settings**：提供通知测试按钮，调用 `POST /admin/notifications/test`（不展示 webhook URL）  
 
 ### FR-ADM-006 仪表盘
 - 今日发布/完成/**GMV（已完成任务 `rewardEth` 合计，单位 ETH）**、待审数量、告警数  
 - 首页须可干活：待审队列预览（点进 `/review?id=`）、开放争议数、Indexer 健康（`GET /health` 的 `indexer.rpcOk` / `catchupPercent` / `leader`）、最近审计  
 - 不得展示占位假金额（如固定 `$128,400 USDC`）  
 - **实现（M3）**：KPI 条接 `GET /admin/stats/overview`（含 `gmvSettledTodayEth`、`needsRevision`、`openDisputes`）  
-- **图表（v0.4，2026-09-18 已定立即开工）**：不做自建图表；**立即 iframe** 嵌入 [DataLuminary](./DATALUMINARY.md) Dashboard。若 DataLuminary 尚无 embed 能力，则 **跨产品迭代 DataLuminary**，不在 admin 自建图表  
+- **图表（v0.4；Wave 44 B3B）**：不做自建图表；iframe 嵌入 [DataLuminary](./DATALUMINARY.md) Dashboard。admin 前端用 **`NEXT_PUBLIC_DATALUMINARY_DASHBOARD_URL`**（缺配置则不嵌）。若 DataLuminary 尚无 embed 能力，则 **跨产品迭代 DataLuminary**，不在 admin 自建图表  
 
 ### FR-ADM-007 支付清算运维（M3）
 - 只读面板：`GET /payments/ledger/commits`  
@@ -114,7 +122,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
   - `release_worker` → 任务 `completed` + 账本结算（链上已锁定则要求已有 `releaseTxHash` 或仅结案标注）  
   - `split` → 按 `splitBps` 账本部分打款后 `completed`  
 - 裁决写入审计 `DISPUTE_RESOLVED`  
-- **v0.4**：smart-site 深链主 UI 在 **web** `/ecosystem` Events（人工打开）。admin 任务/争议 **可不**挂深链按钮（不做远控控制台）  
+- **v0.4（Wave 44 B8）**：smart-site 深链主 UI 可为 **web** `/ecosystem` Events；**admin 亦**挂人工 Intervene 深链按钮（不做远控控制台、不自动远控）  
 
 ### FR-ADM-013 界面文案（M3）
 - 运营控制台用户可见文案走 locale：`lib/i18n/messages/en.json`（类型源）+ `zh-CN.json`（简体中文必填）
@@ -151,7 +159,7 @@ admin → shared（类型）
 | 版本 | 交付 |
 |------|------|
 | v0.3 | 登录、待审列表、单条/批量审批、告警列表、**支付 Commits 运维**、**治理参数**、**任务总览**、**发单方治理**、**审计日志**、**争议工单**；仪表盘 KPI + 待审队列预览 + 真实 GMV（图表 → DataLuminary）；**界面 en + zh-CN** |
-| v0.4 | **进行中**：Logto Hosted MFA 路径可配置；Headless MFA 阻塞于 MFA-capable `@luminaryworks/auth-react` + tenant force-MFA；保留 `/risk-alerts` 轮询 **并** Slack/email webhook；**立即 iframe** DataLuminary；smart-site `deepLink` **人工**按钮主 UI = web `/ecosystem` Events（不自动远控）；链上争议结算 |
+| v0.4 | **进行中**：MFA = Hosted/e2e 完成；本地关 / 生产 Mandatory；Headless 仍阻塞于 auth-react；保留 `/risk-alerts` **并** Slack/email webhook + Settings 测试；iframe DataLuminary（`NEXT_PUBLIC_DATALUMINARY_DASHBOARD_URL`）；smart-site 人工 Intervene（admin 亦展示，主 UI 可为 web `/ecosystem`）；链上争议结算 |
 | v1.0 | 完整 RBAC + 审计留存策略 |
 
 ## 6. 验收
@@ -162,7 +170,7 @@ admin → shared（类型）
 - [x] 运营界面用户文案走 en + zh-CN locale（审批 / 任务 / 仪表盘 / 治理 / 发单方 / 审计 / 告警 / 登录）  
 - [x] 无 API `permissions.review|manage` 时写控件不可用，即使 JWT 带同名角色
 - [x] `401` 返回登录，`402` 显示套餐/配额上下文，`403` 显示资源无权且不展示升级误导
-- [x] `NEXT_PUBLIC_ADMIN_LOGIN_MODE=hosted|headless`（默认 headless）；hosted 走 Logto Hosted `signInRedirect`；Headless 无自造 MFA UI，阻塞于 auth-react MFA challenge + tenant force-MFA
+- [x] MFA 策略：本地 `--off`；`e2e:admin:mfa` 临时 Mandatory+TOTP 后恢复；生产 product/`LOGTO_FORCE_MFA=1` → Mandatory；Admin Hosted 路径可配（Hosted/e2e **完成**）；Headless MFA 仍阻塞于 auth-react（笔记）
 
 ---
 

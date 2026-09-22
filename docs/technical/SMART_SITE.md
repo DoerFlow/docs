@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # smart-site 场景最小契约（SMART_SITE）
 
-**版本**: v0.1-smart-site-lab · **最后更新**: 2026-09-18
+**版本**: v0.1-smart-site-lab · **最后更新**: 2026-09-22
 **关联**: [DEPLOYMENT.md](./DEPLOYMENT.md) · [CLIENTS.md](./CLIENTS.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [CHANNELS.md](./CHANNELS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) · [DATALUMINARY.md](./DATALUMINARY.md)
 
 `smart-site` 是 `agent-commerce` 之上的站点/工地场景档位（见 [DEPLOYMENT.md](./DEPLOYMENT.md) §1）。本文件只定义 **稳定的 env 与契约面**，实现是 **工程实验室**，`DEPLOYMENT_PROFILE` 未设为 `smart-site` 时**默认关**。
@@ -16,7 +16,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 **状态诚实标注**：本档位未接过真实 VistaRemote / DataLuminary 生产对端。`/capabilities` 里 `commerce.readiness` 为 `lab`，文档不得写「已上线」。
 
-**Creator UI**：Creator 面向 catalog/jobs 仍是 web `/ecosystem`（读 `/capabilities`）。`remoteIntervention.deepLink` **主 UI** = **web** `/ecosystem` **Events** 卡（人工打开；catalog/jobs ≠ 介入，同页另卡）。admin **不做**远控控制台。本档位只追加人工介入深链 + DataLuminary 导出关联——**无**自动远控。见 [ECOSYSTEM.md](./ECOSYSTEM.md) §5.1 · [CLIENTS.md](./CLIENTS.md) · [DEPLOYMENT.md](./DEPLOYMENT.md)。
+**Creator UI**：Creator 面向 catalog/jobs 仍是 web `/ecosystem`（读 `/capabilities`）。`remoteIntervention.deepLink` **主 UI** 可为 **web** `/ecosystem` **Events**；**admin + worker 亦**展示人工 Intervene（打开深链；catalog/jobs ≠ 介入）。admin / worker **不做**远控控制台。本档位只追加人工介入深链 + DataLuminary 导出关联——**无**自动远控。见 [ECOSYSTEM.md](./ECOSYSTEM.md) §5.1 · [CLIENTS.md](./CLIENTS.md) · [DEPLOYMENT.md](./DEPLOYMENT.md)。
 
 ---
 
@@ -82,7 +82,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | 触发条件 | 档位 `smart-site` **且** 事件带 `sourceRef` **且** 模板已配 |
 | `sourceRef` 编码 | 逐个占位符做 `encodeURIComponent`，防止拼接注入 |
 | 没有 `sourceRef` | 不返回 `remoteIntervention`，**不猜**、不用 `eventId` 或 `sourceId` 顶替。深链只认信封里源产品**主动声明**的 `data.sourceRef`；`sourceId` 是摄像头/设备 id，不是业务引用 |
-| 谁点 | **人**。主 UI = **web** `/ecosystem` Events。API 不发起会话、不持有 VistaRemote 凭据 |
+| 谁点 | **人**。主 UI 可为 **web** `/ecosystem` Events；**admin + worker 亦**人工 Intervene。API 不发起会话、不持有 VistaRemote 凭据 |
 | 回调 | 若事件带 `callbackUrl`，durable outbox 发签名 CloudEvents `com.doerflow.site.intervention.requested.v1`，载荷只含 `eventId` / `sourceProduct` / `sourceTenantId` / `sourceRef` / `deepLink` / `mode`；**不改源产品业务状态** |
 
 ---
@@ -105,7 +105,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | ID | 简述 |
 |---|---|
 | FR-SITE-001 | `smart-site` 档位与稳定 env（模板必须含 `{sourceRef}`，启动校验） |
-| FR-SITE-002 | 人工介入深链：`sourceRef` → `deepLink`，`mode=manual`，`autoRemoteControl=false`；主 UI = web `/ecosystem` Events |
+| FR-SITE-002 | 人工介入深链：`sourceRef` → `deepLink`，`mode=manual`，`autoRemoteControl=false`；主 UI 可为 web `/ecosystem` Events；admin + worker 亦人工 Intervene |
 | FR-SITE-003 | DataLuminary 导出事件最小契约：去重、关联、治理门禁或 `correlated` |
 | FR-SITE-004 | 不自动 resolve：介入回执与导出完成都不改任务终态 |
 | FR-SITE-005 | 无 runtime import：跨产品仅签名 CloudEvents + REST + OIDC |

@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # DoerFlow 版本规划与里程碑
 
-**最后更新**: 2026-09-18  
+**最后更新**: 2026-09-22  
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [CLIENTS.md](./CLIENTS.md) · [SPEC.md](./SPEC.md)
 
 ---
@@ -158,7 +158,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 发单方仅用 wallet、接单方仅用 worker、运营仅用 admin，可在测试网完成「发布 → 审批 → 接单 → 交付 → 放款」全流程，无需运维手工改库。
 
-**前期不做**：面向听障、视障、言语障碍等特殊人群的残障无障碍（读屏 / 字幕 / WCAG）。**社交任务本身是 M3 交付**（清单+截图）。Android Accessibility Service 打开目标 App 为 **v0.4 进行中**（2026-09-18 已定立即开工），与残障无障碍不是同一件事。
+**前期不做**：面向听障、视障、言语障碍等特殊人群的残障无障碍（读屏 / 字幕 / WCAG）。**社交任务本身是 M3 交付**（清单+截图）。Android Accessibility Service：**UI 已接**（Wave 44 B1C），仍无 auto-click；与残障无障碍不是同一件事。
 
 **预计工期**: 8–10 周  
 **依赖**: M2 Vault/账本可用（充提与余额展示）  
@@ -319,20 +319,35 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `smoke:m4` AI 验收（2026-08-29）。顺序仍是 **清算底座 → 客户端 → 场景 → 生产闸门**；继续留在 Base Sepolia 打磨，**不伪造主网地址**。
 
-**v0.4 产品补齐（进行中 · 2026-09-18）**：M4 `smoke:m4` 已关。下列为同版本产品决策，立即开工，不重开 SDK 验收：
+**v0.4 产品补齐（进行中 · 2026-09-18 开工；Wave 44 B 决策 2026-09-22）**：M4 `smoke:m4` 已关。下列为同版本产品决策，不重开 SDK 验收：
 
 | 项 | 决策 |
 |----|------|
-| FR-WRK-010 | Accessibility Service **立即开工**（非残障无障碍） |
-| admin MFA | Hosted `signInRedirect` 可配；Headless MFA **阻塞于** auth-react MFA challenge + tenant force-MFA |
-| admin 图表 | **立即 iframe** DataLuminary；缺 embed 则跨产品改 DataLuminary |
-| ops 告警 | 保留轮询 `/risk-alerts` **并**加 Slack/email webhook |
-| FeeTier | Sepolia Smart Account + `FeeTierRegistry` 为费率路径 **已定方向**（验收勾选仍开；非 1.0 静态表可选项） |
-| Creator 设备 | web **独立** `/devices` 注册/收益页（不局限于 Payments `LabDevicesCard`） |
-| smart-site 深链 | 主 UI = **web** `/ecosystem` Events；admin 不做远控控制台 |
-| 会员 MoR | **仅** LuminaryWorks Entitlement；DoerFlow 不自建 Creem/Polar/Paddle |
-| commerce.readiness | 保持 `lab` 直至真实 VistaCast/SyncroBrain 对端 |
-| FR-SK-002 EAS | **延期**（未决策开工） |
+| FR-WRK-010 | Accessibility Service：**UI 已接**；仍 **无** auto-click / 代操作（非残障无障碍） |
+| admin MFA | Hosted / `e2e:admin:mfa` **已完成**；本地关 / 生产 Mandatory；Headless MFA **仍阻塞于** auth-react（仅记） |
+| admin 图表 | iframe DataLuminary；前端 env `NEXT_PUBLIC_DATALUMINARY_DASHBOARD_URL` |
+| ops 告警 | 保留 `/risk-alerts` 轮询 **并** Slack/email webhook（`RISK_ALERT_*_WEBHOOK_URL` + admin Settings 测试按钮） |
+| FeeTier | **混合**：浏览静态 `GET /fees/tiers`；收费/升档走 Base Sepolia Smart Account + `FeeTierRegistry` |
+| Creator 设备 | web **独立** `/devices` **已存在**（见 CLIENTS；不局限于 Payments `LabDevicesCard`） |
+| smart-site 深链 | **主 UI** = web `/ecosystem` Events；**admin + worker 亦**展示人工 `deepLink` Intervene（不自动远控） |
+| 会员 MoR | **仅** LuminaryWorks Entitlement（Polar+Creem 优先，Paddle 槽位）；DoerFlow **不**自建；`doerflow_credit` = C 轨 |
+| commerce.readiness | **保持 `lab`** 直至真实 VistaCast/SyncroBrain 对端 |
+| FR-SK-002 EAS | **取消「延期」** → 排入 **v0.4+ Wave 45**（本波不实现） |
+
+#### Wave 44 B 决策日志（2026-09-22）
+
+| ID | 结论 |
+|----|------|
+| B1C | Accessibility：UI 已接；仍无 auto-click |
+| B2B | MFA：Hosted/e2e 完成；Headless 阻塞 auth-react（笔记） |
+| B3B | DataLuminary iframe：`NEXT_PUBLIC_DATALUMINARY_DASHBOARD_URL` |
+| B4AB | 保留 `/risk-alerts` + Slack/email webhook；ONBOARDING 记 env + Settings 测试 |
+| B5B | FR-SK-002 取消延期 → Wave 45 排期（不实现） |
+| B6 | 费率混合：静态浏览 + 链上 Smart Account / `FeeTierRegistry` 收费升档 |
+| B7B | `/devices` 页已存在（CLIENTS 已述） |
+| B8 | admin + worker **亦**人工 Intervene；主 UI 仍可为 web `/ecosystem` |
+| B9′ | MoR 仅 Entitlement；DoerFlow 不自建 Creem/Polar/Paddle；重申 D-PA-09 |
+| B10A | `commerce.readiness` 保持 `lab` 直至伙伴接通 |
 
 | 里程碑 | 版本 | 状态 |
 |--------|------|------|
@@ -388,9 +403,9 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | 鉴权 | 生产 M2M+Entitlement+Casbin；`COMMERCE_AUTH_MODE=lab\|off`（生产禁用） |
 | 验收 | `pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`） |
 
-**Creator UI**：web `/ecosystem`（catalog / jobs + Events 深链 Intervene；实验室 readiness Tags）。见 [CLIENTS.md](./CLIENTS.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)。
+**Creator UI**：web `/ecosystem`（catalog / jobs + Events 深链 Intervene；主 UI）；admin + worker 亦可人工 Intervene。见 [CLIENTS.md](./CLIENTS.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)。
 
-**现状诚实标注**：VistaCast / SyncroBrain 对接是**已实现的工程实验室**，`DEPLOYMENT_PROFILE` 未开时**默认关**；未接真实生产对端。**已定（2026-09-18）**：`/capabilities.commerce.readiness` **保持 `lab`** 直至真实 VistaCast / SyncroBrain 对端。
+**现状诚实标注**：VistaCast / SyncroBrain 对接是**已实现的工程实验室**，`DEPLOYMENT_PROFILE` 未开时**默认关**；未接真实生产对端。**已定（2026-09-18；Wave 44 B10A 2026-09-22 重申）**：`/capabilities.commerce.readiness` **保持 `lab`** 直至真实 VistaCast / SyncroBrain 对端。
 
 ---
 
@@ -405,7 +420,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | Compose | `core` 基座 + `dev`/`prod`/`external-db`/`control-plane`/`smoke` overlay |
 | 探针 | `/ready` 降级 **503**；新增 `/version` 与 `/capabilities` |
 | 启动校验 | capability manifest fail-closed（生产禁 `COMMERCE_AUTH_MODE=lab\|off`） |
-| smart-site | 人工介入深链 + DataLuminary 导出关联；**不自动远控、不自动 resolve**；深链主 UI = **web** `/ecosystem` Events |
+| smart-site | 人工介入深链 + DataLuminary 导出关联；**不自动远控、不自动 resolve**；深链主 UI = **web** `/ecosystem` Events；**admin + worker 亦**人工 Intervene |
 | 验收 | `pnpm run compose:config` · `pnpm run compose:preflight` · `pnpm run smoke:m5` |
 
 Creator UI 同 §9（web `/ecosystem` catalog）。Creator 设备注册/收益走 web **独立** `/devices`（不局限于 Payments `LabDevicesCard`）。

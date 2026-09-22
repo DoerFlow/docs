@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 跨产品支付与会员架构（Payment Architecture）
 
-> **状态**：Accepted · **决策日**：2026-09-16 · **修订**：2026-09-18（D-PA-09：MoR 仅 Entitlement，DoerFlow 不自建 Creem/Polar/Paddle） · **范围**：LuminaryWorks 六产品会员收款 + DoerFlow 作为支付轨
+> **状态**：Accepted · **决策日**：2026-09-16 · **修订**：2026-09-22（Wave 44 B9′：重申 D-PA-09；MoR 仅 Entitlement，Polar+Creem 优先 / Paddle 槽位；C = `doerflow_credit`） · **范围**：LuminaryWorks 六产品会员收款 + DoerFlow 作为支付轨
 > **关联**：[LuminaryWorks payment-platform.md](https://github.com/LuminaryWorks/LuminaryWorks/blob/main/spec/payment-platform.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [ONRAMP.md](./ONRAMP.md) · [GEO_PORTABILITY.md](./GEO_PORTABILITY.md) · [COMMERCIAL.md](./COMMERCIAL.md)
 
 本文是 **DoerFlow 与 LuminaryWorks 会员/支付融合** 的唯一权威。它不重新定义支付编排（那是 LuminaryWorks `payment-platform.md` 的职责），只定义三件事：
@@ -28,7 +28,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | D-PA-06 | 不做法币提现。出金 = 提到用户自托管钱包；平台不持有法币、不做货币转移 |
 | D-PA-07 | `PAYMENTS_ENABLED=false` 时 `PaymentsModule` 整体不注册、公开 webhook 路由不挂载。私有交付包不含 PSP 面 |
 | D-PA-08 | 付款方区分 `individual` / `business`；企业走 `manual`（对公转账）+ `contract`（合同 PO） |
-| D-PA-09 | **2026-09-18**：会员 MoR **只经 LuminaryWorks Entitlement**（统一）。DoerFlow **不**自建 Creem / Polar / Paddle 适配器或 checkout |
+| D-PA-09 | **2026-09-18 定；Wave 44 B9′ 2026-09-22 重申**：会员 MoR **只经 LuminaryWorks Entitlement**（统一）。Entitlement 侧 **Polar + Creem 优先**，**Paddle 留槽位**。DoerFlow **不**自建 Creem / Polar / Paddle 适配器或 checkout。个人阶段第三条通道 **C = `doerflow_credit`**（见 D-PA-03） |
 
 ## 1. 权威边界
 
@@ -85,9 +85,9 @@ flowchart TB
 
 MoR 供应商作为**记录商户**（seller of record）：它对终端买家开票、代扣代缴 VAT / 销售税，再按周期把净额打到个人银行 / Wise / Payoneer。这是无公司主体合法销售 SaaS 的标准解法，也是后续交付给客户时"客户有更多选择"的基础。
 
-候选：Creem · Polar · Paddle · Lemon Squeezy（**开户与适配器在 LuminaryWorks Entitlement，不在 DoerFlow**）。**开户资质必须实际验证**——不同供应商对自然人开户的接受度不同，不得假定。
+候选：**Polar · Creem 优先**，**Paddle 留槽位**；另可评估 Lemon Squeezy（**开户与适配器在 LuminaryWorks Entitlement，不在 DoerFlow**）。**开户资质必须实际验证**——不同供应商对自然人开户的接受度不同，不得假定。
 
-适配器按**单 vendor** 实现（webhook 签名校验必须 vendor-specific，不可抽象成通用 MoR 适配器），其余供应商留 `ProviderId` 槽位。
+适配器按**单 vendor** 实现（webhook 签名校验必须 vendor-specific，不可抽象成通用 MoR 适配器），其余供应商留 `ProviderId` 槽位。**DoerFlow 产品仓禁止**自建 Creem / Polar / Paddle checkout 或 webhook 适配器（D-PA-09）。
 
 MoR 与直连 PSP 的语义差异，适配器必须正确映射：
 
