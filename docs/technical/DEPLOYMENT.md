@@ -17,7 +17,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 1. **可独立**：`standalone` 档位不需要 Logto / Entitlement / 兄弟产品即可跑通任务、账本、Merkle、链上 Escrow。
 2. **不静默匿名**：任何档位、任何 `ENTITLEMENT_MODE`，写路径都必须有已验证主体（SIWE / 平台 JWT / M2M）。「关掉 Entitlement」**不等于**「关掉 AuthN」。
 3. **生产平台档位**：面向多租户公开收款的托管平台必须开 **AuthN（Logto/M2M）+ Entitlement + Casbin**，钱包证明单独走 **SIWE**（双轨，见 §4）。
-4. **诚实标注**：`agent-commerce` / `smart-site` 的兄弟产品对接目前是 **已实现的工程实验室**，默认 **关**；未接真实 VistaCast / SyncroBrain 对端前不得在文档或 `/capabilities` 里把 `commerce.readiness` 标成 `production`（**已定保持 `lab`**，2026-09-18）。
+4. **诚实标注**：`agent-commerce` / `smart-site` 的兄弟产品对接目前是 **已实现的工程实验室**，默认 **关**；未接真实 VistaCast / SyncroBrain 对端前产品状态为 **Lab**。兼容 API 可保持 `commerce.readiness=lab`，不得在 UI/文档显示 Available。
 5. **会员 / MoR**：只经 **LuminaryWorks Entitlement**（统一）。DoerFlow **不**自建 Creem / Polar / Paddle 适配器或 checkout。
 
 ---

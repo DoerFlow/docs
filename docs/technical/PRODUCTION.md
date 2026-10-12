@@ -108,6 +108,8 @@ Hardhat 网络 `base`（chainId **8453**）。部署顺序与 Sepolia 相同：A
 
 ## 4. 运维 Runbook
 
+封闭 Beta **值班决策与 pause / 邀请** 见专用清单：[CLOSED_BETA_RUNBOOK.md](./CLOSED_BETA_RUNBOOK.md)（创始人 on-call）。本节为工程侧常备动作：
+
 | 项 | 做法 |
 |----|------|
 | **备份** | SQLite：停写后拷贝 `SQLITE_PATH`（任务/Casbin/用户）。Postgres：`pg_dump` 日备 + WAL（账本 **与** Agent/Skill/Escrow 索引行、`indexer_cursors`）。Proofs `PROOFS_DIR` / IPFS 本地目录一并备份 |

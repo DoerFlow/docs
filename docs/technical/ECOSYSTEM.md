@@ -63,9 +63,9 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 ### 5.1 工程实验室（web `/ecosystem` 与合作方商业）
 
-Creator DApp 的 **web `/ecosystem`** 含只读 catalog / jobs，**另有 Events 卡**展示 `GET /integrations/events`；有 `remoteIntervention.deepLink` 时提供 **Intervene**（人工新窗口打开）。**不是**合作方生产控制台，**不**自动远控。页面展示：部署档位 Tag 来自 `/capabilities.profile`；commerce readiness Tag 来自 `/capabilities.commerce.readiness`；catalog 行 readiness Tag 来自 trading catalog。部署档位低于 `agent-commerce` 时展示 `ecosystem.labHint`。catalog 加载失败与 jobs `error` 态提供 Retry；未登录或无租户空态不提供 Retry。开发者自助（Key / Skill）走 web `/developers`，与 `/ecosystem` catalog 分开。见 [CLIENTS.md](./CLIENTS.md)、[DEVELOPER.md](./DEVELOPER.md)。
+Creator DApp 的 **web `/ecosystem`** 含只读 catalog / jobs，**另有 Events 卡**展示 `GET /integrations/events`；有 `remoteIntervention.deepLink` 时提供 **Intervene**（人工新窗口打开）。**不是**合作方生产控制台，**不**自动远控。页面展示：部署档位 Tag 来自 `/capabilities.profile`；commerce 与 catalog 能力状态统一归一化为 Available/Beta/Lab/Roadmap。部署档位低于 `agent-commerce` 时展示 `ecosystem.labHint`。catalog 加载失败与 jobs `error` 态提供 Retry；未登录或无租户空态不提供 Retry。开发者自助（Key / Skill）走 web `/developers`，与 `/ecosystem` catalog 分开。见 [CLIENTS.md](./CLIENTS.md)、[DEVELOPER.md](./DEVELOPER.md)。
 
-VistaCast / SyncroBrain 伙伴商业是 **opt-in 工程实验室**：`DEPLOYMENT_PROFILE=agent-commerce`（或累进的 `smart-site`）才开，默认关。**已定（2026-09-18）**：未接真实 VistaCast / SyncroBrain 对端前 `/capabilities.commerce.readiness` **保持 `lab`**，不得标成 production。本机验收：`pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`）。
+VistaCast / SyncroBrain 伙伴商业是 **opt-in 工程实验室**：`DEPLOYMENT_PROFILE=agent-commerce`（或累进的 `smart-site`）才开，默认关。未接真实对端前产品状态为 **Lab**；兼容 API 可保持 `/capabilities.commerce.readiness=lab`，不得展示 Available。本机验收：`pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`）。
 
 排期与档位边界：[ROADMAP.md](./ROADMAP.md) §9 生态商业实验室、§10 smart-site · [DEPLOYMENT.md](./DEPLOYMENT.md) · [SMART_SITE.md](./SMART_SITE.md)。
 

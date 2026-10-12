@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 跨产品支付与会员架构（Payment Architecture）
 
-> **状态**：Accepted · **决策日**：2026-09-16 · **修订**：2026-09-22（Wave 46：Entitlement 落地 Polar+Creem+Paddle MoR 适配器；C = `doerflow_credit`；DoerFlow 仍不自建 checkout） · **范围**：LuminaryWorks 六产品会员收款 + DoerFlow 作为支付轨
+> **状态**：Accepted · **决策日**：2026-09-16 · **修订**：2026-10-10（D-PA-10：平台交易收单方为 DoerFlow，不托管 KYC / 法币。会员 MoR 仍只经 Entitlement） · **范围**：LuminaryWorks 六产品会员收款 + DoerFlow 作为支付轨
 > **关联**：[LuminaryWorks payment-platform.md](https://github.com/LuminaryWorks/LuminaryWorks/blob/main/spec/payment-platform.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [ONRAMP.md](./ONRAMP.md) · [GEO_PORTABILITY.md](./GEO_PORTABILITY.md) · [COMMERCIAL.md](./COMMERCIAL.md)
 
 本文是 **DoerFlow 与 LuminaryWorks 会员/支付融合** 的唯一权威。它不重新定义支付编排（那是 LuminaryWorks `payment-platform.md` 的职责），只定义三件事：
@@ -29,6 +29,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | D-PA-07 | `PAYMENTS_ENABLED=false` 时 `PaymentsModule` 整体不注册、公开 webhook 路由不挂载。私有交付包不含 PSP 面 |
 | D-PA-08 | 付款方区分 `individual` / `business`；企业走 `manual`（对公转账）+ `contract`（合同 PO） |
 | D-PA-09 | **2026-09-18 定；Wave 44/46 重申**：会员 MoR **只经 LuminaryWorks Entitlement**（统一）。Entitlement 已落地 **Polar + Creem + Paddle** 适配器（Wave 46 补齐 Paddle）。DoerFlow **不**自建 Creem / Polar / Paddle 适配器或 checkout。个人阶段第三条通道 **C = `doerflow_credit`**（见 D-PA-03） |
+| D-PA-10 | **2026-10-10**：任务、Escrow、协议费与账本结算的收单方是 **DoerFlow**。购买 ETH 等资产默认进入用户的 DoerFlow 钱包，用户可改选已连接的自托管钱包；两者都不进平台混池。法币兑换与 KYC 仍由持牌 Onramp 在其域内完成，平台不托管二者。与 D-PA-09 分开：会员订阅收单仍走 Entitlement |
 
 ## 1. 权威边界
 
@@ -235,7 +236,7 @@ POST /v1/payments/webhooks/doerflow_credit/:configId
 
 ## 9. 代币定位（长远，需求 5）
 
-**A2A 小额高频交易的结算单位是稳定币，不是自有币。** 自有币若同时充当计价与结算货币，其价格波动会直接破坏 Agent 定价——这是设计红线。
+**A2A 小额高频交易的结算单位是稳定币，不是自有币，也不是 BTC。** 自有币或 BTC 若同时充当计价与结算货币，其价格波动会直接破坏 Agent 定价——这是设计红线。DoerFlow 钱包仍要收付 ETH、BTC 与非 EVM 稳定币（先做 Tron USDT），见 [WALLET.md](./WALLET.md)。这些资产进用户钱包，不直接替代账本结算资产。
 
 分层：
 

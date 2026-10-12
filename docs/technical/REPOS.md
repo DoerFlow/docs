@@ -9,7 +9,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 **品牌**：[DoerFlow](https://doerflow.dev) · **目标组织**：[github.com/doerflow](https://github.com/doerflow)（原 AgentSkillMesh）  
 **版本**: v0.1  
-**最后更新**: 2026-09-15  
+**最后更新**: 2026-10-07
 **清单数据源**: `repos.manifest.json`
 
 > 组织迁移见 [LuminaryWorks/spec/github-org-migration.md](https://github.com/LuminaryWorks/LuminaryWorks/blob/main/spec/github-org-migration.md)。下文 **AgentSkillMesh** 为迁移前组织名。
@@ -31,8 +31,8 @@ doerflow（GitHub 组织，目标名）
 │       ├── web        私有 · DApp
 │       ├── p2p        私有 · P2P SDK
 │       ├── shared     私有 · 类型与 ABI
-│       ├── wallet     私有 · RN 纯粹钱包（发任务）
-│       ├── worker     私有 · RN 综合端（接单 + 社交）
+│       ├── wallet     私有 · 统一 DoerFlow App 主壳
+│       ├── worker     私有 · 旧接单 App（迁移退役）
 │       └── admin      私有 · 运营管理（审核/告警）
 ```
 
@@ -47,8 +47,8 @@ doerflow（GitHub 组织，目标名）
 | 子仓 | web | `doerflow/web` | 私有 | React DApp、wagmi（Creator） |
 | 子仓 | p2p | `doerflow/p2p` | 私有 | libp2p Beacon（v0.2+） |
 | 子仓 | shared | `doerflow/shared` | 私有 | `@doerflow/shared`（原 `@vibe-agent/shared`） |
-| 子仓 | wallet | `doerflow/wallet` | 私有 | RN 纯粹钱包：转账、收益、**发布任务** |
-| 子仓 | worker | `doerflow/worker` | 私有 | RN 综合端：众包接单 + 社交平台任务 |
+| 子仓 | wallet | `doerflow/wallet` | 私有 | 统一 DoerFlow App：首页/工作/发布/资金/我的；渐进吸收 worker |
+| 子仓 | worker | `doerflow/worker` | 私有 | 旧接单/社交 App；迁移期兼容与安全修复，对等后两个版本窗口退役 |
 | 子仓 | admin | `doerflow/admin` | 私有 | 运营平台：审批、告警、订单总览 |
 
 ---
@@ -215,27 +215,31 @@ flowchart TB
 | 包名 | `@doerflow/shared`（对外 npm；仓内路径别名可仍见 `@vibe-agent/shared`） |
 | 职责 | 跨仓类型、链 ID、合约地址常量、ABI 重导出 |
 
-### 3.9 wallet（纯粹钱包 · React Native）
+### 3.9 wallet（统一 DoerFlow App · React Native）
 
 | 项 | 内容 |
 |----|------|
 | 路径 | `repos/wallet` |
 | 规格 | `spec/WALLET.md`、`spec/TASK_GOVERNANCE.md` |
-| 角色 | **发单方**：转账、收益、发布任务（须确认 → 待审核） |
-| 依赖 | `api`（任务发布）、`shared`、链上 Escrow |
+| 用户 | 同一 Platform Account 下的发布者、执行者与持币用户 |
+| 职责 | 首页 / 工作 / 发布 / 资金 / 我的；转账、任务全生命周期；渐进吸收 worker 原生证据能力 |
+| 依赖 | `api`（任务发布/接单/证据）、`shared`、链上 Escrow |
 | 构建 | Expo · `pnpm start` / `android` / `ios` |
 
-**不含**任务大厅与接单 — 见 `worker`。
+迁移顺序须保留 `published` 门禁、证据最小化、私钥本地、SIWE 双证明和 Accessibility Service 禁 auto-click 等约束。
 
-### 3.10 worker（综合端 · React Native）
+### 3.10 worker（旧 Worker App · React Native）
 
 | 项 | 内容 |
 |----|------|
 | 路径 | `repos/worker` |
 | 规格 | `spec/WORKER.md`、`spec/CLIENTS.md` |
-| 角色 | **执行者**：众包 Human Task + 社交平台任务（清单+截图） |
+| 状态 | 迁移期：冻结新增产品面，只做安全/兼容/迁移 |
+| 历史职责 | 众包 Human Task + 社交平台任务（清单+截图） |
 | 依赖 | `api`（仅 `published` 任务）、`shared`、Escrow |
 | 构建 | Expo · 包名 `@vibe-agent/worker` |
+
+统一 App 达到能力对等后，旧 worker 保留两个正式版本的迁移提示、深链与未完成任务兼容，再停止发布。
 
 ### 3.11 admin（运营管理 · Web）
 

@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 五通道任务经济（CHANNELS）
 
-**版本**: v1.2-ecosystem-commerce · **最后更新**: 2026-09-16  
+**版本**: v1.3-product-model · **最后更新**: 2026-10-07
 **关联**: [AGENT_RUNTIME.md](./AGENT_RUNTIME.md) · [ENDPOINT.md](./ENDPOINT.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) · [luminaryworks-ecosystem.md](./luminaryworks-ecosystem.md) · [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 本文件展开 `SPEC.md` **FR-ST-006**：Agent 与 Agent、人、云 API、电脑/手机、物联网都可以完成任务并获取报酬。内核是同一套作业与结算，通道只替换发现协议与执行器。
@@ -23,7 +23,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | `channel` | 参与方 | 发现 | `executorKind` | 最低交付凭证 | 默认 `settlementRail` |
 |-----------|--------|------|----------------|--------------|------------------------|
 | `agent-agent` | Agent ↔ Agent | A2A Agent Card + `GET /a2a/tasks` | `agent-runtime` | artifact / CID / receipt | 微额 `ledger`；大额/争议 `escrow` |
-| `agent-human` | Agent ↔ 人 | wallet 发布 · worker 大厅 | `human-worker` | 照片/GPS/问卷/`proofCid` | `escrow`（链下 stub 可先 `ledger`） |
+| `agent-human` | Agent ↔ 人 | 统一 App/Web 发布 · App 工作页（迁移期 worker） | `human-worker` | 照片/GPS/问卷/`proofCid` | `escrow` 或明确选择的 `ledger` |
 | `agent-cloud` | Agent ↔ 云 API | OpenAPI + MCP + `/trading/catalog` | `cloud-adapter` | EIP-712 Receipt + job 执行结果 | `ledger` |
 | `agent-endpoint` | Agent ↔ 电脑/手机 | `/endpoints` 注册与能力白名单 | `endpoint-agent` | 沙箱输出 hash | 微额 `ledger`；高风险 `escrow` |
 | `agent-iot` | Agent ↔ 设备 | `/devices` 注册 + 心跳；跨产品走时间窗 REST | `iot-device` | telemetry / window digest hash | 数据流 `ledger`；任务型 `escrow` |
@@ -42,6 +42,21 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | `escrow` | 任务型、大额、可争议 | 锁定 → 交付凭证 → 验收/仲裁 → 放款 |
 
 禁止双付：同一 `correlation.jobId` 不得同时走账本入账与 Escrow 放款（已有链上 `onChainEscrowId` 则跳过 `ledgerSettled` 入账）。
+
+所有通道必须上报同一生命周期阶段：`Offer → Quote → Authorize/Fund → Execute → Meter/Evidence → Accept/Capture → Fee Split → Settle/Dispute`。通道可以跳过不适用的展示步骤，但不能绕过 Authorize/Fund、Evidence/Meter 或 Capture 的资金安全语义。
+
+客户端余额只使用 `available/held/pending/withdrawable`；金额拆分只使用 `gross/fee/royalty/net`。直接 `ledger.credit*` 不是通道结算方式。
+
+### 2.1 能力状态
+
+跨通道目录统一使用 Available / Beta / Lab / Roadmap：
+
+- **Available**：生产可用且有真实运行依赖
+- **Beta**：有限用户/额度、可能变更
+- **Lab**：工程实验室或模拟对端
+- **Roadmap**：未上线，不可下单
+
+兼容字段 `production` 映射 Available，`disabled` 不进目录。住宅 IP 出租固定为高风险 Roadmap，当前不得注册 Provider、发布任务或展示收益。
 
 ---
 
@@ -99,7 +114,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | 入站事件 | `POST /integrations/events` · CloudEvents 1.0 · `agent-commerce` 档位允许 VistaCast 告警与 SyncroBrain 事故/工单；`smart-site` 追加 DataLuminary 导出与 VistaRemote 介入回执（见 [SMART_SITE.md](./SMART_SITE.md)） |
 | 设备入账 | `POST /integrations/syncrobrain/telemetry-credits` · `com.syncrobrain.telemetry-credit.v1` · 时间窗 digest → `ledger`（[SYNCROBRAIN_TELEMETRY_CREDIT.md](./SYNCROBRAIN_TELEMETRY_CREDIT.md)）；**不**经 inbox 入账 |
 | 跨租户读 | `production` 模式下 `GET /trading/jobs` 与 `GET /integrations/events` 均需鉴权 + 显式 `sourceTenantId`（FR-DEP-005） |
-| Job 支付 | `awaiting_payment → authorized → running → succeeded → captured/settled`；5xx/超时 `voided`/`failed` |
+| Job 支付 | 映射统一生命周期：`awaiting_payment → authorized → running → succeeded → captured/settled`；5xx/超时 `voided`/`failed` |
 | 授权 vs 入账 | `authorize` 预留预算与 nonce，**不**给 payee 入账；仅 2xx+output hash 后 `capture` |
 | 回调 | durable outbox；签名 CloudEvents；**不**改源产品业务状态 |
 | 任务 | 创建 Agent/Human 任务服从治理门禁；否则 `dispatchStatus=correlated`，不得伪称已创建 |

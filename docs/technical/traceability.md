@@ -9,7 +9,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 将 `SPEC.md` 中的需求 ID 映射到实现仓库与模块，用于 Spec 驱动开发与 Code Review。
 
-**最后更新**: 2026-09-22
+**最后更新**: 2026-10-07
 
 | 需求 ID | 简述 | 主仓库 | 模块/路径 | 版本 |
 |---------|------|--------|-----------|------|
@@ -18,6 +18,9 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-ID-003 | 钱包集成 | web | `wagmi` injected + EIP-6963 选择；可选 thirdweb RPC（非 Connect） | v0.1 |
 | FR-ID-003b | SIWE 登录 | api + web | `auth` 模块、`/account` | v0.1 🟡 |
 | FR-ID-004 | 双身份 + 无 Trial 会员权益 | api, web, admin, wallet, worker | `platform/membership`、wallet-links、客户端 401/402/403 | v0.3 🟡 |
+| FR-PM-001 | Platform Account + Linked Wallets + Workspaces | api, web, wallet, admin | Logto AuthN → Entitlement → Casbin；钱包证明 SIWE；统一账号上下文 | **规格产品模型** |
+| FR-PM-002 | Capabilities + Assets + 统一能力状态 | api, shared, all clients | Available/Beta/Lab/Roadmap；API permissions；住宅 IP 出租 Roadmap | **规格产品模型** |
+| FR-PM-003 | DoerFlow 工作/价值网络定位 | web, wallet, docs | 平台交易收单方为 DoerFlow；钱包一等产品；不托管 KYC/法币；Onramp/Swap/Bridge 仅 Money 资金工具 | **规格产品模型** |
 | FR-SK-001 | Skill 注册 | contracts + web | `SkillRegistry.sol`；Studio `MintFlowPanel` kind=skill（201 pin 后钱包确认） | v0.1 |
 | FR-SK-002 | Skill 验证（lab attest registry） | contracts + api | `SkillAttestationRegistry.sol`；`GET /attestations/:uid`（lab read）；Hardhat + ABI export | **Wave 45/47 ✅** · 非生产 EAS |
 | FR-SK-003 | Skill 绑定 | contracts + web | Studio `MintFlowPanel` kind=bind（钱包→上链→Agent 可见） | v0.1 |
@@ -29,8 +32,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-IPFS-001 | 元数据 / 任务 CID pin | api + web | `storage` 默认 local；`STORAGE_BACKEND=pinata` 才走 Pinata | v0.1 ✅ |
 | FR-P2P-001~004 | P2P | p2p | Beacon 等 | v0.2 |
 | FR-DV-001~003 | 设备/人类任务 | api + wallet + worker | v0.3 | v0.3 |
-| FR-WLT-* | 纯粹钱包 RN | wallet | 发任务、转账 | v0.3 |
-| FR-WRK-* | 综合端 RN | worker | 众包 + 社交 | v0.3+ |
+| FR-WLT-* | 统一 DoerFlow App 主壳 | wallet | 首页/工作/发布/资金/我的；转账、发布并渐进吸收 worker | v0.3+ |
+| FR-WRK-* | 旧 Worker App 迁移 | worker → wallet | 众包/社交能力迁移；对等后两个版本窗口再退役 | 迁移期 |
 | FR-ADM-* | 管理平台 | admin | 审批、告警 | v0.3+ |
 | FR-GOV-* | 任务治理 | api | `tasks` 模块 | MVP+ |
 | FR-GOV-SUBMIT | 人类交付进入 `submitted` 再验收 | api, wallet, worker | `deliver` → `submitted`；`verify` 接受 `submitted\|verifying`；wallet 收益页验收按钮 | **v0.3 / M3 ✅** |
@@ -39,7 +42,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-UI-002 | Agent 详情雇佣进度 + 未绑定引导 | web | `pages/AgentDetail`、托管历史、自雇提示、`MintFlowPanel` kind=hire | v0.1 |
 | FR-UI-004 | 任务中心待办队列 + 超时退款 | web | `pages/Tasks`、上链回执 + 状态对齐；人类任务只读列表 + wallet/worker CTA · locale | **v0.3 / M3 ✅** |
 | FR-UI-003 | Creator 工作台网络/gas 引导；托管收入 | web + MetaRepo | `NetworkGasAlert`、Studio `waitMined`、收入卡、`scripts/use-chain.mjs` · locale | **v0.3 / M3 ✅** |
-| FR-IDX-001 | 索引分片与游标 + RPC 健康 | api, web | `indexer/` 历史追块可走 RPC_URL、链头可选 thirdweb；`catchupPercent` | **v0.3 / M3 ✅** |
+| FR-IDX-001 | 索引分片与游标 + RPC 健康 | api, web | `indexer/` 历史追块可走 RPC_URL、链头先于历史；限流缩小窗口并报 `rpcRateLimited` | **v0.3 / M3 ✅** |
 | FR-IDX-002 | Indexer worker + Redis 选主 + PG 游标与索引行 | api | `INDEXER_ROLE` · `indexer.main.ts` · leader 锁 · `indexer_cursors` · `agents`/`skills`/`escrows` 在账本 Postgres | **v1.0-rc / HA** |
 | FR-IOT-001 | 设备注册认证 | contracts + api | 链上 `DeviceRegistry` 仍为 v1.2+；实验室 HTTP `/devices` 见 FR-IOT-007 | v1.2+ |
 | FR-IOT-002 | 车桩支付 | contracts | `IoTEscrow` | v0.4 |
@@ -69,7 +72,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-ONRAMP-002 | MoonPay + Stripe Adapter | wallet, web, api | Widget | v0.3 |
 | FR-ONRAMP-003 | wallet 买币页 | wallet | WebView | v0.3 |
 | FR-ONRAMP-004 | web Creator 买币 Modal | web | `/payments` `OnrampBuyModal` · GET `/onramp/providers` · POST `/onramp/session` · en+zh · 非 live charge | **v0.3 / M3** 🟡 |
-| FR-ONRAMP-005 | 地区路由 + 披露 | api, docs | v0.3 | v0.3 |
+| FR-ONRAMP-005 | 地区路由 + 披露：先说明到账钱包与持牌合作方，再说明 DoerFlow 是任务/托管交易对手；不托管 KYC / 法币；英文 legalNote 不叠在本地化买币页 | api, docs, web, wallet | v0.3 | v0.3 |
 | FR-ONRAMP-007 | 入金向导 Onramp+Bridge | wallet | v0.7 | v0.7 |
 | FR-PAY-001 | 公链/现成 L2 only（弃联盟链） | spec, docs | **已定** | **已定** |
 | FR-PAY-002 | EIP-712 Receipt schema | shared, api | v0.2 | v0.2 |
@@ -128,7 +131,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-PAY-011 | 不做定制 L3 作微支付主路径 | spec | **已定** | **已定** |
 | FR-PAY-012 | 链下记账引擎 + Vault 充提 | api, contracts | Fastify；默认 `LEDGER_STORE=postgres` + BullMQ；10 万笔引擎单测仍用 memory；显式 `memory` 仅无 Docker | **v0.2 / M2** ✅ |
 | FR-PAY-013 | Merkle 强制提现 | contracts, shared | Hardhat 任意账户 `forceWithdraw`；Sepolia 已部署未重部 | **v0.2 / M2** ✅ |
-| FR-WLT-001 | wallet 账户与首页 | wallet | 首页平台会话/快速体验 · 链名 en+zh | **v0.3 / M3** 🟡 |
+| FR-WLT-001 | wallet 账户与首页 | wallet | 注册不发钱包；App 资金页创建并备份后启用。EVM 用 viem；BTC 与 Tron USDT 用 Tether WDK。任务结算仍是 USDC/USDT | **v0.3 / M3** 🟡 |
 | FR-WLT-002 | wallet ETH 转账（去演示化） | wallet | `/transfer` gas 估算 + 回执 + explorer · en+zh | **v0.3 / M3** 🟡 |
 | FR-WLT-003 | wallet 收益：Escrow 锁定/放款/争议 | wallet | `earnings` 文案 en+zh；Escrow 错误 locale；争议输入框；fund/confirm/refund；**`submitted` 验收** · **进度只读 + 待办置顶** | **v0.3 / M3 ✅** |
 | FR-WLT-004 | wallet 发任务 + 驳回原因回显 | wallet, api | `earnings` 展示 `alertReason`；发布即时 Alert · **说明 / 线下地点** · **社交须声明平台与步骤** · **published 接单进度** · locale | **v0.3 / M3 ✅** |
@@ -136,10 +139,13 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-WLT-006 / FR-ONRAMP-003 | wallet 买币 Onramp | wallet, api | `/onramp` + `POST /onramp/session` · en+zh | **v0.3 / M3** 🟡 |
 | FR-ST-001/002 | 链上 Escrow fund/release（平台任务） | wallet, worker, api, contracts | bind-onchain-escrow · create/fund · deliver · confirm · **`pnpm run smoke:escrow:local`**（Hardhat 31337）· **`pnpm run smoke:escrow`**（Sepolia 可选；拒绝 Hardhat 公开钥 / EIP-7702） | **v0.3 / M3 ✅** |
 | FR-WLT-008 | wallet Vault 充提 | wallet | `app/vault.tsx` + 入金 Tab · disclosure · en+zh | **v0.3 / M3** 🟡 |
-| FR-ADM-001 | admin Logto 登录 | admin, api, LW shared/identity | 本地 `pnpm id:up` 无 MFA + Headless；生产 Mandatory MFA + Hosted；`pnpm e2e:admin:mfa` 覆盖临时 force-MFA；Headless MFA **阻塞于** MFA-capable `@luminaryworks/auth-react` | **v0.3 / M3 ✅** · Hosted MFA / e2e **v0.4 ✅** · 本地关 / 生产开策略 **v0.4 ✅** · Headless MFA **blocked** |
+| FR-ADM-001 | admin Logto 登录 | admin, api, LW shared/identity | 本地 `pnpm id:up` 无 MFA + Headless；生产 Mandatory MFA + Hosted；`pnpm e2e:admin:mfa` 覆盖临时 force-MFA；Headless MFA **阻塞于** MFA-capable `@luminaryworks/auth-react`；运营身份（`super_admin` / `platform_admin` / `doerflow_admin`）跳过 `admin.ops.read` 商业校验，Casbin 仍裁决 | **v0.3 / M3 ✅** · Hosted MFA / e2e **v0.4 ✅** · 本地关 / 生产开策略 **v0.4 ✅** · Headless MFA **blocked** · 超管免商业门禁 **✅** |
 | FR-ADM-005 | admin 风控告警 | admin, api | `/risk-alerts` 轮询保留 **并** `GET /admin/notifications/status` + `POST /admin/notifications/test`（Settings 测试按钮）；env `RISK_ALERT_SLACK_WEBHOOK_URL` / `RISK_ALERT_EMAIL_WEBHOOK_URL`（不回传 URL） | **v0.3 / M3** 🟡 · webhook **v0.4**（Wave 44 B4AB） |
 | FR-ADM-006 | admin 仪表盘 KPI | admin, api | `/dashboard` 真实 GMV ETH + 待审队列 + Indexer + 争议；图表 iframe DataLuminary（`NEXT_PUBLIC_DATALUMINARY_DASHBOARD_URL`）· locale | **v0.3 / M3** 🟡 · iframe **v0.4**（Wave 44 B3B） |
-| FR-ADM-003 | admin 审批工作台 | admin, api | approve 绑 Escrow 预留；request-revision → needs_revision · **社交展示 App/步骤** · locale | **v0.3 / M3 ✅** |
+| FR-ADM-003 | admin 审批工作台 | admin, api | approve 绑 Escrow 预留并写 `MANUAL_APPROVED`；request-revision → needs_revision · **社交展示 App/步骤** · locale | **v0.3 / M3 ✅** |
+| FR-GOV-014 | 未审核不得上架或结算 | api | 新提交不自动 `published`；大厅/接单/A2A/账本/链上绑定均要求 `MANUAL_APPROVED`；旧 `AUTO_PUBLISHED` 不可成交 | **v0.3 / M3 ✅** |
+| FR-GOV-015 | 任务金额额度与分级冷却 | api, admin | 单笔/日/月 ETH 上限；≥阈值 14 天 pending；≥onChainMin 适链上 Escrow 终局 | **v0.3 / M3 ✅** |
+| FR-PAY-029 | 任务放款争议窗口 | api | capture → `pending`；默认生产 14 天后 finalize → `withdrawable`；sweeper 自动到期放行 | **v0.3 / M3 ✅** |
 | FR-ADM-004 | admin 自动审批监控 | admin, api | `/auto-approval` ← auto-decisions / escalate / mark-reviewed · locale | **v0.3 / M3** 🟡 |
 | FR-ADM-009 | admin 治理参数 | admin, api | `/governance` ← GET/PUT governance/config；驱动 scoreTask · locale | **v0.3 / M3** 🟡 |
 | FR-ADM-010 | admin 发单方观察/黑名单 | admin, api | `/publishers` ← aggregate + flag；黑名单禁发 · locale | **v0.3 / M3** 🟡 |
@@ -152,8 +158,14 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-WRK-002/003/005 | worker published 大厅 + 相机/GPS/问卷交付 + Vault/账本 | worker, api | Expo 大厅 · proof · GPS · 社交清单 · accept **仅未接单** · 详情状态/待验收 · deliver → **submitted** · deliverEscrow · earnings **原生 ETH + 链上放款标记** · **en+zh** | **v0.3 / M3 ✅** |
 | FR-WRK-004 | worker 社交任务（清单+截图） | worker, wallet | `social/[id]` · 打开目标首页 · wallet 声明平台与步骤 · 人工审后上架 | **v0.3 / M3 ✅** |
 | FR-WRK-010/011/012 | 社交步骤引导 Accessibility Service | worker | **v0.4**：**UI 已接**（Wave 44 B1C）；仍 **无** auto-click / 抓取 / 代完成；**不是** 残障无障碍 | **v0.4** 🟡 |
-| FR-A11Y | 聋哑盲等残障无障碍（读屏/字幕/WCAG） | 全客户端 | **前期不做**（至商业 1.0 前；单独立项后再议） | **不做** |
-| FR-PAY-SETTLE | 无 `onChainEscrowId` 时任务完成走链下账本（既定路径，非 stub） | api | `settleLedgerPayout` → `ledgerSettled` + LEDGER.credit(WETH wei)；有链上 Escrow 则跳过 credit | **v0.3 / M3 ✅** |
+| FR-A11Y | 基础无障碍发布基线 | 全客户端 | WCAG 2.2 AA；键盘/焦点/读屏标签；移动动态字体/减少动效；与 Accessibility Service 分离 | **发布基线** |
+| FR-DS-001 | 全端设计系统与主题 | site, web, wallet, worker, admin | `DESIGN_SYSTEM.md`；System/Light/Dark；统一语义 token、IA、交易组件与响应式门禁 | **体验重构** |
+| FR-PAY-SETTLE | Escrow 与 Ledger+Merkle 互斥结算 | api | 统一生命周期；有链上 Escrow 跳过账本 capture；禁止直接 credit/双付 | **v0.3 / M3 ✅ + 产品模型** |
+| FR-PAY-026 | 生命周期、余额四态与金额拆分 | api, shared, web, wallet, admin | `shared/payments/settlement`；memory/Postgres reserve/capture/void/finalize；withdrawable-only Merkle；Trading 金额拆分 | **api/shared ✅** · 客户端渐进消费 |
+| FR-PAY-027 | 禁止业务直接 credit 与双重结算 | api, admin | task/Job/IoT payer hold；`SETTLEMENT_RAIL_CONFLICT`；credit source + operationId；Lab guard | **api ✅** |
+| FR-PAY-028 | 支付运维面防未授权枚举/撤销 | api, wallet, shared | sessions?payer；revoke payer 校验；PaymentServiceGuard 覆盖 pending/receipts/nets；health 生产脱敏 | **api/wallet/shared ✅** |
+| FR-UI-IA-001 | Web 七区 IA 与原生证据引导 | web | Home/Work/Create/Money/Build/Devices/Account；原生步骤 deep link App | **规格产品模型** |
+| FR-MOB-MIG-001 | wallet 主壳吸收 worker 并退役旧 App | wallet, worker, MetaRepo | 能力对等、安全约束、两个正式版本迁移窗口 | **规格产品模型** |
 | FR-ST-005/006 | 账本清算主路径 + 场景矩阵 | spec, api, contracts | ASYNC_PAYMENTS · CHANNELS | **v0.2 / M2** · **v1.1-channels-lab** |
 | FR-ST-007 | 跨产品 Job 与 CloudEvents 变现 | spec, api, shared, web | luminaryworks-ecosystem · authorize/capture · `/integrations/events` | **v1.2-ecosystem-commerce** |
 | FR-CH-001~004 | 五通道、结算分流、统一 ID、交付凭证 | spec, api | `CHANNELS.md` · `GET /channels` · OpenAPI | **v1.1-channels-lab** ✅ |

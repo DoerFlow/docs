@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 物联网交易与设备经济
 
-**版本**: v0.3-lab · **最后更新**: 2026-09-18  
+**版本**: v0.4-product-model · **最后更新**: 2026-10-07
 **路线图**: 实验室 P4 = v1.1-channels-lab HTTP 设备；TB 时间窗入账 = **FR-IOT-008**；规模化车桩/能源/冷链 = **v1.2+**（见 [ROADMAP.md](./ROADMAP.md) · [CHANNELS.md](./CHANNELS.md) 五通道实验室）
 
 ## 1. 愿景
@@ -15,6 +15,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 **让 IoT 设备自己收钱**——设备在链上拥有身份与收款能力，与搭载 Agent 的终端（车、电表、传感器）通过智能合约自动撮合、结算，无需中心化平台代扣代付。
 
 轻资产策略：**Bring Your Own Device（BYOD）**，平台提供 SDK + 合约 + 市场，硬件由厂商/用户自带。
+
+Device 是 Workspace 下的 Asset，不是独立账号。所有 Device capability 对外统一标注 Available / Beta / Lab / Roadmap；当前 HTTP Device 与 TB 时间窗入账均为 **Lab**，车桩/能源/冷链为 **Roadmap**，不得用旧版本号暗示已上线。
 
 ## 2. 场景矩阵
 
@@ -26,6 +28,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | **数据资产微市场**（传感器→Agent） | v0.5 | 极高 | 微额（$0.00001/次） | 海量调用 ×（Gas + 数据费抽成） |
 | **分布式能源交易**（光伏↔储能） | v0.6 | 高 | 高（按度电） | 清算手续费（链上结算比例） |
 | **供应链 IoT 契约**（冷链 SLA） | v0.6 | 中 | 企业级大单 | 复杂合约执行 Gas + 安全费 |
+
+各场景都映射 `Offer → Quote → Authorize/Fund → Execute → Meter/Evidence → Accept/Capture → Fee Split → Settle/Dispute`。Telemetry/window digest 是 Meter/Evidence，不等于已结算；入账后仍须按 `available/held/pending/withdrawable` 区分资金状态并禁止与 Escrow 双付。
 
 ## 3. 场景详述
 
@@ -142,6 +146,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - [x] SyncroBrain Gateway 在 TB 遥测时间窗闭合后自动出站（仍须 `DOERFLOW_ENABLED`）
 - [x] asset ↔ SIWE payee 绑定表（`PUT`/`GET /integrations/syncrobrain/payee-bindings`；生产未绑定拒绝入账）
 - [x] 可选信封 `data.payer`：余额足够则 `applyReceipt`（不足 `403 INSUFFICIENT_BALANCE`）；省略 payer 仍实验室铸造
+- 无 payer 的实验室铸造只允许 Lab fixture；生产不得以 `ledger.credit` 替代付款方 Authorize/Capture
 
 ### v1.2+ 车桩
 

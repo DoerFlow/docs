@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 管理平台规格
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-22  
+**版本**: v0.2-draft · **最后更新**: 2026-10-07
 **仓库**: `repos/admin` → `AgentSkillMesh/admin`（私有）
 
 ---
@@ -26,6 +26,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | **参数配置** | 自动审批阈值、敏感词、模板白名单 |
 
 用户：**平台运营、风控、客服**（RBAC，非普通 C 端用户）。
+
+运营人员仍使用统一 Platform Account；“运营”是当前 Workspace/资源的 Capability，不是另一种账号。其 Linked Wallet 仅在确需链上签名时使用，不能因运营身份推断钱包控制权。
 
 - **不托管** VistaCast / SyncroBrain 伙伴控制台，也**不自动** smart-site 远控（不持有 VistaRemote 凭据、不发起会话）。v0.4（Wave 44 B8）：smart-site `remoteIntervention.deepLink` **主 UI** 可为 **web** `/ecosystem` **Events**；**admin 亦**展示人工 Intervene（打开深链，不自动远控）。生态 catalog / jobs 仍在 web `/ecosystem`。admin **不做**远控控制台。见 [ECOSYSTEM.md](./ECOSYSTEM.md) · [SMART_SITE.md](./SMART_SITE.md)。
 - 平台会员 / commerce checkout UI 在 **web** `/membership`（不在 admin）。见 [CLIENTS.md](./CLIENTS.md)。
@@ -52,7 +54,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - JWT 角色 `doerflow_admin` 仅用于引导 Casbin `agent_admin`；审批按钮仍只看资源 `permissions`
 - 资源响应附 `permissions`；审批、风控、治理控件只按该映射启用
 - Logto roles、JWT claims、前端 mock role 和角色切换器均不是授权依据；API Casbin 为唯一资源授权裁决
-- 页头/设置展示中央 `effectivePlan` 与组织上下文；商业门禁 `402` 与资源拒绝 `403` 分开处理
+- **运营身份不是客户套餐**。生态超管（IdP `super_admin`，账号 `superadmin`）与平台运维（`platform_admin`）、DoerFlow 产品管理员（`doerflow_admin`）进入 `/admin/*` 时，不要求其个人主体持有 DoerFlow 付费套餐。`admin.ops.read` 的商业校验对这些身份跳过；无 Casbin 运营策略仍是 `403`。非运营主体缺少该能力才是 `402`
+- 页头/设置展示中央 `effectivePlan` 与组织上下文；商业门禁 `402` 与资源拒绝 `403` 分开处理。超管 `effectivePlan=none` 只说明没有客户订阅，不阻止运营台
 
 ### FR-ADM-002 任务列表
 - 列：ID、类型、发单方、金额、风险分、状态、创建时间  
@@ -93,6 +96,9 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - 列：epoch · status · root · txHash（Basescan）· error · updatedAt  
 - 展示账本引擎 / 队列模式（disclosure）  
 - 路由：`/payments/commits`  
+- 统一展示结算生命周期 `Offer → Quote → Authorize/Fund → Execute → Meter/Evidence → Accept/Capture → Fee Split → Settle/Dispute`
+- 余额与资金占用按 `available` / `held` / `pending` / `withdrawable` 展示；结算明细按 `gross` / `fee` / `royalty` / `net` 展示
+- 发现同一 correlation 同时链上放款与账本入账、或业务直接调用 `ledger.credit*` 时必须告警；后台不得提供绕过授权/证据/验收的“直接加余额”产品操作
 
 ### FR-ADM-008 费率等级只读（M3）
 - 面板：`GET /fees/tiers`（ERC-4337 等级协议费 bps）  
@@ -128,6 +134,11 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - 运营控制台用户可见文案走 locale：`lib/i18n/messages/en.json`（类型源）+ `zh-CN.json`（简体中文必填）
 - 另有 `zh-TW` 及其他语言包；缺 key 时与 `en` 对齐，禁止页面硬编码中文/英文 fallback
 - 禁止 `t(key) || "中文"`、`t(key) !== "key"` 这类缺 key 兜底；缺文案修 locale JSON
+
+### FR-ADM-014 产品能力与可访问性
+- 能力状态只显示 Available / Beta / Lab / Roadmap；兼容 `production` 映射 Available，`disabled` 不进目录
+- 住宅 IP 出租固定为高风险 Roadmap/未上线；运营台不得出现启用、审核通过或收益开关
+- Web 发布基线为 WCAG 2.2 AA 基础项：全键盘、可见焦点、读屏标签、合理标题/地标、减少动效；核心运营动作不满足时阻断发布
 
 ### 实验室设备库存（只读，非链上 Registry）
 
@@ -170,6 +181,7 @@ admin → shared（类型）
 - [x] 运营界面用户文案走 en + zh-CN locale（审批 / 任务 / 仪表盘 / 治理 / 发单方 / 审计 / 告警 / 登录）  
 - [x] 无 API `permissions.review|manage` 时写控件不可用，即使 JWT 带同名角色
 - [x] `401` 返回登录，`402` 显示套餐/配额上下文，`403` 显示资源无权且不展示升级误导
+- [x] 生态超管 / DoerFlow 产品管理员不因 `effectivePlan=none` 在 `/admin/*` 收到 `402`；非运营主体仍按套餐 `402`、按 Casbin `403`
 - [x] MFA 策略：本地 `--off`；`e2e:admin:mfa` 临时 Mandatory+TOTP 后恢复；生产 product/`LOGTO_FORCE_MFA=1` → Mandatory；Admin Hosted 路径可配（Hosted/e2e **完成**）；Headless MFA 仍阻塞于 auth-react（笔记）
 
 ---

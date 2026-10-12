@@ -65,7 +65,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 入站信封仅允许 `{ specversion:'1.0', id, source, type, time?, datacontenttype?, subject?, data }`。`data` **严格白名单**：`sourceTenantId`, `sourceId`, `audience`（`agent|human`），以及可选 `severity`, `summary`, `budget`, `callbackUrl`, `sourceRef`, `orgId`。出现 `video` / `rtsp` / 凭据 / 原始遥测等键 → `SENSITIVE_FIELD_REJECTED`。smart-site 的两类事件 **不新增** `data` 字段。
 
-`productCode`：`vistacast|syncrobrain|vistaremote|dataluminary|generic`。`readiness`：`production|lab`（默认 **lab**，勿把 stub 标成生产）；`disabled` 不进目录。
+`productCode`：`vistacast|syncrobrain|vistaremote|dataluminary|generic`。产品能力状态统一为 `available|beta|lab|roadmap`。迁移期 API 可保留 `readiness=production|lab|disabled`：分别映射 Available、Lab、不进目录；默认 **Lab**，勿把 stub 标成可用。
 
 去重键：`sourceProduct + eventId`（`eventId` = CloudEvents `id`）。
 
@@ -77,7 +77,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | VistaCast / SyncroBrain 入站 | **已实现**，`DEPLOYMENT_PROFILE` 未开时 **默认关** |
 | SyncroBrain 时间窗账本入账 | **实验室 REST + asset↔payee 绑定已实现**；Gateway 自动出站已接；真实买方扣款仍为后续步 |
 | VistaRemote 人工介入深链 / DataLuminary 导出 | **最小契约已实现**，`smart-site` 档位外 **默认关**；见 [SMART_SITE.md](./SMART_SITE.md) |
-| 真实生产对端 | **未接**。**已定（2026-09-18）**：`/capabilities` 的 `commerce.readiness` **保持 `lab`** 直至真实 VistaCast / SyncroBrain 对端，文档不得写「已上线」 |
+| 真实生产对端 | **未接**。兼容 API 的 `commerce.readiness` 保持 `lab`，产品 UI 显示 **Lab**，直至真实 VistaCast / SyncroBrain 对端；文档不得写「已上线」 |
 
 Creator 可在 web `/ecosystem` 查看 profile 与 commerce readiness；见 [ECOSYSTEM.md](./ECOSYSTEM.md) §5.1。
 

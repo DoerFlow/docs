@@ -79,7 +79,8 @@ Vault 主网资产：**Base USDC** `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`�
 - 告警：`deploy/prometheus/alerts.yml`（API down、ready、commit 卡住、Indexer 无 leader）打到创始人手机即可  
 - 封闭 Beta **不要求** 24/7 多人排班  
 - 对外写「founder on-call」，不写「SRE 团队」  
-- Runbook：PRODUCTION §4；pause 决策人 = 同一人  
+- **值班清单**：[CLOSED_BETA_RUNBOOK.md](./CLOSED_BETA_RUNBOOK.md)（pause / 邀请 / 用户自助路径）
+- 工程 Runbook：[PRODUCTION.md](./PRODUCTION.md) §4；pause 决策人 = 同一人
 
 ---
 

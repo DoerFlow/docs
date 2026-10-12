@@ -5,28 +5,35 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
 
-# 综合端 App 规格（React Native）
+# 旧 Worker App 迁移规格（React Native）
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-22  
+**版本**: v0.2-draft · **最后更新**: 2026-10-07
 **仓库**: `repos/worker` → `doerflow/worker`（私有）
 
 ---
 
 ## 1. 定位
 
-面向 **任务执行者** 的 **综合接单 App**：
+本仓库是既有任务执行客户端，现进入迁移期。目标产品为 `repos/wallet` 的统一 DoerFlow App；本 App 在能力迁移期间继续服务既有用户：
 
 1. **AI Agent 众包任务**（人类任务）：拍照、视频、问卷、GPS  
 2. **社交平台任务**：在抖音、小红书、知乎等完成 **点赞、观看、收藏** 等（用户自愿、账号自有）  
 3. **收益**：Escrow 结算至绑定钱包地址  
 
-发单在 **wallet App**；本 App **仅接单与交付**。**不提供** Creator `/ecosystem` 合作方 catalog UI；Creator 走 web。smart-site：有 `remoteIntervention.deepLink` 时 **亦可**展示人工 Intervene（不自动远控；主 UI 可为 web `/ecosystem`）。见 [CLIENTS.md](./CLIENTS.md) · [ECOSYSTEM.md](./ECOSYSTEM.md) · [SMART_SITE.md](./SMART_SITE.md)。
+历史版本只接单与交付；这属于历史产品边界，不是永久账号限制。同一 Platform Account 可在统一 App/Web 发布与接单。本仓库冻结新增产品面，只接受安全、兼容、迁移和阻断性缺陷修复；Creator `/ecosystem` 仍走 web。smart-site 人工 Intervene 保持不自动远控。
+
+### 1.1 退役条件
+
+- 统一 App 的大厅、详情、相机/GPS/问卷、社交清单/截图、收益/Vault、争议与深链达到行为和安全对等
+- 迁移版本提供登录/Linked Wallet 重连说明、统一 App 下载深链和未完成任务继续处理路径
+- 能力对等后至少保留两个正式版本的迁移窗口；窗口结束才停止发布 APK，服务端不得提前切断未完成任务
+- 迁移标记集中在 `src/config/migration.ts`：默认两个正式版本；统一 App scheme 由 `EXPO_PUBLIC_UNIFIED_APP_SCHEME` 配置（默认 `doerflow`），下载回退由 `EXPO_PUBLIC_UNIFIED_APP_DOWNLOAD_URL` 配置。迁移 banner 不得阻断旧 App 的接单与交付。
 
 ## 2. 社交平台任务
 
-社交任务是 **M3 要做的产品能力**（wallet 发单声明平台与步骤 → 治理人工审 → worker 社交 Tab 接单 → 清单 + 截图 → `submitted` → 发单方验收）。用户在自有账号上自愿操作；平台不代操作、不绕过目标 App。
+社交任务是既有产品能力（统一 App/ Web 发布声明平台与步骤 → 治理人工审 → 统一 App 或迁移期 worker 接单 → 清单 + 截图 → `submitted` → 发布者验收）。用户在自有账号上自愿操作；平台不代操作、不绕过目标 App。
 
-> **残障无障碍（已定，前期不做）**：不针对听障、视障、言语障碍等特殊人群做读屏、字幕、WCAG、TalkBack/VoiceOver 专项。见 [CLIENTS.md](./CLIENTS.md)。这 **不是**「不做社交任务」。
+> **两类能力必须分开**：基础无障碍是发布基线（读屏语义、动态字体、焦点、减少动效）；Android Accessibility Service 是受限的社交步骤引导。后者不是残障无障碍，也不能替代前者。
 
 ### FR-WRK-010 能力说明（v0.4：Wave 44 B1C — UI 已接，仍无 auto-click；非社交任务本体）
 
@@ -35,7 +42,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - 在用户 **明确授权** 后，辅助跳转到目标 App  
 - 引导完成 **可验证步骤**（如：打开指定视频 → 停留 N 秒 → 点赞）  
 - 生成交付凭证：截图时间戳 + 步骤完成标记（**不上传** 聊天记录、密码）  
-- **不是** 面向聋哑盲的残障无障碍产品
+- **不是** TalkBack/VoiceOver 等残障无障碍实现
 
 #### 第一刀（stub → UI 已接，worker Android；2026-09-18 stub · 2026-09-22 UI）
 
@@ -111,13 +118,13 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | FR-WRK-007 | **M3** 争议：任务详情对 `assigned|submitted|verifying` 可 `POST /tasks/:id/dispute`（openedBy=worker） |
 | FR-WRK-008 | 可选 Logto 平台会话：只为平台门禁接单/交付调用附 token，并展示套餐/组织；不替代收款钱包 |
 
-## 5. 技术栈
+## 5. 技术栈与冻结边界
 
-- React Native · Expo（**独立工程**，与 wallet 分仓库）  
+- React Native · Expo（迁移期独立工程；新产品面进入统一 App）
 - Android 正式 APK 由 Meta `pnpm pack:publish` 发到 GitHub `DoerFlow/downloads`，稳定文件名为 `DoerFlow-Worker.apk`（`releases/latest/download`）；**不**上 Play Store。
 - 原生模块：`expo-camera`、`expo-location`  
 - Android：Accessibility Service（**原生 Kotlin 模块**，v0.4 **UI 已接**，仍无 auto-click；**不是**读屏/字幕）  
-- **前期不做** 面向聋哑盲等特殊人群的残障无障碍适配
+- 迁移期发布仍须满足 TalkBack/VoiceOver 标签、动态字体、焦点顺序与减少动效基础项
 - `api`：`GET /tasks?status=published&type=social|human`  
 - 本机私钥/签名永不传给 Logto 或平台；公开任务浏览和链上收款地址保持钱包语义
 - `401` 要求平台登录，`402` 为套餐/配额，`403` 为任务资源无权；DoerFlow 不显示 Trial CTA/倒计时
@@ -127,9 +134,10 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | 版本 | 交付 |
 |------|------|
 | v0.3 | 众包 + **社交任务**（抖音/小红书/知乎：发单声明平台与步骤、人工审、接单、清单+截图、验收）；相机/GPS/问卷；收益 Vault + 账本；链上 `deliverEscrow` |
-| v0.4 | **进行中**：Accessibility Service **UI 已接**（仍无 auto-click）；**不含**残障无障碍；smart-site 人工 Intervene 可选展示 |
-| v0.5 | 更多社交平台扩展 |
+| v0.4 | **进行中**：Accessibility Service **UI 已接**（仍无 auto-click）；补齐基础无障碍发布基线；smart-site 人工 Intervene 可选展示 |
+| 迁移版本 N | 统一 App 达到能力对等；本 App 显示迁移提示并冻结新功能 |
+| N+1 / N+2 | 保留未完成任务、深链和安全修复；随后退役 |
 
 ---
 
-*代码可从 `repos/wallet` 众包模块迁移为初始实现。*
+*历史实现可作为迁入 `repos/wallet` 的参考；迁移必须逐项验证，不得复制后放宽安全约束。*

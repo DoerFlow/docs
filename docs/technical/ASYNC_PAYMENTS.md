@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # Agent 异步支付 · 链下账本 + Merkle 批量结算
 
-**版本**: v0.2.8 · **最后更新**: 2026-09-16  
+**版本**: v0.3.0 · **最后更新**: 2026-10-07
 **关联**: [SPEC.md](./SPEC.md) · [AGENT_CHAIN.md](./AGENT_CHAIN.md) · [FEE_TIERS_AA.md](./FEE_TIERS_AA.md) · [IOT.md](./IOT.md) · [BRIDGE.md](./BRIDGE.md) · [CHANNELS.md](./CHANNELS.md)
 
 五通道实验室上手见 MetaRepo [ONBOARDING.md](../ONBOARDING.md)「五通道实验室」。本地验收：`pnpm run smoke:channels`。
@@ -36,10 +36,28 @@ DoerFlow（原 VibeAgent）是区块链交易平台。对 **Agent ↔ Agent 高�
 | **Agent ↔ Agent** | 询价、握手、Skill/API 调用、任务分包 | 高频 → **链下账本**；大额/争议 → Escrow |
 | **Agent → 云服务** | LLM、存储、算力 API 按次/按 Token 计费 | 链下账本 + 批量清算 |
 | **Agent → 客户端 App** | 拍照、取本地数据、刷好评等需端侧能力 | 任务型 Escrow 或链下拆单记账 |
-| **Agent 下单 · 人类完成** | Human Task（wallet 发单 / worker 接单） | Escrow（[TASK_SYSTEM.md](./TASK_SYSTEM.md)） |
+| **Agent 下单 · 人类完成** | Human Task（统一 App/Web 发布；统一 App 或迁移期 worker 接单） | Escrow（[TASK_SYSTEM.md](./TASK_SYSTEM.md)） |
 | **人类下单 · Agent 完成** | Creator/Consumer 雇佣 Agent | Escrow |
 
 **Escrow** 负责任务型托管与争议；**链下账本** 负责大厅内毫秒级微交互。二者并存，不互相替代。
+
+### 1.1 统一商业生命周期
+
+所有场景映射到：
+
+`Offer → Quote → Authorize/Fund → Execute → Meter/Evidence → Accept/Capture → Fee Split → Settle/Dispute`
+
+| 阶段 | Escrow 轨 | Ledger + Merkle 轨 |
+|------|-----------|--------------------|
+| Authorize/Fund | 链上锁仓，形成 `held` | Session/Receipt 授权与预算预留，形成 `held` |
+| Execute + Evidence | 执行并提交交付证据 | 执行并持久化 output hash / meter |
+| Accept/Capture | 验收或仲裁触发 release | 成功条件满足后一次性 `applyReceipt` |
+| Fee Split | `gross - fee - royalty = net` | 同一拆分进入账本 |
+| Settle/Dispute | 链上终局/退款/争议 | `pending` → Merkle → `withdrawable`，争议可冻结 |
+
+账本字段语义：`available` 是当前可再次消费的终局资金，`held` 是已授权未 capture 的预留，`pending` 是争议/终局窗口内收入，`withdrawable` 是 `available` 中已可进入 Merkle 提现快照的子集；因此 `withdrawable` 不与 `available` 相加计算经济余额。旧 `amount` 仅为兼容字段，等于 `available + held + pending`。
+
+同一 `taskId/jobId/resourceId` 只能选择一轨。任何链上 release 后再 ledger capture，或 ledger capture 后再 Escrow release，均为双重结算事故。
 
 ---
 
@@ -231,6 +249,15 @@ Job 状态：`awaiting_payment → authorized → running → succeeded → capt
 
 ### 4.3 Vault 与 Merkle 批量清算
 
+#### 4.3.0 余额与金额语义
+
+- `available`：可用于新授权/支付的已确认账本余额
+- `held`：已 Authorize/Fund、尚未 Capture/Void 的预留
+- `pending`：已 Capture、尚未进入可提现 Merkle 终局的净额
+- `withdrawable`：已有有效 Root/proof、可向 Vault 提现的金额
+- 每笔经济事件必须保留 `gross`、`fee`、`royalty`、`net`，且 `net = gross - fee - royalty`
+- `credit` 是底层记账动词，不是产品余额状态；不得把 credit 成功直接解释为 withdrawable
+
 | 模式 | 场景 | 触发 |
 |------|------|------|
 | **Escrow 终局结算** | 任务型雇佣（现有 `Escrow.sol`） | 交付确认 / 超时 |
@@ -321,12 +348,12 @@ gross(A→B) = 100,  gross(B→A) = 80
 |------|------|------|
 | GET | `/api/v1/payments/health` | 模块健康 |
 | GET | `/api/v1/payments/disclosure` | 异步模型披露 |
-| POST | `/api/v1/payments/sessions` | 注册 Session Key 策略（v0.3） |
-| GET | `/api/v1/payments/sessions` | 列出会话 |
-| POST | `/api/v1/payments/sessions/:id/revoke` | 撤销会话 |
+| POST | `/api/v1/payments/sessions` | 注册 Session Key 策略（v0.3）；**须 payer EIP-712 签名** |
+| GET | `/api/v1/payments/sessions?payer=0x…` | 按 payer 列出会话；**禁止无 payer 全表枚举** |
+| POST | `/api/v1/payments/sessions/:id/revoke` | 撤销会话；body 须带 `payer`，且与会话 owner 一致（防任意撤销） |
 | POST | `/api/v1/payments/receipts` | 提交签名收据（须已注册 Session）；**立即** `applyReceipt`（实验室/非 Job 兼容路径） |
-| POST | `/api/v1/payments/receipts/apply-ledger-batch` | Lab：批量重试入账（body `{ receiptIds?: string[] }`，最多 50；省略则取最多 50 条 `ledgerApplied===false` 的 pending）；逐条结果，单条 `NOT_FOUND` 不失败整批 |
-| POST | `/api/v1/payments/receipts/:receiptId/apply-ledger` | Vault 已受理但账本未入账时重试 `applyReceipt`（补余额后；幂等） |
+| POST | `/api/v1/payments/receipts/apply-ledger-batch` | Lab/运维：批量重试入账（**PaymentServiceGuard**；body `{ receiptIds?: string[] }`，最多 50） |
+| POST | `/api/v1/payments/receipts/:receiptId/apply-ledger` | Vault 已受理但账本未入账时重试 `applyReceipt`（补余额后；幂等；公开重试路径） |
 | POST | `/api/v1/trading/jobs/:id/authorize` | Job 专用：验签+Session+预算预留；Vault 记 `authorized`；**不**给 payee 入账 |
 | POST | `/api/v1/trading/jobs/:id/capture` | Job 专用：仅在 provider 2xx 且输出 hash 已持久化后原子入账（一次性） |
 | POST | `/api/v1/trading/jobs/:id/void` | Job 专用：释放预算预留；5xx/超时；**不**入账 |
@@ -335,18 +362,18 @@ gross(A→B) = 100,  gross(B→A) = 80
 | PUT | `/api/v1/integrations/syncrobrain/payee-bindings` | asset ↔ checksum payee 绑定（生产须 SIWE wallet_link） |
 | GET | `/api/v1/integrations/syncrobrain/payee-bindings` | 查询绑定 |
 | POST | `/api/v1/trading/providers/skills/:skillId/rotate-secret` | 轮换 HMAC webhook secret（只返回一次） |
-| GET | `/api/v1/payments/receipts/stats?payer=0x…` | payer nonce / pending 数 |
-| GET | `/api/v1/payments/receipts/pending?limit=100&ledgerApplied=true\|false` | 待批量清算列表（每条含 `ledgerApplied`）；可选 `ledgerApplied=true\|false` 过滤（omit=全部；`false`=需重试入账；`true`=已入账仍 pending）；非 `true`/`false` 忽略该参数 |
-| GET | `/api/v1/payments/receipts?status=&limit=` | 按 Vault status 列表（`pending` \| `batched`；非法/省略 → `pending`）；形状同 pending（含 `ledgerApplied`）；`meta.status` 为实际过滤值 |
+| GET | `/api/v1/payments/receipts/stats?payer=0x…` | payer nonce / pending 数（**PaymentServiceGuard**；防未授权枚举） |
+| GET | `/api/v1/payments/receipts/pending?limit=100&ledgerApplied=true\|false` | 待批量清算列表（**PaymentServiceGuard**） |
+| GET | `/api/v1/payments/receipts?status=&limit=` | 按 Vault status 列表（**PaymentServiceGuard**） |
 | GET | `/api/v1/payments/receipts/:receiptId` | 查询已存 Vault 收据（id, payer, payee, amount, asset, nonce, status, ledgerApplied, submittedAt）；缺失 → `success: false` `NOT_FOUND` |
-| POST | `/api/v1/payments/ledger/credit` | 记入链下余额（PoC；镜像 Vault 充值）；当前链 canonical 目录 `configured: true` 时拒绝未知 ERC-20（`UNKNOWN_ASSET`），`configured: false` 时 fail-open |
-| POST | `/api/v1/payments/ledger/credit-batch` | 批量入账，单次最多 10000 笔（PaymentServiceGuard）；资产校验同 credit |
-| GET | `/api/v1/payments/ledger/balances?account=0x…` | 查询链下余额 |
+| POST | `/api/v1/payments/ledger/credit` | **受控运维/实验室**：镜像已验证 Vault 充值或迁移；不得被任务、Job、IoT 产品流程直接调用来给收款方加余额 |
+| POST | `/api/v1/payments/ledger/credit-batch` | **受控运维/实验室**：批量镜像/迁移，单次最多 10000 笔（PaymentServiceGuard）；生产业务入账必须走 Receipt capture、Escrow release 或有授权的集成适配器 |
+| GET | `/api/v1/payments/ledger/balances?account=0x…` | 查询单账户链下余额；**省略 account 须 PaymentServiceGuard**（禁止匿名全表） |
 | POST | `/api/v1/payments/ledger/snapshot` | 余额快照 → Merkle Root；成功后 `markBatched`（pending+`ledgerApplied`）；`data.batchedCount`；**PaymentServiceGuard**；`enqueue=0` 时只出 Root 不上链 |
-| GET | `/api/v1/payments/ledger/snapshots/latest` | 最新 Root / epoch |
-| GET | `/api/v1/payments/ledger/proof?account=&asset=&epoch=` | 强制提现用 Merkle proof |
-| GET | `/api/v1/payments/ledger/commits?status=pending` | Root 上链任务列表 |
-| GET | `/api/v1/payments/ledger/nets` | 双向轧差预览（pair gross → 净额） |
+| GET | `/api/v1/payments/ledger/snapshots/latest` | 最新 Root / epoch（**PaymentServiceGuard**） |
+| GET | `/api/v1/payments/ledger/proof?account=&asset=&epoch=` | 强制提现用 Merkle proof（公开，须精确 account+asset） |
+| GET | `/api/v1/payments/ledger/commits?status=pending` | Root 上链任务列表（**PaymentServiceGuard**） |
+| GET | `/api/v1/payments/ledger/nets` | 双向轧差预览（**PaymentServiceGuard**） |
 | POST | `/api/v1/payments/ledger/net-settle` | **PaymentServiceGuard**；轧差上链（Batcher / EntryPoint）并清零 pair gross |
 | POST | `/api/v1/payments/ledger/bundle` | **PaymentServiceGuard**；打包待轧差 + 可选 `commitRoot` 为一批 UserOp / Batcher 调用 |
 | POST | `/api/v1/trading/quote` | Skill 报价（M4） |
@@ -424,6 +451,9 @@ import {
 | FR-PAY-011 | **不做** 定制 L3 作为微支付主路径 | spec | **已定** |
 | FR-PAY-012 | 链下记账引擎（NestJS + Redis/PG）+ Vault 充提 | api, contracts | **v0.2 / M2 ✅** |
 | FR-PAY-013 | Merkle 证明强制提现（抗平台作恶/宕机） | contracts | **v0.2 / M2 ✅** |
+| FR-PAY-026 | 统一生命周期、余额四态与 gross/fee/royalty/net | api, shared, clients | **api/shared 已实现**；客户端渐进消费 |
+| FR-PAY-027 | 禁止业务直接 credit 与双重结算 | api, admin | **payer hold/capture + rail conflict 已实现**；Lab credit 显式 guard |
+| FR-PAY-028 | 支付运维面防未授权枚举/撤销 | api, wallet, shared | Session 列表须 `payer`；revoke 须 owner；pending/receipts/nets/commits/snapshot 与无 account 余额列表走 **PaymentServiceGuard**；生产 health 不回传 indexer 原文错误 |
 
 ---
 

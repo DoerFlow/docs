@@ -14,7 +14,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 **客户端**（[CLIENTS.md](./CLIENTS.md)）：DoerFlow 各端 **没有** 自动远控界面。深链只给人点；API 不发起会话。档位默认关，见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 
-**状态诚实标注**：本档位未接过真实 VistaRemote / DataLuminary 生产对端。`/capabilities` 里 `commerce.readiness` 为 `lab`，文档不得写「已上线」。
+**状态诚实标注**：本档位未接过真实 VistaRemote / DataLuminary 生产对端。兼容 API 的 `commerce.readiness` 为 `lab`，产品能力状态显示 **Lab**，文档不得写「已上线」。
 
 **Creator UI**：Creator 面向 catalog/jobs 仍是 web `/ecosystem`（读 `/capabilities`）。`remoteIntervention.deepLink` **主 UI** 可为 **web** `/ecosystem` **Events**；**admin + worker 亦**展示人工 Intervene（打开深链；catalog/jobs ≠ 介入）。admin / worker **不做**远控控制台。本档位只追加人工介入深链 + DataLuminary 导出关联——**无**自动远控。见 [ECOSYSTEM.md](./ECOSYSTEM.md) §5.1 · [CLIENTS.md](./CLIENTS.md) · [DEPLOYMENT.md](./DEPLOYMENT.md)。
 
@@ -120,7 +120,7 @@ pnpm run compose:preflight
 pnpm run smoke:ecosystem-commerce              # 默认档位下这两类事件必须被拒
 ```
 
-清单（实验室单测已对照；未接真实对端前 `commerce.readiness` 仍为 `lab`）：
+清单（实验室单测已对照；未接真实对端前产品状态仍为 Lab，兼容 `commerce.readiness=lab`）：
 
 - [x] 档位非 `smart-site` 时 `com.dataluminary.export.v1` → `EVENT_TYPE_NOT_ALLOWED`
 - [x] 模板缺 `{sourceRef}` → 启动失败

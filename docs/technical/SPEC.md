@@ -10,9 +10,9 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 > **品牌**：[DoerFlow](https://doerflow.dev) · **组织**：[github.com/doerflow](https://github.com/doerflow)（原 AgentSkillMesh / VibeAgent）  
 > **定位**：The Liquidity Protocol for Autonomous Agents — 自主执行体的价值流动协议
 
-**版本**: v0.4.1  
-**状态**: Draft  
-**最后更新**: 2026-09-22
+**版本**: v0.5.0-draft
+**状态**: Draft
+**最后更新**: 2026-10-07
 
 > 历史名称 **VibeAgent** 在本文档中仍可能出现，含义同 **DoerFlow**。品牌决策见 [LuminaryWorks/spec/products/doerflow.md](https://github.com/LuminaryWorks/LuminaryWorks/blob/main/spec/products/doerflow.md)。
 
@@ -44,8 +44,14 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | **Native Bridge** | Rollup 官方桥：L1 锁仓 → L2 等量铸造；自建链延期前用 Base 等官方桥 |
 | **Canonical Token** | 桥接后在 L2 上唯一认可的 wrapped 资产（USDC/USDT/PYUSD/WETH） |
 | **Omnichain** | LayerZero、CCTP、CCIP 等通用跨链协议（扩展，不替代原生桥） |
-| **Onramp** | 第三方合规 Widget（Stripe/MoonPay 等）；VibeAgent 不持牌、不碰法币 |
+| **Onramp** | 持牌第三方把法币换成 crypto。默认打到用户的 DoerFlow 钱包，用户可改选已连接的自托管钱包。DoerFlow 不托管 KYC / 法币。平台交易的收单方是 DoerFlow |
 | **MetaRepo** | DoerFlow 根仓库（doerflow/platform），含 `spec/` 与各 `repos/*` 子仓库编排 |
+| **Platform Account** | 统一平台身份；同一账号可在不同工作区发布、接单、开发或运营，不按“发布方账号/接单方账号”拆分 |
+| **Linked Wallets** | Platform Account 经新鲜 SIWE 证明绑定的一个或多个非托管地址；仅证明地址控制权，不替代平台登录 |
+| **Workspace** | 个人或组织的业务上下文，承载成员、策略、资产与任务；切换工作区不等于切换账号 |
+| **Capability** | 某账号在当前工作区、资产和资源上的可执行能力；由 Entitlement 与 Casbin 裁决，不由前端角色名授予 |
+| **Asset** | 可拥有、授权、计量或结算的对象，包括钱包、Agent、Skill、Endpoint、Device、资金余额与任务产物 |
+| **Capability Status** | 对外统一状态：`available`、`beta`、`lab`、`roadmap`；不得用“已实现”暗示已生产可用 |
 
 ## 3. 系统边界
 
@@ -64,7 +70,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - **协议激励与 Trading SDK**（MasterChef 等可部署在现成 L2，v0.7+）
 - Web 前端 DApp + NestJS 索引/中继/链下记账后端
 - 以太坊主网及 **现成 L2（Base、Arbitrum）** 部署
-- **法币入口**：嵌入持牌第三方 Onramp Widget（不自建汇款，见 [ONRAMP.md](./ONRAMP.md)）
+- **法币入口**：持牌第三方完成 KYC 与法币支付；DoerFlow 是平台交易收单方，不托管 KYC / 法币。购买 ETH 等资产默认进入 DoerFlow 钱包，用户可改选已连接的自托管钱包（见 [ONRAMP.md](./ONRAMP.md)）
+- **非托管钱包**：统一 App 钱包是一等产品（密钥在设备、Vault、余额四态、收单结算），见 [WALLET.md](./WALLET.md)
 - **跨链**：现阶段 Base/官方桥；自建链原生桥延期；Omnichain 分阶段（见 [BRIDGE.md](./BRIDGE.md)）
 
 ### 3.2 范围外 / 分阶段
@@ -79,7 +86,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | 链下 AI 模型训练平台 | 范围外 |
 | 重资产硬件制造 | 范围外（BYOD + SDK） |
 | 各国电力现货牌照 | v0.6 仅链上撮合 PoC，合规分地域 |
-| 自建法币支付 / 汇款牌照 | 范围外（Onramp 走第三方，见 ONRAMP.md） |
+| 自建法币账户、汇款牌照、托管 KYC | 范围外。平台交易由 DoerFlow 以 crypto 收单；法币与 KYC 仍走持牌 Onramp（见 ONRAMP.md） |
 | 联盟链 / 许可链 | **明确不做** |
 
 ### 3.3 LuminaryWorks 跨产品生态（可选）
@@ -103,10 +110,13 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 - **`standalone`**：不需要 Logto / Entitlement / 兄弟产品。`ENTITLEMENT_MODE` 可为 `off` 或 `offline_license`，但 **AuthN 不静默匿名**——写路径始终要求 SIWE 或平台 JWT。
 - **生产托管平台**（`control-plane` 及以上）：必须 **AuthN（Logto OIDC + M2M）+ Entitlement + Casbin**；钱包证明单独走 **SIWE / `wallet_links`**（双轨，Logto 会话不是钱包证明）。
 - **`agent-commerce`**（VistaCast / SyncroBrain）与 **`smart-site`**（VistaRemote 人工介入深链 / DataLuminary 导出）目前是 **已实现的工程实验室，默认关**；未接真实对端前 `/capabilities` 的 `readiness` 保持 `lab`。见 [SMART_SITE.md](./SMART_SITE.md)（`FR-SITE-*`）。
+- 产品与文档展示能力时只使用 **Available / Beta / Lab / Roadmap**。旧 `production` readiness 映射为 `available`，旧 `disabled` 表示不进目录而非第五种状态；兼容字段迁移期可保留旧值，但 UI 必须归一化。
 
-## 4. 用户角色
+## 4. 统一账户与使用上下文
 
-| 角色 | 描述 | 核心操作 |
+所有人使用同一 **Platform Account** 登录；不存在永久分离的“发布账号”与“接单账号”。下表角色仅是当前任务或工作区中的使用上下文，可并存、可切换，不能作为授权真相源。
+
+| 使用上下文 | 描述 | 核心操作 |
 |------|------|----------|
 | **Creator** | Agent/Skill 创造者 | 铸造 Agent、注册 Skill、设定价格 |
 | **Consumer** | 服务消费者 | 搜索 Agent/Skill、发起雇佣、支付 |
@@ -117,7 +127,25 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 | **IoT Provider** | 设备方/厂商 | 注册设备、定价、收稳定币 |
 | **Data Consumer Agent** | 数据买方 Agent | 订阅传感器流、微额支付 |
 
+权限链固定为 **Logto AuthN → Entitlement → Casbin**；链上地址控制权固定由 **SIWE** 证明。前端角色、Tab、JWT role 或“当前是发布方/接单方”的选择不得直接授予 Capability。账号可加入多个 Workspace，并在每个 Workspace 下查看其 Linked Wallets、Capabilities 与 Assets。
+
 ## 5. 功能需求
+
+### 5.0 产品模型（Product Model）
+
+#### FR-PM-001 统一身份与工作区
+- 一个 Platform Account 可同时发布任务、接单、管理 Agent/Skill/设备与查看资金；不得要求为发布/接单注册第二账号
+- Workspace 是个人/组织上下文；资源 API 必须按 workspace/tenant + resource 做 Casbin 裁决
+- Linked Wallet 绑定要求平台 JWT + 新鲜 SIWE；移除绑定不得删除钱包本身或托管私钥
+
+#### FR-PM-002 Capabilities 与 Assets
+- 客户端根据 API 返回的 capabilities/permissions 渲染操作，不从角色名、页面或客户端类型推断权限
+- Assets 至少覆盖 Linked Wallet、Agent、Skill、Endpoint、Device、任务产物与资金账户；同一资产可按策略授权给 Workspace
+- 能力状态统一为 Available / Beta / Lab / Roadmap；住宅 IP 出租属于高风险 **Roadmap**，当前未上线，不得开放发布、接单或收益入口
+
+#### FR-PM-003 产品定位
+- DoerFlow 是 Agent、人和设备的工作与价值结算网络，也是这些平台交易的**收单方**；DoerFlow 钱包是一等产品。购买资产默认进入该钱包，用户可改选已连接的自托管钱包
+- 不托管 KYC / 法币。买币（Onramp）、Swap 与 Bridge 是入金、兑换结算资产和跨链的**资金工具**；不得把 DEX/投机交易作为 Home 或主导航中心
 
 ### 5.1 身份层（Identity Layer）
 
@@ -145,6 +173,7 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 
 #### FR-ID-004 平台会员与商业权益
 - 调用顺序固定为 Logto AuthN → Entitlement → Casbin；`401` 登录、`402 ENTITLEMENT_*` 升级/配额、`403` 资源 ACL
+- **运营面与客户套餐分离**：`admin.ops.read` 是运营控制台能力，不是客户 Pro / Ultra / Enterprise 订阅。已验证的平台运营身份（IdP `super_admin` / `superadmin`、`platform_admin`、`doerflow_admin`）在该能力上跳过商业校验；发单、配额、开发者 API 等客户能力仍按套餐 fail-closed。跳过商业校验后仍由 Casbin 裁决，无运营策略则 `403`。不得把生态超管「无个人套餐」误报为 `402 ENTITLEMENT_REQUIRED`
 - DoerFlow `trialPolicy=disabled`：只展示 Pro / Ultra / Enterprise，不创建 Trial，不显示试用 CTA 或倒计时
 - 会员快照来自 `GET /api/v1/platform/membership`，包含 `effectivePlan`、组织上下文与 quota；不得从 JWT 或前端角色推断
 - 协议费、Escrow、Gas、链上 Skill 按次价格属于协议经济；平台套餐只控制托管 API/配额，两者不得混称
@@ -192,6 +221,16 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 
 > 任务型托管用 **Escrow**；Agent 大厅高频微支付用 **链下账本 + Merkle**（[ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)）。状态通道为可选拓展，非全局默认。
 
+所有通道共享规范生命周期：
+
+`Offer → Quote → Authorize/Fund → Execute → Meter/Evidence → Accept/Capture → Fee Split → Settle/Dispute`
+
+- **Escrow 轨**：`Fund` 锁定资产，`Evidence` 后由验收或仲裁触发 `Capture`，再分账与结算
+- **Ledger + Merkle 轨**：`Authorize` 只预留预算，执行成功并持久化输出/计量证据后才 `Capture` 入账，周期 Root 完成最终清算
+- 同一经济事件只能选择一条结算轨；禁止链上放款后再账本入账或反向双重结算
+- 对用户余额统一展示 `available`、`held`、`pending`、`withdrawable`；禁止把内部 `credit` 管理动作或未清算数直接显示为“可提现”
+- 每笔结算拆分为 `gross`、`fee`、`royalty`、`net`，且满足 `net = gross - fee - royalty`
+
 #### FR-ST-001 Escrow 创建
 - Consumer 发起雇佣：指定 Agent、Skill、任务描述 CID、金额、超时时间
 - 资金锁定至 Escrow 合约
@@ -228,6 +267,9 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 - **不做**：以定制 L3 作为微支付底座；以状态通道作为大厅全局架构
 - HTTP 入口为 **NestJS + Fastify**（禁止 Express）
 - `POST /payments/ledger/credit-batch` 单次最多 10000 笔链下入账（Sepolia / 本地吞吐打磨）
+- `ledger/credit*` 仅为受控的 Vault 镜像、迁移或实验室运维入口，不是产品业务结算 API；生产业务必须从已验证的充值、Receipt capture、Escrow release 或授权集成进入账本
+- `GET /payments/ledger/balances` 返回 `available/held/pending/withdrawable`；`POST /payments/ledger/authorizations/:id/finalize` 在 finality/裁决后把 pending 转为 withdrawable；Merkle snapshot 只包含 withdrawable
+- 受控 `ledger/credit*` 请求必须声明 `source` 与 `operationId`；IoT/telemetry 无 payer 时仅允许非生产且显式 `ALLOW_LAB_LEDGER_CREDIT=true`，响应标记 `labCredit` 与来源
 - **M2 实验室验收（2026-08-25）**：1 万笔/分链下记账（零链上 tx）；≥10 万笔合成 **1 个 Merkle Root**；Hardhat 上任意存款账户可 `forceWithdraw`
 - **FR-PAY-007**：买卖双方 pair gross 轧差后 `CreditLineNetting` 一次 `internalTransfer`
 - **FR-PAY-008**：`SettlementBatcher` / 实验室 EntryPoint + Paymaster 打包 `commitRoot` 与 `settleNetBatch`
@@ -243,7 +285,7 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 - 实验室版本 **v1.1-channels-lab**：`pnpm run smoke:channels`
 
 #### FR-ST-007 跨产品商业作业与事件（生态变现）
-- Provider Skill / Trading Job 携带 `productCode`（`vistacast|syncrobrain|vistaremote|dataluminary|generic`）、`offeringCode`、`sourceTenantId`、`sourceRef`、`pricingUnit`、`readiness`（`production|lab`，可 `disabled`）、`idempotencyKey`
+- Provider Skill / Trading Job 携带 `productCode`（`vistacast|syncrobrain|vistaremote|dataluminary|generic`）、`offeringCode`、`sourceTenantId`、`sourceRef`、`pricingUnit`、`capabilityStatus`（`available|beta|lab|roadmap`）、`idempotencyKey`；迁移期兼容旧 `readiness=production|lab|disabled`，其中 `production→available`、`lab→lab`、`disabled` 不进目录
 - Job 状态机：`awaiting_payment` → `authorized` → `running` → `succeeded` → `captured`/`settled`；失败或超时 `voided`|`failed`。实验室旧值 `open` 视为 `awaiting_payment`
 - **Job 专用** signed receipt：`authorize` 验 EIP-712 / Session / 预算，**不得**给 payee 入账；provider **2xx 且输出 hash 已持久化**后**原子 capture**；**5xx / 超时 void**。禁止再把「Receipt Vault accepted + `applyReceipt` best-effort」当作 Job 结算
 - `POST /payments/receipts` 旧路径保持兼容（非 Job 微支付仍可入账）
@@ -304,6 +346,12 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 
 ### 5.6 前端 DApp
 
+Web 信息架构统一为 **Home / Work / Create / Money / Build / Devices / Account**：
+
+- **Home**：网络概览与可浏览市场；**Work**：可接工作、我的执行与证据状态；**Create**：发布与管理任务、Agent、Skill
+- **Money**：余额四态、流水、Vault、Onramp/Swap/Bridge 资金工具；**Build**：开发者 Key、SDK、Provider；**Devices**：Endpoint/IoT Assets；**Account**：Platform Account、Workspace、Linked Wallets、Capabilities
+- Web 可浏览、发布和管理任务；需要相机、GPS、系统分享或原生证据采集时，引导打开统一 DoerFlow App，不伪装为 Web 已完成原生证据步骤
+
 #### FR-UI-001 市场首页
 - Agent/Skill 列表、分类、搜索、排序
 - 用户可见文案走 en + zh-CN locale（含 401/402/403 横幅、路由错误、Vault / 支付提示）
@@ -339,8 +387,12 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 - `GET /health` 的 `indexer.rpcUrl` **必须脱敏**（thirdweb URL 中的 secret/clientId 不得明文返回）
 - 启动从持久化游标、`INDEXER_START_BLOCK` 或近期 lookback 开始；禁止每次从创世块扫到 latest
 - `GET /health` 返回索引游标、是否追块、`rpcOk` / `lastError` / `rpcProvider` / `leader` / `role`；RPC 不可达时市场须提示「链 RPC 未就绪」（如 Hardhat 未启动），不得伪装成「没有 Agent」；追块中展示进度百分比
-- 历史追块期间须**同时扫描链头窗口**（`latest − INDEXER_MAX_BLOCK_RANGE`），使新铸造 / 新 Escrow 不必等整段 lookback 追完才可见
+- 历史追块期间须**先扫描链头窗口**（`latest − INDEXER_MAX_BLOCK_RANGE`，且不重复扫已扫过的头块），再扫历史块，使新铸造 / 新 Escrow 不必等整段 lookback 追完才可见；历史窗口被限流时，本轮已扫入的链头事件仍保留
+- 每个合约地址、每个窗口只发**一次** `eth_getLogs`，在本地按 topic 分发；相邻请求间隔 `INDEXER_RPC_GAP_MS`（默认 200ms）。`JsonRpcProvider` 关闭 JSON-RPC 批量（`batchMaxCount: 1`）
+- 公共 Base 端点（`mainnet.base.org`、`sepolia.base.org`）默认窗口 **200** 块（`INDEXER_MAX_BLOCK_RANGE` 可覆盖；thirdweb 仍为 1000）。`mainnet.base.org` 对 `eth_getLogs` 返回 `-32011` 时**立即换**备用 RPC（`https://base.drpc.org`，其次 `https://base.publicnode.com`），窗口收到 **100** 块，并在同一次 tick 重试。缩小窗口不能代替换节点：该端点连 10 块也会限流
+- 备用节点若报 archive / personal token，再换下一个。`ranges over N blocks` 在当前窗口已经小于 N 时只把窗口减半，不得把 N 当成新的窗口上限
 - Indexer 在 RPC 连续失败时退避重试，避免刷屏日志
+- 供应商限流（JSON-RPC `-32011`、`request limit reached`、HTTP 429）时：窗口减半（下限 25）、使用更长退避；`rpcOk` 保持 true，`rpcRateLimited` 为 true。不得把限流当成节点宕机，不得因此关闭历史追块 RPC。市场展示限流提示，而不是「Hardhat 未启动」
 
 #### FR-IDX-002 Indexer 选主与独立 worker
 - **角色**（`INDEXER_ROLE`）：`auto`（默认，HTTP 进程参与选主，便于单进程开发）· `http`（只做人机请求，不追块）· `worker`（只追块）
@@ -361,7 +413,7 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 - 后台刷新不得整页转圈；刚创建的订单可用 `?id=` 高亮
 - 截止后仍为 FUNDED/DELIVERED 时，Consumer 可调用 `refundTimedOut`
 - 同一钱包同时为 consumer 与 provider 时（自雇演示），按状态机展示下一步（付款 → 交付 → 确认），不得因「雇主」角色优先而隐藏交付
-- 任务中心只读列出已发布人类任务（`GET /human-tasks`）；接单、交付、验收在 **worker**（见 [CLIENTS.md](./CLIENTS.md)），web 不提供 `accept`，须提供 CTA 指向 wallet（发单）与 worker（接单）
+- 任务中心列出已发布人类任务（`GET /human-tasks`）；Web 可浏览、发布和管理，纯 Web 任务可按权限操作；相机/GPS/社交 App 等原生证据步骤须 CTA 打开统一 DoerFlow App。迁移期 worker 仍可处理既有任务
 
 #### FR-UI-005 设备管理
 - 注册/注销 Device Node
@@ -372,9 +424,10 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 > 完整规格见 **[WALLET.md](./WALLET.md)**。
 
 #### 移动端分工（摘要）
-- **wallet（纯粹钱包）**：转账、收益、发布任务（须审批）— [WALLET.md](./WALLET.md)
-- **worker（综合端）**：众包接单 + **社交平台任务（M3 要做，清单+截图）**— [WORKER.md](./WORKER.md)
-- **残障无障碍（前期不做）**：不针对聋哑盲等特殊人群做读屏/字幕/WCAG 专项；见 [CLIENTS.md](./CLIENTS.md)
+- **`repos/wallet` = 统一 DoerFlow App 主壳**：首页 / 工作 / 发布 / 资金 / 我的；同一 Platform Account 可发布与接单，并逐步吸收 worker 的相机、GPS、问卷、社交清单与证据能力
+- **`repos/worker` = 迁移期旧客户端**：冻结新增产品面，只做安全、兼容与迁移；统一 App 达到能力对等后保留两个版本迁移窗口，再退役
+- 私钥/助记词只在设备、SIWE 与 Logto 双轨、仅 `published` 可接、证据最小化及 Accessibility Service 禁止 auto-click 等原安全约束全部保留
+- **基础无障碍是发布基线**：目标 WCAG 2.2 AA，并覆盖键盘/焦点、读屏标签、动态字体与减少动效；Android Accessibility Service 是社交步骤引导能力，不能混同残障无障碍
 
 见 [CLIENTS.md](./CLIENTS.md)。
 
@@ -383,7 +436,7 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 > [TASK_SYSTEM.md](./TASK_SYSTEM.md) · [TASK_GOVERNANCE.md](./TASK_GOVERNANCE.md) · [FEE_TIERS_AA.md](./FEE_TIERS_AA.md) · [ADMIN.md](./ADMIN.md) · [PORTS.md](./PORTS.md)
 
 - **双通道发布**：`audience=agent`（Agent 发现价格合适自动 claim）与 `audience=human`（worker 自愿接单、可选验收）  
-- **任务管理**：违禁硬拒绝、高频发布限流、L0–L3 审批与 admin 风控  
+- **任务管理**：违禁硬拒绝、高频发布限流、L0–L3 评分；**新任务须人工通过后才可上架与结算**（见 TASK_GOVERNANCE §7）
 - **交易**：Escrow（任务型）+ **链下账本 / Merkle**（高频微支付）+ **ERC-4337 AA** 等级协议费（`GET /fees/tiers`）  
 - 本地 API 默认端口 **13008**  
  
@@ -450,9 +503,11 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 
 > [ONRAMP.md](./ONRAMP.md)
 
-- **不自建汇款**；嵌入 **Stripe Crypto Onramp、MoonPay、Transak、Alchemy Pay** Widget/SDK  
-- Port/Adapter：`IOnrampProvider`；crypto **直达用户自托管钱包**  
-- api 仅签发 session、地区路由；**不存 PII**  
+- **平台交易收单方是 DoerFlow**（任务、Escrow、协议费、账本）；**不托管 KYC / 法币**
+- 法币换成 crypto：嵌入 **Stripe Crypto Onramp、MoonPay、Transak、Alchemy Pay** Widget/SDK，不自建汇款
+- Port/Adapter：`IOnrampProvider`；购买 crypto **默认进入 DoerFlow 钱包**，用户可改选已连接的自托管钱包
+- api 仅签发 session、地区路由；**不存 PII**
+- 非托管钱包是一等产品，见 [WALLET.md](./WALLET.md)；买币只是入金工具
 - wallet/web「买币」+ 与 [BRIDGE.md](./BRIDGE.md) 链式入金向导（v0.7）  
 
 ## 6. 非功能需求
@@ -479,6 +534,7 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 
 - 系统可用性 99.5%（不含链上故障）
 - 支持优雅降级：P2P 不可用时走链上事件 + 后端中继
+- Web/admin 发布须满足 WCAG 2.2 AA 基础项与键盘/焦点/读屏标签/减少动效；移动端须支持读屏语义、动态字体、可达焦点与减少动效。阻断核心流程的基础无障碍缺陷视为发布阻断项
 
 ### 6.4 可扩展性
 
@@ -566,7 +622,7 @@ integration_events / outbox_callbacks
 | HumanTasks | `/api/v1/human-tasks` | 人类任务 CRUD |
 | AgentTasks | `/api/v1/agent-tasks` | Agent 列表 / claim / deliver |
 | Storage | `/api/v1/storage` | 元数据 pin。默认本地目录；`STORAGE_BACKEND=pinata` 才用 Pinata。`backend: "local"` 均为成功 |
-| Payments | `/api/v1/payments` | 收据、账本、`ledger/credit` / `ledger/credit-batch`、snapshot / proof、披露；Job 授权走 `/trading/jobs/:id/authorize|capture|void` |
+| Payments | `/api/v1/payments` | 收据、余额四态、snapshot / proof、披露；Job 授权走 `/trading/jobs/:id/authorize|capture|void`；`ledger/credit*` 仅受控镜像/迁移/Lab，不是业务结算入口 |
 | Trading | `/api/v1/trading` | 目录 / 报价 / 作业 / `execute` / `authorize` / Provider HTTP Skill / SSE / WebSocket；CloudEvents + HMAC |
 | Integrations | `/api/v1/integrations` | CloudEvents inbox（`POST /events`）；SyncroBrain 时间窗入账 `POST /syncrobrain/telemetry-credits`；asset↔payee `PUT`/`GET /syncrobrain/payee-bindings`；按 sourceProduct+eventId 去重；`production` 模式读写均需鉴权 + 显式 `sourceTenantId` |
 | Ready | `/api/v1/ready` · `/live` | M5 生产探针。`ready` 降级 **503**；`live` 恒 200 |

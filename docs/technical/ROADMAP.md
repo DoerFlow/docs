@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # DoerFlow 版本规划与里程碑
 
-**最后更新**: 2026-09-22  
+**最后更新**: 2026-10-07
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [CLIENTS.md](./CLIENTS.md) · [SPEC.md](./SPEC.md)
 
 ---
@@ -23,7 +23,7 @@ M0–M1 基础已齐
 M2  v0.2  链下账本 + Merkle 批量结算     ← 实验室验收通过（2026-08-25）
       │
       ▼
-M3  v0.3  客户端完善：wallet · worker · admin · web     ← AI 验收通过（2026-08-29）
+M3  v0.3  历史双 App 客户端完善：wallet · worker · admin · web ← AI 验收通过（2026-08-29）
       │
       ▼
 M4  v0.4  赚钱场景：Agent/云 SDK·API · 人类发单接单闭环  ← AI 验收（smoke:m4）
@@ -52,6 +52,8 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 1. **先清算底座，再客户端，再场景，最后商业发版。**  
 2. 高频路径必须走 [ASYNC_PAYMENTS](./ASYNC_PAYMENTS.md)（链下账本 + Merkle）；**不做** 定制 L3 作前置。  
 3. MetaDEX / IoT 车桩 / 能源冷链 / 完整 P2P / Omnichain → **1.0 后或并行支线**，不占用主线关键路径。
+4. 产品模型收敛不再按发布/接单拆账号：`repos/wallet` 演进为统一 DoerFlow App，旧 worker 在能力对等后保留两个正式版本再退役。
+5. 基础无障碍是所有后续发布基线，不再延期到商业 1.0 之后。
 
 ---
 
@@ -145,8 +147,8 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 | 客户端 | 交付 | 状态 |
 |--------|------|------|
-| **wallet** | 发任务 UX 完整；转账 / 收益流水；Vault 充提；Onramp 买币；官方桥入金引导 | ✅ transfer · vault · onramp · session · Escrow fund/release · **SIWE 任务写** · **dispute / refundTimedOut** · 驳回/修改 · **`submitted` 验收** · **发单说明 / 线下地点** · **发单进度 / 待办置顶 / 接单通知** · **客户端 en+zh** |
-| **worker** | 众包接单 / 交付 / 收款闭环；**社交任务（清单+截图）**；任务仅展示 `published` | ✅ **Expo 大厅 + accept + deliverEscrow** · **相机/GPS/问卷 + proofCid** · **社交 Tab / 打开目标首页 / 清单 / 截图** · published 门禁 · **详情状态 / 已被接单 / 待验收** · Vault · 账本余额 · **收益页原生 ETH** · escrowId · **open dispute** · **en+zh** · **Sepolia 独立 demo 钥（非 Hardhat #1）** |
+| **wallet（历史）** | 发任务 UX 完整；转账 / 收益流水；Vault 充提；Onramp 买币；官方桥入金引导 | ✅；现作为统一 DoerFlow App 主壳继续演进 |
+| **worker（历史）** | 众包接单 / 交付 / 收款闭环；社交任务；仅展示 `published` | ✅；能力渐进迁入统一 App，旧 App 进入迁移退役 |
 | **admin** | 审批队列、L0–L3 风控、告警、费率与支付运维只读面板 | ✅ review · **batch-approve** · auto-approval · tasks · **社交 App/步骤回显** · governance · publishers · audit · disputes · alerts · **仪表盘真实 GMV + 待审队列** · commits · fees · **CORS :13011** · **en+zh-CN locale** |
 | **web** | Creator 工作台与市场体验 hardening；与 Vault / Escrow 状态一致 | ✅ `/payments` Vault + fees；Escrow UX；测试网 gas 引导；**公开市场（无需平台登录）**；`use:sepolia` / `use:localhost` 链配置切换 · **en+zh locale** |
 | **api** | 任务治理与客户端 API 稳定；推送 / WebSocket 通知（按需） | ✅ 治理 · publishers flag · onChainEscrowId · 预留 · ledger · fees · auto-decisions；Indexer 分片 + **链头窗口**；health 含 indexer 游标；链 profile 与 web/wallet/worker 对齐；**`deliver` → `submitted`**；**`pnpm run smoke:m3`**（链下）· **`pnpm run smoke:escrow`**（Sepolia 真锁仓） |
@@ -156,9 +158,9 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 > `pnpm run smoke:m3`：自动上架 → 接单锁定 → 免验收完成；须验收照片 `submitted` → 发单方 verify；社交 `pending_review` 不进大厅，Logto 可达时审批→接单→交付。  
 > 链上放款另跑 `pnpm run smoke:escrow`（Sepolia，需余额）。Expo 不在 Playwright 里点，状态机由 API + 客户端单测覆盖。
 
-发单方仅用 wallet、接单方仅用 worker、运营仅用 admin，可在测试网完成「发布 → 审批 → 接单 → 交付 → 放款」全流程，无需运维手工改库。
+历史 M3 验收使用 wallet 发布、worker 接单、admin 运营完成闭环。该句只记录当时实现状态，不再是永久产品/账号边界；新基线为同一 Platform Account + 统一 App/Web。
 
-**前期不做**：面向听障、视障、言语障碍等特殊人群的残障无障碍（读屏 / 字幕 / WCAG）。**社交任务本身是 M3 交付**（清单+截图）。Android Accessibility Service：**UI 已接**（Wave 44 B1C），仍无 auto-click；与残障无障碍不是同一件事。
+**发布基线**：Web/admin 目标 WCAG 2.2 AA 基础项；移动端覆盖读屏标签、动态字体、焦点和减少动效。Android Accessibility Service 仍仅为社交步骤引导，禁止 auto-click；与残障无障碍不是同一件事。
 
 **预计工期**: 8–10 周  
 **依赖**: M2 Vault/账本可用（充提与余额展示）  
@@ -278,6 +280,17 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 | v0.7+ | `$DOER` **非结算**效用代币：费率折扣 / 质押 / ve gauge（FR-TOK-001） |
 | v1.x+ | MasterChef / DAO 治理扩大；自建 L2 **仅规模证明后评估** |
 
+### 4.4 规格产品模型收敛（当前）
+
+| 阶段 | 交付 | 完成条件 |
+|------|------|----------|
+| PM0 规范 | Platform Account / Linked Wallets / Workspaces / Capabilities / Assets；统一结算生命周期与能力状态 | 本轮 spec + docs 同步 |
+| PM1 主壳 | `repos/wallet` 五 Tab：首页/工作/发布/资金/我的；Web IA：Home/Work/Create/Money/Build/Devices/Account | 导航与统一账号上下文可用 |
+| PM2 能力迁移 | worker 大厅、详情、相机/GPS/问卷、社交清单/截图、收益/争议逐项迁入 | 行为、安全、i18n、无障碍测试对等 |
+| PM3 退役 | worker 显示迁移提示，保留两个正式版本与未完成任务兼容后停止发布 | 无活跃任务被截断；下载与深链完成迁移 |
+
+资金展示统一为 `available/held/pending/withdrawable` 与 `gross/fee/royalty/net`；业务路径禁止直接 credit 或双重结算。能力只用 Available/Beta/Lab/Roadmap；住宅 IP 出租为高风险 Roadmap/未上线。Onramp、Swap、Bridge 仅作为资金工具。
+
 #### 代币铁律（FR-TOK-001 / FR-TOK-002）
 
 - A2A 小额高频的**结算与计价单位永远是稳定币**。自有币若兼任计价货币，其波动会直接破坏 Agent 定价 —— 设计红线。
@@ -315,7 +328,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 ## 7. 进度追踪
 
-**当前阶段: M5a — 封闭 Beta 工程清单（主网资金仍人工；公开 1.0 见 M5b）**
+**当前阶段: M5a 与产品模型 PM0–PM2 并行**（主网资金仍人工；公开 1.0 见 M5b）
 
 M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `smoke:m4` AI 验收（2026-08-29）。顺序仍是 **清算底座 → 客户端 → 场景 → 生产闸门**；继续留在 Base Sepolia 打磨，**不伪造主网地址**。
 
@@ -331,7 +344,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | Creator 设备 | web **独立** `/devices` **已存在**（见 CLIENTS；不局限于 Payments `LabDevicesCard`） |
 | smart-site 深链 | **主 UI** = web `/ecosystem` Events；**admin + worker 亦**展示人工 `deepLink` Intervene（不自动远控） |
 | 会员 MoR | **仅** LuminaryWorks Entitlement（Polar+Creem+Paddle 适配器均已落地）；DoerFlow **不**自建；`doerflow_credit` = C 轨 |
-| commerce.readiness | **保持 `lab`** 直至真实 VistaCast/SyncroBrain 对端 |
+| commerce.readiness | UI 统一显示 **Lab**，直至真实 VistaCast/SyncroBrain 对端；兼容 API 可暂保留 `lab` |
 | FR-SK-002 EAS | **Wave 45 B5**：lab `SkillAttestationRegistry` ✅（非生产 EAS） |
 | FeeTier AA | **Wave 46 lab**：UserOp → `LabSmartAccount` → `settleWithFee` ✅；Base Sepolia 全路径仍开 |
 
@@ -363,7 +376,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 |----|------|
 | B6 lab AA | Hardhat：`LabSmartAccount` + `LabEntryPoint` + Paymaster → `Escrow.settleWithFee` 读 Registry T3；**非** Base Sepolia / 官方 EntryPoint |
 | B9′ Paddle | LuminaryWorks Entitlement：`paddle` 适配器（checkout + `Paddle-Signature` + refund）；与 Polar/Creem 并列；DoerFlow 仍不自建 |
-| 仍开 | Base Sepolia 全路径 AA、生产 EAS、对端接通后 `commerce.readiness=production` |
+| 仍开 | Base Sepolia 全路径 AA、生产 EAS、对端接通后 API 可进入 `production`，UI 显示 Available |
 
 #### Wave 47 · ABI 诚实 + fees 镜像 + lab attestation 读（2026-09-23）
 
