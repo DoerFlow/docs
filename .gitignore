@@ -4,3 +4,6 @@ doc_build/
 *.log
 .env
 .env.local
+
+# Local AI provider secrets — never commit
+.env.ai
