@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 平台生态与壮大策略
 
-**版本**: v0.1-draft · **最后更新**: 2026-09-18
+**版本**: v0.1-draft · **最后更新**: 2026-11-11
 
 ## 1. 核心目标
 
@@ -65,7 +65,9 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 Creator DApp 的 **web `/ecosystem`** 含只读 catalog / jobs，**另有 Events 卡**展示 `GET /integrations/events`；有 `remoteIntervention.deepLink` 时提供 **Intervene**（人工新窗口打开）。**不是**合作方生产控制台，**不**自动远控。页面展示：部署档位 Tag 来自 `/capabilities.profile`；commerce 与 catalog 能力状态统一归一化为 Available/Beta/Lab/Roadmap。部署档位低于 `agent-commerce` 时展示 `ecosystem.labHint`。catalog 加载失败与 jobs `error` 态提供 Retry；未登录或无租户空态不提供 Retry。开发者自助（Key / Skill）走 web `/developers`，与 `/ecosystem` catalog 分开。见 [CLIENTS.md](./CLIENTS.md)、[DEVELOPER.md](./DEVELOPER.md)。
 
-VistaCast / SyncroBrain 伙伴商业是 **opt-in 工程实验室**：`DEPLOYMENT_PROFILE=agent-commerce`（或累进的 `smart-site`）才开，默认关。未接真实对端前产品状态为 **Lab**；兼容 API 可保持 `/capabilities.commerce.readiness=lab`，不得展示 Available。本机验收：`pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`）。
+VistaCast / SyncroBrain 伙伴商业是 **opt-in 工程实验室**：`DEPLOYMENT_PROFILE=agent-commerce`（或累进的 `smart-site`）才开，默认关。
+
+**代码解锁路径 ✅ · 真实对端 ⚪。** `/capabilities.commerce.readiness` 默认 `lab`。仅当 `COMMERCE_READINESS_UNLOCK=production` 且 VistaCast `GET {VISTACAST_BASE_URL}/ready`、SyncroBrain `GET {SYNCROBRAIN_BASE_URL}/api/v1/ready` 都返回 HTTP 2xx 时才为 `production`；探针失败或环境未设置则保持 `lab`。`autoRemoteControl` / `autoResolve` 恒 `false`。lab 时 UI 显示 **Lab**，不得显示 Available。真实生产对端仍未接通。本机验收：`pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`）；对端探针 `pnpm run smoke:peers`。
 
 排期与档位边界：[ROADMAP.md](./ROADMAP.md) §9 生态商业实验室、§10 smart-site · [DEPLOYMENT.md](./DEPLOYMENT.md) · [SMART_SITE.md](./SMART_SITE.md)。
 

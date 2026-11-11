@@ -145,7 +145,7 @@ flowchart TB
 | 项 | 内容 |
 |----|------|
 | 路径 | 仓库根（非 `repos/` 下） |
-| 包含 | `spec/`、`scripts/`、`repos.manifest.json`、`MVP_PLAN.md`、`WHITEPAPER.md` |
+| 包含 | `spec/`、`scripts/`、`repos.manifest.json`、`WHITEPAPER.md`、`ONBOARDING.md` |
 | 不包含 | 子项目 `node_modules`（`repos/*` 在 `.gitignore` 中） |
 | 协作者 | 团队编排、规范评审、一键脚本 |
 
@@ -179,7 +179,7 @@ flowchart TB
 | 路径 | `repos/contracts` |
 | 实现 Spec | `FR-ID-*`、`FR-SK-*`、`FR-ST-*`；**v0.15** `FR-DEX-001*` → `src/metadex/`；**v0.7** `FR-BRIDGE-*` → `src/bridge/` + OP Stack |
 | 输出 | `artifacts/`、ABI → `api`/`web`/`shared` |
-| 关键脚本 | `deploy:mvp`、`deploy:sepolia:full`、`deploy:metadex`、`export-abi` |
+| 关键脚本 | `deploy:mvp`、`deploy:sepolia:full`、`deploy:metadex`、`deploy:metadex:sepolia`、`export-abi` |
 
 ### 3.5 api
 
@@ -292,4 +292,4 @@ flowchart TB
 - [Spec 目录说明](./README.md)
 - [技术规格 SPEC.md](./SPEC.md)
 - [需求追溯 traceability.md](./traceability.md)
-- MetaRepo：[MVP_PLAN.md](../MVP_PLAN.md)、[NAMING.md](../NAMING.md)
+- MetaRepo：[ONBOARDING.md](../ONBOARDING.md)、[NAMING.md](../NAMING.md)、[ROADMAP.md](./ROADMAP.md)

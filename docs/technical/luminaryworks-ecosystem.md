@@ -77,7 +77,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | VistaCast / SyncroBrain 入站 | **已实现**，`DEPLOYMENT_PROFILE` 未开时 **默认关** |
 | SyncroBrain 时间窗账本入账 | **实验室 REST + asset↔payee 绑定已实现**；Gateway 自动出站已接；真实买方扣款仍为后续步 |
 | VistaRemote 人工介入深链 / DataLuminary 导出 | **最小契约已实现**，`smart-site` 档位外 **默认关**；见 [SMART_SITE.md](./SMART_SITE.md) |
-| 真实生产对端 | **未接**。兼容 API 的 `commerce.readiness` 保持 `lab`，产品 UI 显示 **Lab**，直至真实 VistaCast / SyncroBrain 对端；文档不得写「已上线」 |
+| 真实生产对端 | **未接**（⚪）。代码解锁路径 ✅：默认 `commerce.readiness=lab`；仅 `COMMERCE_READINESS_UNLOCK=production` 且 VistaCast `/ready`、SyncroBrain `/api/v1/ready` 都 2xx 时才报 `production`。lab 时 UI 显示 **Lab**，不得写「已上线」 |
 
 Creator 可在 web `/ecosystem` 查看 profile 与 commerce readiness；见 [ECOSYSTEM.md](./ECOSYSTEM.md) §5.1。
 

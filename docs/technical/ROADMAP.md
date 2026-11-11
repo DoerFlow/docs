@@ -1,13 +1,14 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
 
+
 # DoerFlow 版本规划与里程碑
 
-**最后更新**: 2026-10-07
+**最后更新**: 2026-11-11
 **关联**: [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [CLIENTS.md](./CLIENTS.md) · [SPEC.md](./SPEC.md)
 
 ---
@@ -32,10 +33,10 @@ M4  v0.4  赚钱场景：Agent/云 SDK·API · 人类发单接单闭环  ← AI 
 M5  v1.0  工程 1.0-rc（生产闸门）
       │
       ▼
-M5a 封闭 Beta   Base 主网白名单收款（Web/API）  ← 工程可关；资金/部署仍人工
+M5a 封闭 Beta   Base 主网白名单收款（Web/API）  ← 代码层 ✅ · 主网资金 ⚪
       │
       ▼
-M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不予赔付
+M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不予赔付  ← 代码层 ✅ · 主网资金 ⚪
 ```
 
 | 阶段 | 版本 | 一句话目标 |
@@ -76,9 +77,9 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 ---
 
-### M1 — v0.1 MVP「身份与交易」✅
+### M1 — v0.1「身份与交易」✅（MVP 已关闭）
 
-**主题**: Agent 铸造 → Skill 注册 → Escrow 结算最小闭环（已基本达成）
+**主题**: Agent 铸造 → Skill 注册 → Escrow 结算最小闭环（已验收；原 `MVP_PLAN.md` 已移除，本地启动见根目录 `README.md` / `pnpm run dev:local`）
 
 | 域 | 状态摘要 |
 |----|----------|
@@ -201,7 +202,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 | 域 | 交付 | AI 工程 | 人类商业宣布 |
 |----|------|---------|--------------|
 | **安全** | 内部预审；`SECURITY.md` 收报告；**明确不予赔付** | ✅ | 有资金后再开 Bounty |
-| **主网** | Hardhat `base`（8453）网络；deployments 待真实地址；**Timelock + Multisig 持有 admin** | ✅ 脚本 + **Indexer HA** + **索引行 Postgres** + `GOVERNANCE=1` | 资金 + 部署 |
+| **主网** | Hardhat `base`（8453）网络；deployments 待真实地址；**Timelock + Multisig 持有 admin** | ✅ 代码层（`deploy:base:check` 不广播） | ⚪ 主网资金 |
 | **运维** | `/live` `/ready`、Prometheus 告警、备份/Root/强制提现 Runbook | ✅ | 创始人 on-call |
 | **产品** | 生产 env 模板；Onramp/风险/不赔付披露 | ✅ | 商店签名可选 |
 | **生态** | SDK + API 文档；Sepolia ABI/地址已发布 | ✅ | 主网地址页（部署后填） |
@@ -216,25 +217,27 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 ---
 
-### M5a — closed-beta「封闭主网收款」🟡 工程清单 ✅ / 主网资金 ⚪
+### M5a — closed-beta「封闭主网收款」代码层 ✅ · 主网资金 ⚪
 
 **主题**: 邀请制在 Base 主网收真实 ETH（Escrow）与 USDC（Vault）；**不**对外宣布商业 1.0  
 **规范**: [PRODUCTION.md](./PRODUCTION.md) · [COMMERCIAL.md](./COMMERCIAL.md) · FR-PAY-016
 
 | 交付 | 状态 |
 |------|------|
-| `COMMERCIAL_MODE=beta` + 地址白名单；主网禁止 `off` | 工程 |
-| 单笔 / 地址 / 全局 TVL 限额；`PAYMENTS_PAUSED` + Vault `pause`（停充值、不停 `forceWithdraw`） | 工程 |
-| 未审计 + **不予赔付** 披露（web/wallet/worker + `/payments/disclosure`） | 工程 |
-| 主网 Vault 资产 = Base 原生 USDC（禁止 Mock） | 脚本硬约束 |
-| `pnpm run use:base`（无 `"8453"` 地址则失败，不造假） | 工程 |
-| `deploy/docker-compose.prod.yml` | 工程 |
+| `COMMERCIAL_MODE=beta` + 地址白名单；主网禁止 `off` | 代码层 ✅ |
+| 单笔 / 地址 / 全局 TVL 限额；`PAYMENTS_PAUSED` + Vault `pause`（停充值、不停 `forceWithdraw`） | 代码层 ✅ |
+| 未审计 + **不予赔付** 披露（web/wallet/worker + `/payments/disclosure`） | 代码层 ✅ |
+| 主网 Vault 资产 = Base 原生 USDC（禁止 Mock） | 代码层 ✅ |
+| `pnpm run use:base`（无 `"8453"` 地址则失败，不造假） | 代码层 ✅ |
+| `pnpm run smoke:mainnet:check` | 代码层 ✅ |
+| `pnpm --dir repos/contracts deploy:base:check`（不广播、不写地址） | 代码层 ✅ |
+| `deploy/docker-compose.prod.yml` | 代码层 ✅ |
 | `pnpm run smoke:vault`（Sepolia 真 deposit → commitRoot → forceWithdraw） | 脚本；链上需测试 ETH |
-| 人类：主网部署钥、ETH/USDC、multisig、域名/TLS | ⚪ |
+| 人类：主网部署钥、ETH/USDC、multisig、域名/TLS、`deploy:base` 广播 | 主网资金 ⚪ |
 
 默认限额（env 可覆盖）：单笔 Vault ≤ 100 USDC；地址净敞口 ≤ 500 USDC；全局 TVL ≤ 5,000 USDC；单笔 Escrow ≤ 0.05 ETH。
 
-**验收（工程）**：`smoke:m5` 含 M5a 文件与 env 键；`smoke:vault` 在 Sepolia 绿灯。主网首笔由白名单钱包完成，AI 不填写 `"8453"` 假地址。
+**验收（代码层）**：`pnpm run smoke:mainnet:check`（并入 `smoke:m5`）。`smoke:vault` 在 Sepolia 绿灯。主网首笔与 `deploy:base` 广播仍是主网资金 ⚪，AI 不填写 `"8453"` 假地址。
 
 ---
 
@@ -253,6 +256,8 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 | v0.15.1 api | `/dex/*` 读链 | 可并行 |
 | v0.15.2 web | Swap / LP / Vote | 可并行 |
 
+**Sepolia（2026-11-11）**：部署路径代码 ✅。`pnpm --dir repos/contracts deploy:metadex:sepolia` 使用与 localhost 相同的碰撞守卫，并在真实部署且链 ID 为 84532 之后写入 api 与 web 的 `84532.metadex`。链上部署仍开：本仓库没有 `DEPLOYER_PRIVATE_KEY`，deployments 里没有 `84532.metadex`。`pnpm run smoke:metadex:sepolia -- --check` 会因此失败；`--live` 在地址出现且 RPC 可用之前不会补地址。
+
 ### 4.2 LuminaryWorks 会员与支付融合（P0–P4 · 支线，与 M5a 并行）
 
 规范：[PAYMENT_ARCHITECTURE.md](./PAYMENT_ARCHITECTURE.md) · [GEO_PORTABILITY.md](./GEO_PORTABILITY.md)
@@ -263,7 +268,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 |------|------|------|------|
 | **P0** | PayPal 活体（零新代码）+ `manual` 对公 + 付款方类型 `individual\|business`（FR-PAY-022/025） | 真实产生一笔 `order.fulfilled`，产品侧 plan 生效 | 🟡 |
 | **P1** | MoR 通道（代扣代缴 VAT，个人可开户）（FR-PAY-024） | 沙箱含税结算 + MoR 侧发起的退款级联撤销 | 🟡 |
-| **P2** | USDT 多资产 Vault + `doerflow_credit` 支付轨（FR-PAY-020/021） | 链上余额买通一个产品会员；重放 `idempotencyKey` 不二次扣款 | 🟡 |
+| **P2** | USDT 多资产 Vault + `doerflow_credit` 支付轨（FR-PAY-020/021） | 链上余额买通一个产品会员；重放 `idempotencyKey` 不二次扣款 | 🟡 DoerFlow+Entitlement code path ✅ · live PSP/membership buy still ops · USDT 31337 lab ✅ |
 | **P3** | `PAYMENTS_ENABLED` 硬开关 + VistaCast 接入 + 企业开票（FR-PAY-023） | 关开关后 webhook 路由 404 且产品仍可跑 | 🟡 |
 | **P4** | 大陆分站权益断言（FR-GEO-002~005） | 仅 spec + 契约与守卫测试，同步服务不落代码 | ⚪ |
 
@@ -282,12 +287,12 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 ### 4.4 规格产品模型收敛（当前）
 
-| 阶段 | 交付 | 完成条件 |
-|------|------|----------|
-| PM0 规范 | Platform Account / Linked Wallets / Workspaces / Capabilities / Assets；统一结算生命周期与能力状态 | 本轮 spec + docs 同步 |
-| PM1 主壳 | `repos/wallet` 五 Tab：首页/工作/发布/资金/我的；Web IA：Home/Work/Create/Money/Build/Devices/Account | 导航与统一账号上下文可用 |
-| PM2 能力迁移 | worker 大厅、详情、相机/GPS/问卷、社交清单/截图、收益/争议逐项迁入 | 行为、安全、i18n、无障碍测试对等 |
-| PM3 退役 | worker 显示迁移提示，保留两个正式版本与未完成任务兼容后停止发布 | 无活跃任务被截断；下载与深链完成迁移 |
+| 阶段 | 交付 | 完成条件 | 状态 |
+|------|------|----------|------|
+| PM0 规范 | Platform Account / Linked Wallets / Workspaces / Capabilities / Assets；统一结算生命周期与能力状态 | 本轮 spec + docs 同步 | ✅ |
+| PM1 主壳 | `repos/wallet` 五 Tab：首页/工作/发布/资金/我的；Web IA：Home/Work/Create/Money/Build/Devices/Account | 导航与统一账号上下文可用 | ✅ 2026-11-10 |
+| PM2 能力迁移 | worker 大厅、详情、相机/GPS/问卷、社交清单/截图、收益/争议逐项迁入 | 行为、安全、i18n、无障碍测试对等 | ✅ 2026-11-10（wallet 单测）；PM3 代码门闩已接，商店停发未做 |
+| PM3 退役 | worker 横幅展示 `WORKER_MIGRATE_FROM_VERSION` → `WORKER_RETIRE_AFTER_VERSION` 两个正式版本、`doerflow://work` 与下载链接；`WORKER_PUBLISH_DISABLED=1` 时 `pnpm run gate:pm3 -- --publish`、`pack:publish` 与 worker Android 打包失败关闭 | 无活跃任务被截断；代码门闩可阻止再打包；商店下架仍是人工步骤，不删除 `repos/worker` | 代码门闩 ✅ 2026-11-11 · 商店停发 ⚪ |
 
 资金展示统一为 `available/held/pending/withdrawable` 与 `gross/fee/royalty/net`；业务路径禁止直接 credit 或双重结算。能力只用 Available/Beta/Lab/Roadmap；住宅 IP 出租为高风险 Roadmap/未上线。Onramp、Swap、Bridge 仅作为资金工具。
 
@@ -328,7 +333,7 @@ M5b 公开运行    取消邀请制；审计/Bounty 有资金再做；前期不�
 
 ## 7. 进度追踪
 
-**当前阶段: M5a 与产品模型 PM0–PM2 并行**（主网资金仍人工；公开 1.0 见 M5b）
+**当前阶段: M5a 代码层 ✅ · 主网资金 ⚪ · PM0–PM2 ✅（2026-11-10）· PM3 代码门闩 ✅、商店停发 ⚪**（M5b 代码层 ✅ · 主网资金 ⚪）
 
 M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `smoke:m4` AI 验收（2026-08-29）。顺序仍是 **清算底座 → 客户端 → 场景 → 生产闸门**；继续留在 Base Sepolia 打磨，**不伪造主网地址**。
 
@@ -344,7 +349,7 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | Creator 设备 | web **独立** `/devices` **已存在**（见 CLIENTS；不局限于 Payments `LabDevicesCard`） |
 | smart-site 深链 | **主 UI** = web `/ecosystem` Events；**admin + worker 亦**展示人工 `deepLink` Intervene（不自动远控） |
 | 会员 MoR | **仅** LuminaryWorks Entitlement（Polar+Creem+Paddle 适配器均已落地）；DoerFlow **不**自建；`doerflow_credit` = C 轨 |
-| commerce.readiness | UI 统一显示 **Lab**，直至真实 VistaCast/SyncroBrain 对端；兼容 API 可暂保留 `lab` |
+| commerce.readiness | 默认 **Lab**。代码解锁路径 ✅（`COMMERCE_READINESS_UNLOCK=production` 且两端 admission 探针 2xx）；真实对端 ⚪。lab 时 UI 显示 Lab，不显示 Available |
 | FR-SK-002 EAS | **Wave 45 B5**：lab `SkillAttestationRegistry` ✅（非生产 EAS） |
 | FeeTier AA | **Wave 46 lab**：UserOp → `LabSmartAccount` → `settleWithFee` ✅；Base Sepolia 全路径仍开 |
 
@@ -396,9 +401,9 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | M3 客户端完善 | v0.3 | ✅ **AI：`pnpm run smoke:m3`** |
 | M4 赚钱场景落地 | v0.4 | ✅ **AI：`pnpm run smoke:m4`** |
 | **M5 工程 1.0-rc** | **v1.0-rc** | **✅ `pnpm run smoke:m5`** |
-| **M5a 封闭 Beta** | closed-beta | **✅ 工程（白名单/限额/pause/`use:base`/`smoke:vault`）** · ⚪ 主网资金 |
-| M5b / 公开运行 | v1.0 | ⚪ 取消邀请制 · 主网地址页；审计/Bounty 有资金再做 |
-| 支线 MetaDEX | v0.15.x | 🟡 合约进度另计 |
+| **M5a 封闭 Beta** | closed-beta | **代码层 ✅ · 主网资金 ⚪** |
+| M5b / 公开运行 | v1.0 | **代码层 ✅ · 主网资金 ⚪**（取消邀请制 = `COMMERCIAL_MODE=public`；地址页等部署后） |
+| 支线 MetaDEX | v0.15.x | 🟡 localhost swap/lock/vote ✅（`smoke:metadex:local`）· Sepolia 部署路径代码 ✅ · 链上 `84532.metadex` 仍待部署 |
 | **五通道实验室** | **v1.1-channels-lab** | **✅ `pnpm run smoke:channels`（P0–P4）** |
 | **生态商业实验室** | **v1.2-ecosystem-commerce** | **`pnpm run smoke:ecosystem-commerce`**（默认关，未接真实对端） |
 | **部署边界四档 + 探针** | **v0.1-profiles** | **`pnpm run compose:preflight` · `smoke:m5`** |
@@ -440,11 +445,18 @@ M2 实验室验收已通过（2026-08-25）。M3/M4 由 `pnpm run smoke:m3` / `s
 | TB 时间窗入账 | `POST /integrations/syncrobrain/telemetry-credits`；asset↔payee 绑定；Gateway UTC 窗闭合后自动出站（FR-IOT-008） |
 | 回调 | durable outbox |
 | 鉴权 | 生产 M2M+Entitlement+Casbin；`COMMERCE_AUTH_MODE=lab\|off`（生产禁用） |
-| 验收 | `pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`） |
+| 验收 | `pnpm run smoke:ecosystem-commerce`（别名 `smoke:ecosystem`）；对端探针 `pnpm run smoke:peers`（`smoke:ecosystem-commerce -- --peers-check` 先跑同一检查） |
 
 **Creator UI**：web `/ecosystem`（catalog / jobs + Events 深链 Intervene；主 UI）；admin + worker 亦可人工 Intervene。见 [CLIENTS.md](./CLIENTS.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)。
 
-**现状诚实标注**：VistaCast / SyncroBrain 对接是**已实现的工程实验室**，`DEPLOYMENT_PROFILE` 未开时**默认关**；未接真实生产对端。**已定（2026-09-18；Wave 44 B10A 2026-09-22 重申）**：`/capabilities.commerce.readiness` **保持 `lab`** 直至真实 VistaCast / SyncroBrain 对端。
+**代码解锁路径 ✅ · 真实对端 ⚪**
+
+VistaCast / SyncroBrain 对接仍是**已实现的工程实验室**，`DEPLOYMENT_PROFILE` 未开时**默认关**。`/capabilities.commerce.readiness` **默认 `lab`**。只有同时满足下面两条才报 `production`：
+
+1. `COMMERCE_READINESS_UNLOCK=production`（其他值或未设置都保持 `lab`）
+2. 两端 admission 探针都是 HTTP 2xx：VistaCast `GET {VISTACAST_BASE_URL}/ready`（FR-PLT-14；`/health` 只是存活，依赖挂了仍可能 200，不能用来解锁）；SyncroBrain `GET {SYNCROBRAIN_BASE_URL}/api/v1/ready`（`/api/v1/health` 同理只是存活）
+
+任一 URL 缺失、探针非 2xx、超时、或基址是 `host.docker.internal`，readiness 保持 `lab`。`autoRemoteControl` / `autoResolve` 恒 `false`。lab 时产品 UI 显示 **Lab**，不显示 Available。真实生产对端仍未接通。
 
 ---
 
@@ -477,7 +489,7 @@ Creator UI 同 §9（web `/ecosystem` catalog）。Creator 设备注册/收益�
 | 控制台 | web `/developers`：发 Key、注册 Skill、轮换 webhook、看流水 |
 | Python 闭环 | `authorize_session` + `pay_quote` 与 TS EIP-712 字节一致 |
 | 发布面 | `@vibe-agent/shared` / `doerflow` 可 dry-run pack；**不代发 npm/PyPI** |
-| 主网 | 地址只由部署脚本写入；AI 禁止填 `"8453"` |
+| 主网 | 地址只由 `deploy:base` 回执写入；`deploy:base:check` 不写 `"8453"`；AI 禁止填假地址 |
 
 生产默认仍是 M2M + Entitlement + Casbin；`NODE_ENV=production` 下 `COMMERCE_AUTH_MODE=lab\|off` 启动即失败。API Key 是第三条生产路径，不是实验室后门。
 

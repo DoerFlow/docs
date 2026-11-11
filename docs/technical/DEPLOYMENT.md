@@ -17,7 +17,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 1. **可独立**：`standalone` 档位不需要 Logto / Entitlement / 兄弟产品即可跑通任务、账本、Merkle、链上 Escrow。
 2. **不静默匿名**：任何档位、任何 `ENTITLEMENT_MODE`，写路径都必须有已验证主体（SIWE / 平台 JWT / M2M）。「关掉 Entitlement」**不等于**「关掉 AuthN」。
 3. **生产平台档位**：面向多租户公开收款的托管平台必须开 **AuthN（Logto/M2M）+ Entitlement + Casbin**，钱包证明单独走 **SIWE**（双轨，见 §4）。
-4. **诚实标注**：`agent-commerce` / `smart-site` 的兄弟产品对接目前是 **已实现的工程实验室**，默认 **关**；未接真实 VistaCast / SyncroBrain 对端前产品状态为 **Lab**。兼容 API 可保持 `commerce.readiness=lab`，不得在 UI/文档显示 Available。
+4. **诚实标注**：`agent-commerce` / `smart-site` 的兄弟产品对接目前是 **已实现的工程实验室**，默认 **关**。`commerce.readiness` 默认 **`lab`**。代码解锁路径已落地，真实对端仍未接通：只有 `COMMERCE_READINESS_UNLOCK=production` 且 VistaCast / SyncroBrain admission 探针都成功才报 `production`。lab 时 UI/文档不得显示 Available。
 5. **会员 / MoR**：只经 **LuminaryWorks Entitlement**（统一）。DoerFlow **不**自建 Creem / Polar / Paddle 适配器或 checkout。
 
 ---
@@ -202,7 +202,7 @@ Creator 开发者控制台 web `/developers` 需平台登录；API Key CRUD 打 
   },
   "entitlement": { "mode": "off", "controlPlane": null },
   "authz": { "casbin": true },
-  "commerce": { "authMode": "lab", "readiness": "lab" },
+  "commerce": { "authMode": "lab", "readiness": "lab" },  // production 仅在对端探针通过且 unlock 打开时
   "integrations": {
     "inbound": [],                  // 档位未开时为空数组，不列「计划支持」
     "outbound": [],
@@ -227,6 +227,19 @@ Creator 开发者控制台 web `/developers` 需平台登录；API Key CRUD 打 
 | `anonymousWrites` 恒 `false` | 不可配置成 true |
 
 `manifestHash` = manifest 规范化 JSON 的 SHA-256 前 16 位；客户端与 smoke 用它判断对端配置是否变化。
+
+### 5.2 `commerce.readiness` 解锁（fail-closed）
+
+默认 `lab`。`capabilityManifest()` 在没有 `peersVerified` 时忽略调用方传入的 `"production"`。`GET /version` 与 `GET /capabilities` 在应答前探测；对端挂了不会阻止进程启动，只是继续报 `lab`。
+
+| 条件 | 结果 |
+|---|---|
+| `COMMERCE_READINESS_UNLOCK` 未设置，或不是 `production` | `lab`（不发探针） |
+| `VISTACAST_BASE_URL` 或 `SYNCROBRAIN_BASE_URL` 缺失、非法、或含 `host.docker.internal` | `lab` |
+| VistaCast `GET {base}/ready` 或 SyncroBrain `GET {base}/api/v1/ready` 非 2xx / 超时 / 网络失败 | `lab` |
+| 解锁值为 `production` 且两端都是 HTTP 2xx | `production` |
+
+路径来自各产品已发布的 **admission** 探针，不是存活探针：VistaCast `/health` 与 SyncroBrain `/api/v1/health` 在必需依赖挂掉时仍可能 200。可选覆盖 `VISTACAST_HEALTH_PATH` / `SYNCROBRAIN_HEALTH_PATH`（必须是站内绝对路径）。超时 `COMMERCE_PEER_PROBE_TIMEOUT_MS`（默认 2000）。`autoRemoteControl` 与 `autoResolve` 不随 readiness 变化，恒 `false`。验收：`pnpm run smoke:peers`。
 
 ---
 

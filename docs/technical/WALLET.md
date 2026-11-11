@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 统一 DoerFlow App 规格（React Native 主壳）
 
-**版本**: v0.3-draft · **最后更新**: 2026-10-10
+**版本**: v0.3-draft · **最后更新**: 2026-11-11
 **仓库**: `repos/wallet` → `AgentSkillMesh/wallet`（私有）
 
 ---
@@ -36,7 +36,7 @@ Creator `/ecosystem` 合作方 catalog UI 仍留在 Web。社交任务仍禁止�
 | **资金** | 余额四态、流水、Vault、Onramp/Swap/Bridge |
 | **我的** | Platform Account、Linked Wallets、Workspaces、Capabilities、安全与无障碍设置 |
 
-`repos/worker` 在迁移期继续承载既有接单/证据功能。新产品面只进入本 App；能力对等后旧 worker 保留两个正式版本迁移窗口再退役。迁移期间允许同一账号在两个 App 登录，但同一任务动作仍须服务端幂等与 Casbin 裁决。
+`repos/worker` 在迁移期继续承载既有接单/证据功能。新产品面只进入本 App；能力对等后旧 worker 保留两个正式版本迁移窗口再退役。窗口由 worker `src/config/migration.ts` 标出：`WORKER_MIGRATE_FROM_VERSION` 到 `WORKER_RETIRE_AFTER_VERSION`，深链 `doerflow://work`。停止再发 worker 包须设 `WORKER_PUBLISH_DISABLED=1`（`pnpm run gate:pm3`）；商店下架不在该门闩内，也不删除 worker 仓库。已安装的旧 App 仍可完成未结束任务。迁移期间允许同一账号在两个 App 登录，但同一任务动作仍须服务端幂等与 Casbin 裁决。
 
 ## 3. 功能需求
 
@@ -142,7 +142,7 @@ React Native · Expo · expo-router · viem · Biome · 依赖 `api` 任务治�
 |------|------|
 | v0.3 | 历史钱包 + 发任务能力；统一 App 五 Tab 主壳与账户/Workspace/能力模型 |
 | v0.4 | 渐进吸收 worker 大厅、详情、相机/GPS/问卷、社交清单与证据；WalletConnect、账单导出 |
-| 后续两个正式版本 | worker 只做兼容/安全修复、迁移提示与深链；完成后退役 |
+| 后续两个正式版本 | worker 只做兼容/安全修复、迁移提示与深链；`WORKER_PUBLISH_DISABLED` 代码门闩已接，商店停发仍待人工 |
 | v0.7 | Agent L2 原生桥 UI + 入金向导 |
 
 ---

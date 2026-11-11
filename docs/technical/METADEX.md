@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # MetaDEX · 轻量 ve 模型 DEX
 
-**版本**: v0.1-draft · **最后更新**: 2026-11-10  
+**版本**: v0.1-draft · **最后更新**: 2026-11-11  
 **关联**: [CLIENTS.md](./CLIENTS.md)  
 **路线图**: v0.15（**合约优先**，见 [ROADMAP.md](./ROADMAP.md) § M1b）  
 **合约计划**: [METADEX_CONTRACTS.md](./METADEX_CONTRACTS.md) ← **当前实施入口**  
@@ -107,11 +107,11 @@ LP Token ──lock──▶ veNFT ──vote──▶ Gauge 权重
 
 - [x] Factory / Pair / Router 单测通过
 - [x] VotingEscrow / Voter / Gauge 单测通过
-- [ ] Base Sepolia 部署 + `deployments.json`（当前仅 localhost `31337.metadex`；禁止填假 Sepolia 地址）
+- [ ] Base Sepolia 部署 + `deployments.json`（当前仅 localhost `31337.metadex`；禁止填假 Sepolia 地址）。部署路径代码 ✅：`deploy:metadex:sepolia` 与 localhost 共用 CREATE 碰撞守卫，真实部署且链 ID 为 84532 之后才写入 api 与 web 的 `84532.metadex`。`pnpm run smoke:metadex:sepolia -- --check` 在没有 `DEPLOYER_PRIVATE_KEY` 或没有 `84532.metadex` 时失败，并保持 deployments 不变
 - [x] 集成测试：Add LP → Swap → Lock → Vote
 - [x] `export-abi` 可供 shared/api 使用
 
-Hardhat 单测：`repos/contracts/test/metadex/Router.test.ts`、`VotingEscrow.test.ts`、`integration.test.ts` 已通过。`pnpm run smoke:metadex:local -- --unit` 在进程内跑集成测试，并检查部署合并不会把 MetaDEX 地址写成 SkillRegistry（无节点时的覆盖）。`pnpm run smoke:metadex:local -- --live` 只连接 `http://127.0.0.1:8545`：节点没起来就失败并写明先 `deploy:mvp` 再 `deploy:metadex`；节点在则断言 `eth_getCode(31337.metadex.router)` 是 MetaRouter 而不是 SkillRegistry，再挖 swap、`createLockForToken`、vote。不带参数时，节点可用走 live，节点未起则说明原因并回落 `--unit`（回落不算挖出回执）。同一 Hardhat 进程里必须先身份、后 MetaDEX，否则 CREATE nonce 会复用 AgentNFT / SkillRegistry。`pnpm run smoke:m5` 只确认包装脚本在，不跑 Hardhat。`export-abi.ts` 含 MetaFactory/Pair/Router/VotingEscrow/Voter/Gauge；`repos/api/src/abis/` 已有对应 JSON。Base Sepolia MetaDEX **未**部署，禁止填写 `84532.metadex`。  
+Hardhat 单测：`repos/contracts/test/metadex/Router.test.ts`、`VotingEscrow.test.ts`、`integration.test.ts` 已通过。`pnpm run smoke:metadex:local -- --unit` 在进程内跑集成测试，并检查部署合并不会把 MetaDEX 地址写成 SkillRegistry（无节点时的覆盖）。`pnpm run smoke:metadex:local -- --live` 只连接 `http://127.0.0.1:8545`：节点没起来就失败并写明先 `deploy:mvp` 再 `deploy:metadex`；节点在则断言 `eth_getCode(31337.metadex.router)` 是 MetaRouter 而不是 SkillRegistry，再挖 swap、`createLockForToken`、vote。不带参数时，节点可用走 live，节点未起则说明原因并回落 `--unit`（回落不算挖出回执）。同一 Hardhat 进程里必须先身份、后 MetaDEX，否则 CREATE nonce 会复用 AgentNFT / SkillRegistry。`pnpm run smoke:m5` 只确认包装脚本在，不跑 Hardhat。`export-abi.ts` 含 MetaFactory/Pair/Router/VotingEscrow/Voter/Gauge；`repos/api/src/abis/` 已有对应 JSON。Base Sepolia MetaDEX **未**部署，禁止填写 `84532.metadex`。部署路径代码 ✅（2026-11-11）：`script/deploy-metadex.ts` 在 `baseSepolia` 上先检查 `DEPLOYER_PRIVATE_KEY`，再跑与 localhost 相同的 `assertMetaDexDeployWillNotCollide`，`deployMetaDex` 返回且链 ID 为 84532 之后才 `persistMetaDex` 到 api、web 与 contracts `deployments`。`pnpm run smoke:metadex:sepolia -- --check` 核对这段脚本和 Hardhat `baseSepolia`（chainId 84532）；缺钥或缺 `84532.metadex` 时失败。`--live` 只在这三份 deployments 里已有同一条真实 `84532.metadex` 且 RPC 为 84532 时核对 router 字节码，有钥且有 gas 时再挖 swap、lock、vote。本机没有合约钥，`84532.metadex` 仍为空，Sepolia 部署框继续打开。`smoke:metadex:local` 只在 `84532.metadex.router` 与本机 MetaDEX 或身份合约同地址时失败。  
 
 ### Phase B/C — api & web（v0.15.1–.2）
 
@@ -119,7 +119,7 @@ Hardhat 单测：`repos/contracts/test/metadex/Router.test.ts`、`VotingEscrow.t
 - [x] web Swap 页完成一笔 Swap  
 - [x] Lock LP → ve → 投 1 个 Gauge  
 
-Phase C lab（web `/dex`）：quote/pools UI 已落地。Swap CTA 在 `health.router` 为 0x、已报价且钱包已连接时调用 `swapExactTokensForTokens`（先 ERC-20 approve）。Lock/Vote 在 `GET /dex/gauges` 返回真实 VotingEscrow/Voter 且已填金额/tokenId/gauge 时调用 `createLockForToken` / `vote`（权重 100，与合约集成测试一致）。2026-11-10 在 localhost Hardhat（31337，先 `deploy:mvp` 再 `deploy:metadex`）由 `pnpm run smoke:metadex:local -- --live` 挖出回执：`swapExactTokensForTokens` `0xe11495a44fcfd7be2f5756f76c22d48d8d815254ffee627074fffc80c96abde2`，`createLockForToken` `0xa26c27cff8a1ae4e452d7d02126f160239b119ca1675c7bf384334d635f67f96`（ve tokenId 1），`vote` `0xe000cd9c947bdf59c1a220d26dd15f16775c36c8f792690054ede7966a2d369a`。当时 router `0x5FC8d32690cc91D4c39d9d3abcBD16989F875707` 的 `eth_getCode` 为 MetaRouter，与 SkillRegistry `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512` 不是同一地址。证据是该节点上的回执，不是浏览器里点击 `/dex`。Base Sepolia 部署框仍打开。  
+Phase C lab（web `/dex`）：quote/pools UI 已落地。Swap CTA 在 `health.router` 为 0x、已报价且钱包已连接时调用 `swapExactTokensForTokens`（先 ERC-20 approve）。Lock/Vote 在 `GET /dex/gauges` 返回真实 VotingEscrow/Voter 且已填金额/tokenId/gauge 时调用 `createLockForToken` / `vote`（权重 100，与合约集成测试一致）。2026-11-10 在 localhost Hardhat（31337，先 `deploy:mvp` 再 `deploy:metadex`）由 `pnpm run smoke:metadex:local -- --live` 挖出回执：`swapExactTokensForTokens` `0xe11495a44fcfd7be2f5756f76c22d48d8d815254ffee627074fffc80c96abde2`，`createLockForToken` `0xa26c27cff8a1ae4e452d7d02126f160239b119ca1675c7bf384334d635f67f96`（ve tokenId 1），`vote` `0xe000cd9c947bdf59c1a220d26dd15f16775c36c8f792690054ede7966a2d369a`。当时 router `0x5FC8d32690cc91D4c39d9d3abcBD16989F875707` 的 `eth_getCode` 为 MetaRouter，与 SkillRegistry `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512` 不是同一地址。证据是该节点上的回执，不是浏览器里点击 `/dex`。Base Sepolia 部署框仍打开。部署路径代码 ✅，链上 `84532.metadex` 仍空。  
 
 ### Phase D — 分析（可选）
 

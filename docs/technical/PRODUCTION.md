@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 生产就绪（M5 工程闸门）
 
-**版本**: v1.0-rc · **最后更新**: 2026-09-17  
+**版本**: v1.0-rc · **最后更新**: 2026-11-11  
 **关联**: [ROADMAP.md](./ROADMAP.md) · [DEPLOYMENT.md](./DEPLOYMENT.md) · [ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md) · [COMMERCIAL.md](./COMMERCIAL.md) · [ONRAMP.md](./ONRAMP.md)
 
 本文件是 **AI 可自动验收** 的生产工程清单。  
@@ -81,12 +81,14 @@ Hardhat 网络 `base`（chainId **8453**）。部署顺序与 Sepolia 相同：A
 | **operator**（热钥） | `SETTLER_OPERATOR_KEY`（api 进程） | 仅 `commitRoot` / `settleNetBatch` / Batcher；**不**持有升级/换钥权 |
 | **minDelay** | `GOVERNANCE_MIN_DELAY` | 主网默认 **2 天**（172800）；测试网可 1s |
 
-1. 设置 `DEPLOYER_PRIVATE_KEY` 与主网 `RPC_URL`（不得写入 Git）  
-2. 设置 `GOVERNANCE=1`、`GOVERNANCE_SIGNERS`（逗号分隔）、`GOVERNANCE_THRESHOLD`、`GOVERNANCE_MIN_DELAY`  
-3. `pnpm --dir repos/contracts compile`  
-4. 人工确认余额与 **multisig 签名人** 后再 `deploy`（chainId 8453 默认开启治理）  
-5. `export-abi` → 写入 `repos/api/deployments.json` 的 `"8453"` 键  
-6. 公开披露地址（docs + `/payments/disclosure`），含 Timelock / Multisig
+1. 设置 `DEPLOYER_PRIVATE_KEY`（禁止 Hardhat/Anvil 公开钥）与主网 `RPC_URL`（不得写入 Git）  
+2. 设置 `GOVERNANCE=1`、`GOVERNANCE_SIGNERS`（至少 2 个不同地址）、`GOVERNANCE_THRESHOLD`（≥ 2）、`GOVERNANCE_MIN_DELAY`（≥ 172800）。`8453` 上 `GOVERNANCE=0` 直接失败，不会退回部署者单钥  
+3. 设置 `COMMERCIAL_MODE=beta` 或 `public`（`off` 在 8453 失败）。`VAULT_ASSET` 留空或等于 Base 原生 USDC；禁止 MockERC20  
+4. `pnpm --dir repos/contracts deploy:base:check`（缺项即失败；**不广播、不写** `deployments.json`）  
+5. `pnpm --dir repos/contracts compile`  
+6. 人工确认余额与 **multisig 签名人** 后再 `pnpm --dir repos/contracts deploy:base`（只在 chainId 8453 广播）  
+7. 部署脚本把链上回执写入 `repos/api/deployments.json` 的 `"8453"` 键（禁止手填、禁止占位地址）  
+8. 公开披露地址（docs + `/payments/disclosure`），含 Timelock / Multisig
 
 **当前**：Base Sepolia 已部署（见 ROADMAP）；Base Mainnet 地址在资金到位并真实部署前 **不得填写伪造地址**。封闭 Beta 也必须是真地址。
 
@@ -94,13 +96,14 @@ Hardhat 网络 `base`（chainId **8453**）。部署顺序与 Sepolia 相同：A
 
 准备：Base ETH（部署 + operator gas）、multisig 2–3 签名人、生产域名/TLS、Logto 生产租户、VPS 或同等主机、受邀地址列表。
 
-1. `GOVERNANCE=1` `VAULT_ASSET=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` 部署核心合约 + Vault + Settler + Netting/Batcher  
-2. 把真实地址写入 `repos/api/deployments.json` 的 `"8453"`（含 `vault.asset`）  
-3. `pnpm run use:base`（缺 8453 则失败）  
-4. 复制 `deploy/production.env.example` → `deploy/env/api.env`：`COMMERCIAL_MODE=beta`、白名单、限额、`INDEXER_ROLE=http`、`DEPLOYMENT_PROFILE`、`COMMERCE_AUTH_MODE=production`；再按 `deploy/env/*.example` 填 `indexer.env` / `db.env`（口令只在 db.env）  
-5. `docker compose -f deploy/docker-compose.core.yml -f deploy/docker-compose.prod.yml up -d`（API + indexer + Postgres + Redis；DB **不**映射宿主端口）。托管 DB 用 `-f deploy/docker-compose.external-db.yml`；控制面档位再叠 `-f deploy/docker-compose.control-plane.yml`  
-6. `pnpm run compose:preflight` 绿灯（无 `container_name` / `host.docker.internal`、生产 DB 未暴露、API/Web/Admin 默认绑 `127.0.0.1`；见 [DEPLOYMENT.md](./DEPLOYMENT.md) §3.1）  
-7. 白名单钱包小额 Vault 充值 / Escrow 锁定 → 再请受邀用户  
+1. 导出 `DEPLOYER_PRIVATE_KEY`、`GOVERNANCE=1`、至少 2 个 `GOVERNANCE_SIGNERS`、`GOVERNANCE_THRESHOLD`（≥ 2）、`GOVERNANCE_MIN_DELAY`（≥ 172800）、`COMMERCIAL_MODE=beta`。`VAULT_ASSET` 留空或设为 `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`  
+2. `pnpm --dir repos/contracts deploy:base:check`（失败则停；不广播、不写地址）  
+3. 人工确认余额与签名人后 `pnpm --dir repos/contracts deploy:base`。脚本把回执写入 `repos/api/deployments.json` 的 `"8453"`（含 `vault.asset`）。禁止手填  
+4. `pnpm run use:base`（缺 8453、占位地址或非原生 USDC 则失败，且不改 `.env`）  
+5. 复制 `deploy/production.env.example` → `deploy/env/api.env`：`COMMERCIAL_MODE=beta`、白名单、限额、`INDEXER_ROLE=http`、`DEPLOYMENT_PROFILE`、`COMMERCE_AUTH_MODE=production`；再按 `deploy/env/*.example` 填 `indexer.env` / `db.env`（口令只在 db.env）  
+6. `docker compose -f deploy/docker-compose.core.yml -f deploy/docker-compose.prod.yml up -d`（API + indexer + Postgres + Redis；DB **不**映射宿主端口）。托管 DB 用 `-f deploy/docker-compose.external-db.yml`；控制面档位再叠 `-f deploy/docker-compose.control-plane.yml`  
+7. `pnpm run compose:preflight` 绿灯（无 `container_name` / `host.docker.internal`、生产 DB 未暴露、API/Web/Admin 默认绑 `127.0.0.1`；见 [DEPLOYMENT.md](./DEPLOYMENT.md) §3.1）  
+8. 白名单钱包小额 Vault 充值 / Escrow 锁定 → 再请受邀用户  
 
 `pnpm run smoke:vault` 须在 **Sepolia** 先绿灯（deposit → snapshot/`commitRoot` → `forceWithdraw`）。
 
@@ -155,6 +158,8 @@ Hardhat 网络 `base`（chainId **8453**）。部署顺序与 Sepolia 相同：A
 pnpm run compose:config     # 四种 overlay 组合的 docker compose config 语法校验
 pnpm run compose:preflight  # Compose 硬约束静态断言（含 API/Web/Admin loopback bind；无需 Docker 守护进程）
 pnpm run smoke:m5
+pnpm run smoke:mainnet:check   # 8453 代码层：不广播、不写地址
+pnpm --dir repos/contracts deploy:base:check   # 缺配置则失败；有配置也不广播
 pnpm run smoke:vault   # Sepolia；需测试 ETH / Mock USDC 与 operator 钥
 ```
 
@@ -172,14 +177,17 @@ pnpm run smoke:vault   # Sepolia；需测试 ETH / Mock USDC 与 operator 钥
 - [x] web `/payments` 与雇佣页展示未审计封闭测试文案（限额 / 白名单 / pause；**不**反复展示不予赔付）
 - [x] 不予赔付仅出现在文档 `legal/terms` 与注册/登录勾选协议
 - [x] `GET /payments/disclosure` 含 `commercialMode`、`unaudited`、`compensationPolicy`/`noCompensation`、限额
-- [x] `pnpm run use:base` 在无 `"8453"` 时失败
+- [x] `pnpm run use:base` 在无 `"8453"` 时失败，且不改 `.env`
+- [x] `pnpm run smoke:mainnet:check`：无占位 `"8453"`、8453 拒绝 MockERC20、`COMMERCIAL_MODE=off` 在 8453 被拒绝
+- [x] `pnpm --dir repos/contracts deploy:base:check` 只校验配置，不广播、不写入 `deployments.json`
+- [ ] 人类已广播 `pnpm --dir repos/contracts deploy:base`（资金与签名人到位后再做；AI 不勾）
 - [ ] 未填写伪造主网地址（`deployments.json` 当前无 `"8453"`；真人确认后才可勾。禁止填假地址）
 - [x] `/ready` 降级返回 **503**，`/live` 仍 200
 - [x] `/version` 的 `profile` 与实际 `DEPLOYMENT_PROFILE` 一致；`/capabilities` 未开档位的 `integrations.inbound` 为空
 - [x] `COMMERCE_AUTH_MODE=production`；`lab`/`off` 在 `NODE_ENV=production` 下启动失败
 - [x] 生产 compose 的 `postgres` / `redis` 无 `ports:`；无 `container_name` / `host.docker.internal`
 
-工程闸门证据（非托管 live）：`pnpm run smoke:m5` → `scripts/m5-production-gate.mjs`（探针 503/200、`/version` profile+manifestHash、disclosure 字段、`autoRemoteControl`/`autoResolve` 恒 false、compose preflight、无 `"8453"` 时不伪造）；`compose:preflight`；`use-chain.mjs` `ensureBaseProfiles`；`commercial-config.spec.ts`；`commercial.service.spec.ts`（`COMMERCIAL_NOT_ALLOWLISTED` / `COMMERCIAL_CAP_EXCEEDED` / `PAYMENTS_PAUSED`）；`deployment-profile.spec.ts`；`probe.controller.spec.ts`；`PaymentVault.t.ts`（`pause()` 拦 deposit、`forceWithdraw` 仍可用）。web `CommercialBanner` 在 `/payments` 与雇佣页展示未审计/限额/白名单/pause，不展示不予赔付；不予赔付在 `repos/docs/docs/legal/terms.md` 与 web `/login`、wallet、worker 勾选协议。  
+工程闸门证据（非托管 live）：`pnpm run smoke:m5` → `scripts/m5-production-gate.mjs`（探针 503/200、`/version` profile+manifestHash、disclosure 字段、`autoRemoteControl`/`autoResolve` 恒 false、compose preflight、并调用 `smoke:mainnet:check`）；`scripts/mainnet-funds-check.mjs`（无占位 `"8453"`、`use:base` 失败关闭、拒绝 MockERC20、`COMMERCIAL_MODE=off`）；`repos/contracts/script/deploy-base-check.mjs`（不广播）；`compose:preflight`；`use-chain.mjs` `ensureBaseProfiles`；`commercial-config.spec.ts`；`commercial.service.spec.ts`（`COMMERCIAL_NOT_ALLOWLISTED` / `COMMERCIAL_CAP_EXCEEDED` / `PAYMENTS_PAUSED`）；`deployment-profile.spec.ts`；`probe.controller.spec.ts`；`PaymentVault.t.ts`（`pause()` 拦 deposit、`forceWithdraw` 仍可用）。web `CommercialBanner` 在 `/payments` 与雇佣页展示未审计/限额/白名单/pause，不展示不予赔付；不予赔付在 `repos/docs/docs/legal/terms.md` 与 web `/login`、wallet、worker 勾选协议。  
 
 公开收款与审计包见 [COMMERCIAL.md](./COMMERCIAL.md)（M5b）。
 

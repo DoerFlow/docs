@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 客户端与平台总览
 
-**版本**: v0.3-draft · **最后更新**: 2026-10-07
+**版本**: v0.3-draft · **最后更新**: 2026-11-11
 
 ## 1. 产品矩阵
 
@@ -36,7 +36,9 @@ flowchart TB
 
 ### Android 分发（sideload）
 
-迁移期 **wallet** / **worker** 均以 Android sideload APK 安装，**不上架 Play Store**。`DoerFlow-App.apk` 是统一 DoerFlow App 的主分发产物；`DoerFlow-Wallet.apk` 作为同一主产物的兼容别名至少保留两个正式版本，`DoerFlow-Worker.apk` 同期保留旧接单流程与迁移提示。MetaRepo `pnpm pack:publish` 发布到 `DoerFlow/downloads`。统一 App 达到旧 worker 能力对等后，旧 worker 至少保留两个正式版本的迁移提示、配置 scheme 深链与数据导出/重连说明，再停止发布。
+迁移期 **wallet** / **worker** 均以 Android sideload APK 安装，**不上架 Play Store**。`DoerFlow-App.apk` 是统一 DoerFlow App 的主分发产物；`DoerFlow-Wallet.apk` 作为同一主产物的兼容别名至少保留两个正式版本，`DoerFlow-Worker.apk` 同期保留旧接单流程与迁移提示。MetaRepo `pnpm pack:publish` 发布到 `DoerFlow/downloads`。统一 App 达到旧 worker 能力对等后，旧 worker 至少保留两个正式版本的迁移提示、`doerflow://work` 与下载链接，再停止发布。
+
+代码门闩（商店停发仍未做）：`pnpm run gate:pm3` 核对上述两个正式版本清单。窗口边界是 `WORKER_MIGRATE_FROM_VERSION` 与 `WORKER_RETIRE_AFTER_VERSION`。`WORKER_PUBLISH_DISABLED=1` 时 `pack:publish` 与 worker Android 打包失败关闭。该开关不删除 `repos/worker`，也不代为从商店下架。横幅在窗口关闭后仍声明未完成任务不会被截断。
 
 ## 2. 任务受众与类型
 
@@ -87,12 +89,12 @@ flowchart TB
 - **web**：平台 Logto 会话、钱包连接、SIWE 会话分别展示；显示钱包链接状态、会员快照、Pro / Ultra / Enterprise 与配额。公开市场和钱包直签保持可用。Creator DApp 用户可见文案走 en + zh-CN locale。
 - **web IA**：主导航固定为 **Home / Work / Create / Money / Build / Devices / Account**。Home 可浏览市场；Work 浏览可接任务与管理执行；Create 发布/管理任务和 Agent/Skill；Money 聚合余额四态与资金工具；Build 承载开发者能力；Devices 管理 Endpoint/IoT Assets；Account 管理 Platform Account、Workspace、Linked Wallets 与 Capabilities。
 - **web 任务边界**：Web 可浏览、发布与管理任务，也可完成纯 Web 证据流程；相机、GPS、系统分享、社交目标 App 等原生证据步骤必须显示“在 DoerFlow App 继续”，不得伪造为 Web 已采集。
-- **web Home / market**：可展示 `/capabilities` 的 profile Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 commerce readiness Tag（归一化为 Available/Beta/Lab/Roadmap），用于本地 DX 的只读诊断。加载失败 Alert 可 Retry（`market.retry`）。
+- **web Home / market**：可展示 `/capabilities` 的 profile Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 commerce readiness Tag（API `production` → Available，其余 → Lab），用于本地 DX 的只读诊断。加载失败 Alert 可 Retry（`market.retry`）。
 - **web `/login`**：`HeadlessLoginPanel` 可经 `@luminaryworks/auth-react` Experience API 暴露注册（`showRegister`）；仍为 Logto 平台账号，**不是**钱包注册。
 - **admin `/login`**：本地默认 `NEXT_PUBLIC_ADMIN_LOGIN_MODE=headless`（无 MFA）。生产强制 MFA 时用 `hosted` + Logto Hosted。测试：`pnpm e2e:admin:mfa`（临时 Mandatory，结束后恢复）。Headless MFA **阻塞于** auth-react；禁止自造 MFA UI。见 [ADMIN.md](./ADMIN.md)。
 - **web `/account`**：可展示 `/capabilities` 的 profile Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 entitlement.mode Tag（`/capabilities.entitlement.mode`），诊断语义与 `/membership` 相同。会员加载失败时 membership Down Alert 提供 Retry（`account.retry`）。会员卡片链到 `/developers`。
 - **web `/membership`**：走 `/platform/commerce/*`；需 `DEPLOYMENT_PROFILE=control-plane`、`ENTITLEMENT_MODE=enforce`、Entitlement `:3040`。standalone 下 commerce **503**。页面可展示部署档位 Tag（`/capabilities.profile`，与 `/version.profile` 相同）与 entitlement.mode Tag（`/capabilities.entitlement.mode`），用于说明 control-plane / entitlement 关闭时 commerce BFF **503**。catalog / offerings 失败（**503** / `ENTITLEMENT_SERVICE_UNAVAILABLE`）时 web 展示 `membership.commerceUnavailable` Alert，而非空结算页；commerceUnavailable / catalog 加载失败可 Retry（`membership.retry`）。全局 `AccessErrorBanner` 亦会展示拦截器 `resolveAccessError` 将其标为 `kind: error`（与会员页 Alert 并存）。**会员 / MoR 只经 LuminaryWorks Entitlement（统一）**；DoerFlow **不**自建 Creem / Polar / Paddle 或其它 MoR checkout。**Lab tip**：Sepolia Vault 充值并同步账本后，Entitlement 若返回 `doerflow_credit`，web 会原样展示并走 `ledger_debit`（见 [PAYMENT_ARCHITECTURE.md](./PAYMENT_ARCHITECTURE.md) §3）；不另建 MoR。见 [DEPLOYMENT.md](./DEPLOYMENT.md) §4.1.1、[ONBOARDING.md](../ONBOARDING.md)。
-- **web `/ecosystem`**：只读 catalog / jobs。catalog 加载失败与 jobs 加载 `error`（非 auth/tenant）均展示 Retry 操作（`ecosystem.retry`）。Profile Tag 来自 `/capabilities.profile`（与 `/version.profile` 相同）；commerce readiness Tag 归一化显示 Available/Beta/Lab/Roadmap（兼容 API `lab|production`）；catalog 行 readiness Tag 同样归一化。部署档位低于 `agent-commerce` 时展示 `ecosystem.labHint` Alert。未登录或无租户为空态。另有 Events 卡：`GET /integrations/events`；有 `remoteIntervention.deepLink` 时 Intervene（人工打开）。**主 UI** 可为本页；**admin + 迁移期 worker 亦**展示同语义人工 Intervene（不自动远控）。**不是**生产合作方控制台。见 [SMART_SITE.md](./SMART_SITE.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)。
+- **web `/ecosystem`**：只读 catalog / jobs。catalog 加载失败与 jobs 加载 `error`（非 auth/tenant）均展示 Retry 操作（`ecosystem.retry`）。Profile Tag 来自 `/capabilities.profile`（与 `/version.profile` 相同）；commerce readiness Tag 在 API 为 `production` 时显示 Available，其余（含 `lab`）显示 Lab。catalog 行同样归一化，且 host 不是 `production` 时不得把 skill 标成 Available。部署档位低于 `agent-commerce` 时展示 `ecosystem.labHint` Alert。未登录或无租户为空态。另有 Events 卡：`GET /integrations/events`；有 `remoteIntervention.deepLink` 时 Intervene（人工打开）。**主 UI** 可为本页；**admin + 迁移期 worker 亦**展示同语义人工 Intervene（不自动远控）。**不是**生产合作方控制台。见 [SMART_SITE.md](./SMART_SITE.md) · [ECOSYSTEM.md](./ECOSYSTEM.md)。
 - **web `/devices`**：Creator **独立**设备注册 / 收益页（HTTP `GET /devices`、`POST /devices/register`；收益用既有账本展示）。**已存在**（Wave 44 B7B；不局限于 Payments `LabDevicesCard`）。**不是**链上 DeviceRegistry。见 [IOT.md](./IOT.md)。
 - **web `/developers`**：Creator / 开发者控制台。需平台登录。自助 API Key、HTTP Skill 注册、作业/收据只读表。me/keys/skills/jobs/receipts 加载失败均展示 Retry 操作（`developers.retry`）。可展示 `/capabilities` 的 profile Tag 与归一化的 Available/Beta/Lab/Roadmap commerce Tag，用于本地 DX 的只读诊断。**不是** admin。见 [DEVELOPER.md](./DEVELOPER.md)。
 - **web `/dex`**：加载失败展示 Retry 操作（`dex.retry`）。

@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # MetaDEX 合约实现计划（合约优先）
 
-**版本**: v0.1-draft · **最后更新**: 2024-10-10  
+**版本**: v0.1-draft · **最后更新**: 2026-11-11  
 **产品**: [METADEX.md](./METADEX.md) · **排期**: [ROADMAP.md](./ROADMAP.md) § M1b
 
 ## 1. 原则：合约是核心
@@ -69,7 +69,7 @@ script/
 |---|--------|------|
 | A1 | `Factory` + `Pair` + `Router` | Hardhat 单测：创建 Pool、Swap、Add/Remove LP |
 | A2 | `VotingEscrow` + `Voter` + `Gauge` | 单测：Lock LP → ve 余额 → 投票权重 |
-| A3 | 部署脚本 `deploy-metadex` | localhost + **Base Sepolia** 可重复部署 |
+| A3 | 部署脚本 `deploy-metadex` | localhost 可重复部署 ✅。Base Sepolia 部署路径代码 ✅（`deploy:metadex:sepolia`，碰撞守卫与 localhost 相同）。链上 `84532.metadex` 仍待真实部署 |
 | A4 | `export-abi` 写入 shared | api/web 可 import ABI + 地址 |
 | A5 | ≥2 个稳定/蓝筹 Pool 初始化 | 例：USDC/WETH、USDC/USDbC（测试网 Mock 或官方测试代币） |
 | A6 | 集成测试 `integration.t.sol` | 完整路径：Add LP → Swap → Lock → Vote |
@@ -106,7 +106,7 @@ script/
 
 ## 8. 部署与配置
 
-`deployments.json` 示例键：
+`deployments.json` 示例键（形状说明，不是已部署地址。`84532.metadex` 只由 `deploy-metadex.ts` 在 Base Sepolia 上 `waitForDeployment` 之后写入）：
 
 ```json
 {

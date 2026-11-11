@@ -109,7 +109,7 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 
 - **`standalone`**：不需要 Logto / Entitlement / 兄弟产品。`ENTITLEMENT_MODE` 可为 `off` 或 `offline_license`，但 **AuthN 不静默匿名**——写路径始终要求 SIWE 或平台 JWT。
 - **生产托管平台**（`control-plane` 及以上）：必须 **AuthN（Logto OIDC + M2M）+ Entitlement + Casbin**；钱包证明单独走 **SIWE / `wallet_links`**（双轨，Logto 会话不是钱包证明）。
-- **`agent-commerce`**（VistaCast / SyncroBrain）与 **`smart-site`**（VistaRemote 人工介入深链 / DataLuminary 导出）目前是 **已实现的工程实验室，默认关**；未接真实对端前 `/capabilities` 的 `readiness` 保持 `lab`。见 [SMART_SITE.md](./SMART_SITE.md)（`FR-SITE-*`）。
+- **`agent-commerce`**（VistaCast / SyncroBrain）与 **`smart-site`**（VistaRemote 人工介入深链 / DataLuminary 导出）目前是 **已实现的工程实验室，默认关**。`/capabilities.commerce.readiness` 默认 `lab`；代码可在 `COMMERCE_READINESS_UNLOCK=production` 且两端 admission 探针 2xx 时改为 `production`（真实对端仍未接通）。见 [SMART_SITE.md](./SMART_SITE.md)（`FR-SITE-*`）· [ROADMAP.md](./ROADMAP.md) §9。
 - 产品与文档展示能力时只使用 **Available / Beta / Lab / Roadmap**。旧 `production` readiness 映射为 `available`，旧 `disabled` 表示不进目录而非第五种状态；兼容字段迁移期可保留旧值，但 UI 必须归一化。
 
 ## 4. 统一账户与使用上下文
@@ -273,7 +273,7 @@ DoerFlow 的最小后端是 **API + Indexer + Postgres + Redis**；客户端（w
 - **M2 实验室验收（2026-08-25）**：1 万笔/分链下记账（零链上 tx）；≥10 万笔合成 **1 个 Merkle Root**；Hardhat 上任意存款账户可 `forceWithdraw`
 - **FR-PAY-007**：买卖双方 pair gross 轧差后 `CreditLineNetting` 一次 `internalTransfer`
 - **FR-PAY-008**：`SettlementBatcher` / 实验室 EntryPoint + Paymaster 打包 `commitRoot` 与 `settleNetBatch`
-- **FR-PAY-016**：封闭 Beta / 公开收款商业控制（`COMMERCIAL_MODE`、白名单、限额、充值暂停、未审计披露）；主网 Vault 资产为 Base 原生 USDC；见 [PRODUCTION.md](./PRODUCTION.md) M5a
+- **FR-PAY-016**：封闭 Beta / 公开收款商业控制（`COMMERCIAL_MODE`、白名单、限额、充值暂停、未审计披露）；主网 Vault 资产为 Base 原生 USDC；`pnpm run smoke:mainnet:check` 与 `deploy:base:check` 不广播、不写 `"8453"` 地址。代码层 ✅ · 主网资金 ⚪。见 [PRODUCTION.md](./PRODUCTION.md) M5a
 - **FR-PAY-017**：前期 **不予赔付**；知情入口为文档用户协议与注册/登录勾选，资金操作页不反复横幅；见 [COMMERCIAL.md](./COMMERCIAL.md)
 - 无 App 接入：`@vibe-agent/shared/sdk`（`DoerFlowClient`）+ Python `doerflow`；底层仍为 `signReceipt` + `POST /payments/receipts`（[DEVELOPER.md](./DEVELOPER.md)）
 - 细则与 FR-PAY-*：[ASYNC_PAYMENTS.md](./ASYNC_PAYMENTS.md)
@@ -660,12 +660,14 @@ integration_events / outbox_callbacks
 4. Skill 内容验证在 v1 为信任模型，v2 引入密码学验证
 5. 后端为索引/中继/链下记账服务；**不托管**用户主私钥。结算资产在链上 Vault；用户可凭 Merkle 证明强制提现（见 ASYNC_PAYMENTS）
 
-## 11. 验收标准（v0.1 MVP）
+## 11. 验收标准（v0.1 · 已完成）
+
+> M1「身份与交易」闭环已验收关闭；后续里程碑见 [ROADMAP.md](./ROADMAP.md)。
 
 - [x] 用户可铸造 Agent NFT 并在市场展示（本地已冒烟：`smoke-mint.ts`）
 - [x] 用户可注册 Skill 并绑定 Agent（代码就绪 / 需本机链：Studio `useRegisterSkill` / `useBindSkill`）
 - [x] 用户可通过 Escrow 完成一次完整的雇佣-交付-结算流程（本地已冒烟：`smoke:escrow:local` · `smoke:m3`）
-- [ ] P2P Beacon 广播可被其他节点发现（**v0.2**，不在 MVP 本地范围）
+- [ ] P2P Beacon 广播可被其他节点发现（**不在 v0.1 范围**；见后续里程碑）
 - [x] 前端 DApp 可连接钱包并完成上述操作（代码就绪；本地联调）
 - [x] 合约部署至 Base Sepolia 测试网（2024-12-24 · 见 `ROADMAP.md` / `deployments/baseSepolia.json`）
 - [x] 后端索引服务同步链上事件（本地 Indexer + IPFS 元数据解析）

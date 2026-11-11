@@ -7,7 +7,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 
 # 旧 Worker App 迁移规格（React Native）
 
-**版本**: v0.2-draft · **最后更新**: 2026-10-07
+**版本**: v0.2-draft · **最后更新**: 2026-11-11
 **仓库**: `repos/worker` → `doerflow/worker`（私有）
 
 ---
@@ -27,7 +27,8 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 - 统一 App 的大厅、详情、相机/GPS/问卷、社交清单/截图、收益/Vault、争议与深链达到行为和安全对等
 - 迁移版本提供登录/Linked Wallet 重连说明、统一 App 下载深链和未完成任务继续处理路径
 - 能力对等后至少保留两个正式版本的迁移窗口；窗口结束才停止发布 APK，服务端不得提前切断未完成任务
-- 迁移标记集中在 `src/config/migration.ts`：默认两个正式版本；统一 App scheme 由 `EXPO_PUBLIC_UNIFIED_APP_SCHEME` 配置（默认 `doerflow`），下载回退由 `EXPO_PUBLIC_UNIFIED_APP_DOWNLOAD_URL` 配置。迁移 banner 不得阻断旧 App 的接单与交付。
+- 迁移标记集中在 `src/config/migration.ts`：默认两个正式版本。`WORKER_MIGRATE_FROM_VERSION` 是窗口第一版，`WORKER_RETIRE_AFTER_VERSION` 是第二版；客户端同时读 `EXPO_PUBLIC_WORKER_*`。统一 App scheme 由 `EXPO_PUBLIC_UNIFIED_APP_SCHEME` 配置（默认 `doerflow`），工作页深链为 `doerflow://work`。下载回退为 `EXPO_PUBLIC_UNIFIED_APP_DOWNLOAD_URL`；Android / iOS 链接为 `WORKER_ANDROID_STORE_URL` / `WORKER_IOS_STORE_URL`（及 `EXPO_PUBLIC_` 前缀）。
+- MetaRepo `pnpm run gate:pm3` 打印停发前清单。`WORKER_PUBLISH_DISABLED=1` 时拒绝 `pack:publish` 与 worker Android 打包。该开关不下架商店，也不删除本仓库。横幅在窗口关闭后仍声明未完成任务可继续交付，不得阻断旧 App 的接单与交付。
 
 ## 2. 社交平台任务
 
@@ -136,7 +137,7 @@ doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
 | v0.3 | 众包 + **社交任务**（抖音/小红书/知乎：发单声明平台与步骤、人工审、接单、清单+截图、验收）；相机/GPS/问卷；收益 Vault + 账本；链上 `deliverEscrow` |
 | v0.4 | **进行中**：Accessibility Service **UI 已接**（仍无 auto-click）；补齐基础无障碍发布基线；smart-site 人工 Intervene 可选展示 |
 | 迁移版本 N | 统一 App 达到能力对等；本 App 显示迁移提示并冻结新功能 |
-| N+1 / N+2 | 保留未完成任务、深链和安全修复；随后退役 |
+| N+1 / N+2 | 保留未完成任务、深链和安全修复；代码门闩已接，商店停发仍待人工 |
 
 ---
 

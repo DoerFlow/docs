@@ -1,9 +1,10 @@
 ---
 syncSource: VibeAgent MetaRepo spec/
-doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.sh
+doNotEdit: 请修改 MetaRepo spec/ 后重新运行 scripts/sync-spec-to-docs.ps1
 ---
 
 > **规范源文件**：由 MetaRepo `spec/` 同步，请勿直接编辑本页。
+
 
 # 跨产品支付与会员架构（Payment Architecture）
 
@@ -152,7 +153,7 @@ DoerFlow 侧新增（服务间调用，非公开）：
 ```text
 POST /payments/merchant/charges
   鉴权：X-Service-Key（服务间），不接受用户 Bearer
-  入参：{ orderId, subjectId, asset, amountMinor, currency, idempotencyKey, metadata? }
+  入参：{ orderId, subjectId, asset, chainId, amountMinor, currency, idempotencyKey, metadata? }
   出参：{ chargeId, status: 'succeeded'|'failed'|'insufficient_funds', ledgerOpId, eventId }
 ```
 
@@ -165,9 +166,41 @@ POST /v1/payments/webhooks/doerflow_credit/:configId
 
 签名方案**复用已有的 partner callback 方案**（见 LuminaryWorks `services/entitlement/src/modules/partner/`），不新造签名格式。验签必须对**原始字节**，禁止先 `JSON.parse` 再重新序列化。
 
+查询与退款（服务间，`X-Service-Key`）：
+
+```text
+GET  /payments/merchant/health
+GET  /payments/merchant/charges/:chargeId
+GET  /payments/merchant/refunds/:refundId
+POST /payments/merchant/refunds
+  入参：{ originalIdempotencyKey, amountMinor, idempotencyKey, orderId?, chargeId?, currency? }
+  originalIdempotencyKey 是扣款时的 idempotencyKey。
+  Entitlement 派生为 dfc:${orderId}:${attemptId}。
+```
+
+`DOERFLOW_CREDIT_FIXTURE=1` 且 `NODE_ENV` 不是 `production` 时，退款成功后另发一条 lab 事件 `doerflow.merchant.refund.settled`，只给 dry-run 接收端撤销标记。已启用的 provider 行仍走 Entitlement 主动退款，不依赖这条事件。
+
 ### 3.4 商户账户
 
 平台收款账户在账本中是一个普通 `account`，由环境变量 `DOERFLOW_MERCHANT_ACCOUNT` 指定；其链上对应物是自托管地址。提取由人工操作 `PaymentVault.withdraw`，不自动化。
+
+### 3.5 本地代码路径（无真实资金）
+
+`pnpm smoke:entitlement-credit` 走账本扣款和 HMAC webhook。`--fixture` 在进程内核对签名、幂等 grant 与 refund revoke，不连接服务。Entitlement 未监听时，脚本退出并提示 `pnpm id:up`，以及在 LuminaryWorks 仓执行 `pnpm ent:up` 与 `pnpm ent:dev`。
+
+值只留在本机，不要写入 git。两边进程使用同一组字符串：
+
+| 变量 | 进程 | 作用 |
+|------|------|------|
+| `ENTITLEMENT_BASE_URL` | DoerFlow API | Webhook 基址。本机 `http://127.0.0.1:3040`；Compose 用服务名，端口 `3040` |
+| `DOERFLOW_CREDIT_CONFIG_ID` | API 与 smoke 外壳 | Webhook 路径里的 UUID。Dry-run 示例 `00000000-0000-4000-8000-00000000dfc1`（该 id 没有已启用的 provider 行） |
+| `DOERFLOW_CREDIT_WEBHOOK_SECRET` | API 与 Entitlement | HMAC 密钥，至少 16 字符。本地生成，例如 `openssl rand -base64 24` |
+| `DOERFLOW_MERCHANT_ACCOUNT` | API 与 Entitlement | 同一个 `0x` 账户字符串（大小写一致） |
+| `PAYMENT_SERVICE_KEY` | DoerFlow API | `X-Service-Key`。真实 provider 行上还要等于 Entitlement 的 `serviceKey` |
+| `ENTITLEMENT_SERVICE_API_KEY` | DoerFlow API，可选 | 出站 webhook 额外的 `X-Service-Key` |
+| `DOERFLOW_CREDIT_FIXTURE` | 两边，仅 lab | `1` 时，config id 没有已启用 provider 行就记录 dry-run plan 标记并在退款时撤销。`NODE_ENV=production` 时忽略 |
+
+本机顺序：`pnpm id:up` → LuminaryWorks `pnpm ent:up` 与 `pnpm ent:dev` → DoerFlow `pnpm ledger:up` 与 `pnpm dev:api` → `pnpm smoke:entitlement-credit`。Smoke 先给公开的 Hardhat 实验地址做 **lab ledger credit**，再扣同一笔账本余额。线上 PSP 与真实会员购买仍是运维步骤。
 
 ## 4. USDT 多资产支持（FR-PAY-021）
 
